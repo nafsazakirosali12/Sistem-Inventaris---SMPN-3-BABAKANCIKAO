@@ -54,7 +54,7 @@
             <span class="material-symbols-outlined mr-3 text-[20px]">account_balance</span>
             <span>Profil Sekolah</span>
         </a>
-        <a href="#" class="flex items-center h-11 px-4 rounded-lg text-[#CCFBF1] hover:bg-white/10 hover:text-white transition-all text-xs font-medium">
+        <a href="{{ route('admin.kategori.index') }}" class="flex items-center h-11 px-4 rounded-lg text-[#CCFBF1] hover:bg-white/10 hover:text-white transition-all text-xs font-medium">
             <span class="material-symbols-outlined mr-3 text-[20px]">category</span>
             <span>Kategori</span>
         </a>
@@ -79,15 +79,6 @@
             <span>Laporan Inventaris</span>
         </a>
     </nav>
-    <div class="px-4 pt-4">
-        <div class="bg-[#115E59]/50 rounded-lg p-3 flex items-center justify-between">
-            <div class="flex flex-col">
-                <span class="text-[11px] text-[#CCFBF1]">Versi Sistem</span>
-                <span class="text-xs font-semibold text-white">v2.4.0 (2024)</span>
-            </div>
-            <span class="material-symbols-outlined text-[#CCFBF1] text-[18px]">verified</span>
-        </div>
-    </div>
 </aside>
 
 <!-- Main Workspace -->
