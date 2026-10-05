@@ -216,7 +216,7 @@
                     <label for="telepon" class="text-xs font-semibold text-[#1F2937]">
                         No. Telepon / HP Resmi
                     </label>
-                    <div class="relative">
+                    <div class="relative flex items-center">
                         <input type="text"
                                id="telepon"
                                name="telepon"
@@ -224,8 +224,8 @@
                                :disabled="!isEditing"
                                placeholder="(0264) 1234567"
                                class="w-full h-10 px-3 pr-10 bg-[#F3F7F6] disabled:bg-[#F3F7F6]/60 rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
-                        <div class="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-[#6B7280]">
-                            <span class="material-symbols-outlined text-[18px]">call</span>
+                        <div class="absolute right-3.5 inset-y-0 flex items-center pointer-events-none text-[#6B7280]">
+                            <span class="material-symbols-outlined text-[18px] leading-none select-none">call</span>
                         </div>
                     </div>
                 </div>
@@ -235,7 +235,7 @@
                     <label for="email" class="text-xs font-semibold text-[#1F2937]">
                         Email Resmi Sekolah
                     </label>
-                    <div class="relative">
+                    <div class="relative flex items-center">
                         <input type="email"
                                id="email"
                                name="email"
@@ -243,8 +243,8 @@
                                :disabled="!isEditing"
                                placeholder="info@smpn3babakancikao.sch.id"
                                class="w-full h-10 px-3 pr-10 bg-[#F3F7F6] disabled:bg-[#F3F7F6]/60 rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
-                        <div class="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-[#6B7280]">
-                            <span class="material-symbols-outlined text-[18px]">mail</span>
+                        <div class="absolute right-3.5 inset-y-0 flex items-center pointer-events-none text-[#6B7280]">
+                            <span class="material-symbols-outlined text-[18px] leading-none select-none">mail</span>
                         </div>
                     </div>
                 </div>
@@ -280,7 +280,7 @@
                     <label for="instagram" class="text-xs font-semibold text-[#1F2937]">
                         Instagram Sekolah
                     </label>
-                    <div class="relative">
+                    <div class="relative flex items-center">
                         <input type="text"
                                id="instagram"
                                name="instagram"
@@ -288,8 +288,8 @@
                                :disabled="!isEditing"
                                placeholder="mis. @smpn3babakancikao_official atau https://instagram.com/..."
                                class="w-full h-10 px-3 pr-10 bg-[#F3F7F6] disabled:bg-[#F3F7F6]/60 rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
-                        <div class="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-[#6B7280]">
-                            <span class="material-symbols-outlined text-[18px]">photo_camera</span>
+                        <div class="absolute right-3.5 inset-y-0 flex items-center pointer-events-none text-[#6B7280]">
+                            <span class="material-symbols-outlined text-[18px] leading-none select-none">photo_camera</span>
                         </div>
                     </div>
                     @if($schoolProfile->instagram)
@@ -311,7 +311,7 @@
                     <label for="youtube" class="text-xs font-semibold text-[#1F2937]">
                         YouTube Channel Sekolah
                     </label>
-                    <div class="relative">
+                    <div class="relative flex items-center">
                         <input type="text"
                                id="youtube"
                                name="youtube"
@@ -319,8 +319,8 @@
                                :disabled="!isEditing"
                                placeholder="mis. @SMPN3BabakancikaoChannel atau https://youtube.com/..."
                                class="w-full h-10 px-3 pr-10 bg-[#F3F7F6] disabled:bg-[#F3F7F6]/60 rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
-                        <div class="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-[#6B7280]">
-                            <span class="material-symbols-outlined text-[18px]">smart_display</span>
+                        <div class="absolute right-3.5 inset-y-0 flex items-center pointer-events-none text-[#6B7280]">
+                            <span class="material-symbols-outlined text-[18px] leading-none select-none">smart_display</span>
                         </div>
                     </div>
                     @if($schoolProfile->youtube)

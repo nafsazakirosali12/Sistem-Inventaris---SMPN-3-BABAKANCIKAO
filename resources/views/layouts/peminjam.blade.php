@@ -7,6 +7,10 @@
 
     <title>@yield('title', 'Peminjaman Inventaris - ' . ($schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao'))</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ (!empty($schoolProfile->logo) && file_exists(public_path($schoolProfile->logo))) ? asset($schoolProfile->logo) : asset('images/logo-sekolah.png') }}">
+    <link rel="shortcut icon" href="{{ (!empty($schoolProfile->logo) && file_exists(public_path($schoolProfile->logo))) ? asset($schoolProfile->logo) : asset('images/logo-sekolah.png') }}">
+
     <!-- Google Fonts & Material Symbols -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

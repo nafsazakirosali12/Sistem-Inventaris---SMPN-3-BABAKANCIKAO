@@ -10,34 +10,34 @@
             <span class="material-symbols-outlined text-[22px]">menu</span>
         </button>
 
-        <!-- Navbar Breadcrumb Navigation (Text Only, No Icon per User Request) -->
+        <!-- Navbar Breadcrumb Navigation -->
         <nav class="flex items-center gap-1.5 text-xs text-[#6B7280]">
             <a href="{{ route('admin.dashboard') }}" class="hover:text-[#0F766E] transition-colors font-semibold text-[#4B5563]">
                 Dashboard
             </a>
 
-            @if(!request()->routeIs('admin.dashboard'))
-                <span class="text-[#B7C9C6] font-semibold">/</span>
-                <span class="text-[#0F766E] font-semibold">
-                    @if(request()->routeIs('admin.profil*'))
-                        Profil Sekolah
-                    @elseif(request()->routeIs('admin.kategori*'))
-                        Kategori
-                    @elseif(request()->routeIs('admin.ruangan*'))
-                        Ruangan
-                    @elseif(request()->routeIs('admin.akun*'))
-                        Daftar Akun
-                    @elseif(request()->routeIs('admin.inventaris*'))
-                        Data Inventaris
-                    @elseif(request()->routeIs('admin.peminjaman*'))
-                        Data Peminjaman
-                    @elseif(request()->routeIs('admin.laporan*'))
-                        Laporan Inventaris
-                    @else
-                        @yield('breadcrumb_title', 'Halaman')
-                    @endif
-                </span>
-            @endif
+            <span class="text-[#B7C9C6] font-semibold">/</span>
+            <span class="text-[#0F766E] font-semibold">
+                @if(request()->routeIs('admin.dashboard'))
+                    Dashboard
+                @elseif(request()->routeIs('admin.profil*'))
+                    Profil Sekolah
+                @elseif(request()->routeIs('admin.kategori*'))
+                    Kategori
+                @elseif(request()->routeIs('admin.ruangan*'))
+                    Ruangan
+                @elseif(request()->routeIs('admin.akun*'))
+                    Daftar Akun
+                @elseif(request()->routeIs('admin.inventaris*'))
+                    Data Inventaris
+                @elseif(request()->routeIs('admin.peminjaman*'))
+                    Data Peminjaman
+                @elseif(request()->routeIs('admin.laporan*'))
+                    Laporan Inventaris
+                @else
+                    @yield('breadcrumb_title', 'Halaman')
+                @endif
+            </span>
         </nav>
     </div>
 

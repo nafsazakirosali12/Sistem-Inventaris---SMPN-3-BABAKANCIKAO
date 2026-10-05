@@ -6,7 +6,7 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <!-- 1. Top Section: Logo & Nama Sekolah (Khusus Sidebar Admin) -->
         <div class="h-16 px-4 bg-[#134E4A] flex items-center gap-3 border-b border-[#115E59] shrink-0">
-            <img src="{{ asset('images/logo-sekolah.svg') }}" alt="Logo {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKANCIKAO' }}" class="h-9 w-auto object-contain">
+            <img src="{{ (!empty($schoolProfile->logo) && file_exists(public_path($schoolProfile->logo))) ? asset($schoolProfile->logo) : asset('images/logo-sekolah.png') }}" alt="Logo {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKANCIKAO' }}" class="h-9 w-auto object-contain shrink-0">
             <div class="flex flex-col overflow-hidden">
                 <span class="font-bold text-xs tracking-wider text-white uppercase truncate">{{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKANCIKAO' }}</span>
                 <span class="text-[10px] text-[#CCFBF1]/80 truncate">Sistem Inventaris</span>

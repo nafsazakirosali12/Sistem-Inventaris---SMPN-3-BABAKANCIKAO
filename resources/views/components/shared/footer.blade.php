@@ -13,7 +13,7 @@
                 <div class="flex flex-col items-center md:items-start text-center md:text-left gap-4">
                     <div class="flex items-center gap-3">
                         <img
-                            src="{{ asset('images/logo-sekolah.svg') }}"
+                            src="{{ (!empty($schoolProfile->logo) && file_exists(public_path($schoolProfile->logo))) ? asset($schoolProfile->logo) : asset('images/logo-sekolah.png') }}"
                             alt="Logo {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKANCIKAO' }}"
                             class="h-10 w-10 object-contain shrink-0"
                         >

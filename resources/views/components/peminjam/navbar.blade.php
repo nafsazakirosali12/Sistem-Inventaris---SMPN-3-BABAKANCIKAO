@@ -3,7 +3,7 @@
     <!-- Brand & Logo -->
     <div class="flex items-center space-x-3">
         <a href="{{ route('home') }}" class="flex items-center space-x-3 hover:opacity-95 transition-opacity">
-            <img src="{{ asset('images/logo-sekolah.svg') }}" alt="Logo {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKAN CIKAO' }}" class="h-10 w-10 object-contain">
+            <img src="{{ (!empty($schoolProfile->logo) && file_exists(public_path($schoolProfile->logo))) ? asset($schoolProfile->logo) : asset('images/logo-sekolah.png') }}" alt="Logo {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKAN CIKAO' }}" class="h-10 w-10 object-contain">
             <div>
                 <h2 class="font-bold text-sm sm:text-base leading-tight text-white uppercase tracking-wider">{{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKAN CIKAO' }}</h2>
                 <p class="text-[11px] text-[#CCFBF1] opacity-95">{{ $schoolProfile->nama_sistem ?? 'Sistem Informasi Inventaris & Peminjaman' }}</p>
