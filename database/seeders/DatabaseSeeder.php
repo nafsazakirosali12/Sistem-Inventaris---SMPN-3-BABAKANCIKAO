@@ -136,7 +136,7 @@ class DatabaseSeeder extends Seeder
             'nama_barang' => 'Mikroskop Olympus CX23',
             'category_id' => $catIpa->id,
             'room_id' => $roomLabIpa->id,
-            'status' => 'dipinjam',
+            'status' => 'baik',
             'nomor_register' => 'REG-2022-012',
             'merk_type' => 'Olympus CX23',
             'ukuran_cc' => 'Binokuler LED',
@@ -184,7 +184,7 @@ class DatabaseSeeder extends Seeder
             'nama_barang' => 'Pengeras Suara Toa ZS-202C',
             'category_id' => $catElektronik->id,
             'room_id' => $roomAula->id,
-            'status' => 'dipinjam',
+            'status' => 'baik',
             'nomor_register' => 'REG-2020-019',
             'merk_type' => 'Toa ZS-202C',
             'ukuran_cc' => 'Column Speaker 20W',
@@ -211,8 +211,8 @@ class DatabaseSeeder extends Seeder
             'keterangan' => 'Layar bergaris, perlu servis panel LCD',
         ]);
 
-        // 6. Loans
-        // Pending approval 1
+        // 6. Loans (Strictly only 'dipinjam' and 'selesai')
+        // Active loan 1 (Dipinjam - Proyektor)
         Loan::create([
             'kode_peminjaman' => 'PINJAM-2026-001',
             'nama_peminjam' => 'Dra. Hj. Nurjanah',
@@ -221,11 +221,11 @@ class DatabaseSeeder extends Seeder
             'inventory_id' => $inv1->id,
             'tanggal_pinjam' => Carbon::now()->setTime(7, 30),
             'tanggal_kembali' => Carbon::now()->setTime(11, 30),
-            'status' => 'menunggu',
+            'status' => 'dipinjam',
             'alasan_tujuan' => 'Pembelajaran Presentasi Matematika di Lab 1',
         ]);
 
-        // Pending approval 2
+        // Active loan 2 (Dipinjam - Mikroskop)
         Loan::create([
             'kode_peminjaman' => 'PINJAM-2026-002',
             'nama_peminjam' => 'Bambang Setiawan, S.Pd',
@@ -234,37 +234,39 @@ class DatabaseSeeder extends Seeder
             'inventory_id' => $inv2->id,
             'tanggal_pinjam' => Carbon::now()->setTime(9, 0),
             'tanggal_kembali' => Carbon::now()->setTime(14, 0),
-            'status' => 'menunggu',
+            'status' => 'dipinjam',
             'alasan_tujuan' => 'Praktikum Pengamatan Sel Biologi',
         ]);
 
-        // Pending approval 3
+        // Completed loan 1 (Selesai tepat waktu)
         Loan::create([
             'kode_peminjaman' => 'PINJAM-2026-003',
             'nama_peminjam' => 'Rudi Hermawan, S.Pd',
             'user_id' => $guru->id,
             'category_id' => $catElektronik->id,
-            'inventory_id' => null,
-            'tanggal_pinjam' => Carbon::tomorrow()->setTime(8, 0),
-            'tanggal_kembali' => Carbon::tomorrow()->setTime(16, 0),
-            'status' => 'menunggu',
-            'alasan_tujuan' => 'Kegiatan Gladi Bersih Pentas Seni OSIS',
+            'inventory_id' => $inv3->id,
+            'tanggal_pinjam' => Carbon::yesterday()->setTime(8, 0),
+            'tanggal_kembali' => Carbon::yesterday()->setTime(12, 0),
+            'tanggal_kembali_aktual' => Carbon::yesterday()->setTime(11, 45),
+            'status' => 'selesai',
+            'alasan_tujuan' => 'Kegiatan Gladi Bersih OSIS',
         ]);
 
-        // Active loan 1 (Dipinjam)
+        // Completed loan 2 (Selesai terlambat)
         Loan::create([
             'kode_peminjaman' => 'PINJAM-2026-004',
             'nama_peminjam' => 'Bambang Setiawan, S.Pd',
             'user_id' => $guru->id,
-            'category_id' => $catIpa->id,
-            'inventory_id' => $inv2->id,
-            'tanggal_pinjam' => Carbon::now()->subHours(3),
-            'tanggal_kembali' => Carbon::now()->addHours(2),
-            'status' => 'dipinjam',
-            'alasan_tujuan' => 'Penelitian jaringan sampel IPA',
+            'category_id' => $catOlahraga->id,
+            'inventory_id' => $inv4->id,
+            'tanggal_pinjam' => Carbon::yesterday()->setTime(9, 0),
+            'tanggal_kembali' => Carbon::yesterday()->setTime(11, 0),
+            'tanggal_kembali_aktual' => Carbon::yesterday()->setTime(13, 15),
+            'status' => 'selesai',
+            'alasan_tujuan' => 'Latihan Senam Siswa',
         ]);
 
-        // Active loan 2 (Terlambat - Return date passed)
+        // Active loan 3 (Terlambat - Overdue active)
         Loan::create([
             'kode_peminjaman' => 'PINJAM-2026-005',
             'nama_peminjam' => 'Rudi Hermawan, S.Pd',

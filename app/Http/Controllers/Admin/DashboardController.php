@@ -23,7 +23,7 @@ class DashboardController extends Controller
         $totalAset = Inventory::count();
         $totalKategori = Category::count();
         $totalRuangan = Room::count();
-        $sedangDipinjam = Inventory::where('status', 'dipinjam')->count();
+        $sedangDipinjam = Loan::where('status', 'dipinjam')->count();
         $perluTindakanCount = Loan::where('status', 'menunggu')->count();
         $totalGuruAktif = Loan::whereIn('status', ['dipinjam', 'menunggu'])
             ->whereNotNull('nama_peminjam')
@@ -35,7 +35,7 @@ class DashboardController extends Controller
             ->count();
 
         // 2. Condition & Status Breakdown (Donut Chart)
-        $baikCount = Inventory::where('status', 'baik')->count();
+        $baikCount = Inventory::whereIn('status', ['baik', 'tersedia'])->count();
         $dipinjamCount = $sedangDipinjam;
         $rusakCount = Inventory::where('status', 'rusak')->count();
         $menungguCount = $perluTindakanCount;
@@ -83,7 +83,12 @@ class DashboardController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
+            $status = $request->input('status');
+            if ($status === 'baik' || $status === 'tersedia') {
+                $query->whereIn('status', ['baik', 'tersedia']);
+            } else {
+                $query->where('status', $status);
+            }
         }
 
         $inventories = $query->orderBy('updated_at', 'desc')->paginate(15);

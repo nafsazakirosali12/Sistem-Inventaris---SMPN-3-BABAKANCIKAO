@@ -20,6 +20,8 @@
             <span class="text-[#0F766E] font-semibold">
                 @if(request()->routeIs('admin.dashboard'))
                     Dashboard
+                @elseif(request()->routeIs('admin.profile*'))
+                    Profil Admin
                 @elseif(request()->routeIs('admin.profil*'))
                     Profil Sekolah
                 @elseif(request()->routeIs('admin.kategori*'))
@@ -43,15 +45,92 @@
 
     <!-- Right Section: Notification & Admin User Profile Dropdown -->
     <div class="flex items-center gap-2 sm:gap-4">
-        <!-- Notification Bell -->
-        <a href="{{ route('admin.dashboard') }}" class="relative p-2 rounded-lg text-[#4B5563] hover:text-[#0F766E] hover:bg-[#F3F7F6] transition-colors focus:outline-none" title="Notifikasi Permohonan">
-            <span class="material-symbols-outlined text-[20px]">notifications</span>
-            @if (isset($perluTindakanCount) && $perluTindakanCount > 0)
-                <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#EAB308] ring-2 ring-white animate-pulse"></span>
-            @endif
-        </a>
+        <!-- Notification Bell with Interactive Popover -->
+        <div class="relative inline-block text-left" x-data="{ notifOpen: false }">
+            <button @click="notifOpen = !notifOpen"
+                    type="button"
+                    class="relative p-2 rounded-lg text-[#4B5563] hover:text-[#0F766E] hover:bg-[#F3F7F6] transition-colors focus:outline-none"
+                    title="Notifikasi Pengajuan Peminjaman"
+                    aria-label="Notifikasi Peminjaman">
+                <span class="material-symbols-outlined text-[22px]">notifications</span>
+                @if (isset($pendingLoansCount) && $pendingLoansCount > 0)
+                    <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#F59E0B] ring-2 ring-white animate-pulse"></span>
+                @endif
+            </button>
 
-        <!-- Admin Profile Menu with Dropdown (Displays Name Only, No Role) -->
+            <!-- Notification Popover Dropdown (Width ~320px, DESIGN.md 6.11) -->
+            <div x-show="notifOpen"
+                 @click.away="notifOpen = false"
+                 x-transition:enter="transition ease-out duration-150"
+                 x-transition:enter-start="transform opacity-0 scale-95 -translate-y-1"
+                 x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-100"
+                 x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
+                 x-transition:leave-end="transform opacity-0 scale-95 -translate-y-1"
+                 class="origin-top-right absolute right-0 mt-2 w-80 sm:w-[320px] rounded-xl shadow-xl bg-white divide-y divide-[#D9E4E2] focus:outline-none z-50 overflow-hidden border border-[#D9E4E2]"
+                 style="display: none;">
+                
+                <!-- Popover Header -->
+                <div class="px-4 py-3 bg-[#F0FDFA] flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px] text-[#0F766E]">notifications</span>
+                        <span class="text-xs font-bold text-[#1F2937]">Notifikasi</span>
+                    </div>
+                    @if (isset($pendingLoansCount) && $pendingLoansCount > 0)
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]">
+                            {{ $pendingLoansCount }} Baru
+                        </span>
+                    @endif
+                </div>
+
+                <!-- Popover Notification List (From actual database) -->
+                <div class="max-h-80 overflow-y-auto divide-y divide-[#F3F7F6]">
+                    @if (isset($pendingLoansNotifications) && $pendingLoansNotifications->count() > 0)
+                        @foreach ($pendingLoansNotifications as $notif)
+                            <a href="{{ route('admin.peminjaman.index', ['highlight' => $notif->id]) }}"
+                               class="block px-4 py-3 hover:bg-[#F0FDFA] transition-colors group">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-[#1F2937] group-hover:text-[#0F766E] transition-colors">
+                                            {{ $notif->nama_peminjam }}
+                                        </p>
+                                        <p class="text-[11px] text-[#4B5563] mt-0.5 leading-snug">
+                                            Mengajukan peminjaman <span class="font-medium text-[#1F2937]">{{ $notif->category->nama_kategori ?? 'Barang' }}</span>
+                                        </p>
+                                        <div class="flex items-center gap-1 text-[10px] text-[#6B7280] mt-1.5">
+                                            <span class="material-symbols-outlined text-[12px] text-[#9CA3AF]">schedule</span>
+                                            <span>{{ $notif->created_at ? $notif->created_at->diffForHumans() : 'Baru saja' }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="w-6 h-6 rounded-full bg-[#F3F7F6] group-hover:bg-[#CCFBF1] text-[#6B7280] group-hover:text-[#0F766E] flex items-center justify-center shrink-0 transition-colors mt-0.5">
+                                        <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    @else
+                        <!-- Empty State (DESIGN.md 6.11) -->
+                        <div class="py-8 px-4 text-center flex flex-col items-center justify-center">
+                            <div class="w-10 h-10 rounded-full bg-[#F3F7F6] flex items-center justify-center text-[#9CA3AF] mb-2">
+                                <span class="material-symbols-outlined text-[22px]">notifications_paused</span>
+                            </div>
+                            <p class="text-xs font-semibold text-[#1F2937]">Tidak ada peminjaman baru</p>
+                            <p class="text-[11px] text-[#6B7280] mt-0.5">Semua permohonan peminjaman telah ditindaklanjuti.</p>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Popover Footer -->
+                <div class="px-4 py-2.5 bg-[#F8FBFA] text-center">
+                    <a href="{{ route('admin.peminjaman.index') }}" class="text-xs font-semibold text-[#0F766E] hover:text-[#115E59] hover:underline inline-flex items-center gap-1">
+                        <span>Lihat Semua Peminjaman</span>
+                        <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Profile Menu with Dropdown (Displays Name & Avatar with updated link) -->
         <div class="relative inline-block text-left" x-data="{ open: false }" id="adminUserDropdown">
             <button @click="open = !open"
                     type="button"
@@ -60,13 +139,19 @@
                 <div class="text-right hidden sm:block">
                     <p class="text-xs font-bold text-[#1F2937] leading-tight">{{ auth()->user()->name ?? 'Admin Sarpras' }}</p>
                 </div>
-                <div class="w-8 h-8 rounded-full bg-[#0F766E] flex items-center justify-center border border-[#CCFBF1] text-white shadow-xs">
-                    <span class="material-symbols-outlined text-[18px]">person</span>
+                <div class="w-8 h-8 rounded-full bg-[#0F766E] flex items-center justify-center border border-[#CCFBF1] text-white shadow-xs overflow-hidden">
+                    @if(auth()->user() && !empty(auth()->user()->avatar) && file_exists(public_path(auth()->user()->avatar)))
+                        <img src="{{ asset(auth()->user()->avatar) }}?v={{ filemtime(public_path(auth()->user()->avatar)) }}"
+                             alt="{{ auth()->user()->name }}"
+                             class="w-full h-full object-cover">
+                    @else
+                        <span class="material-symbols-outlined text-[18px]">person</span>
+                    @endif
                 </div>
                 <span class="material-symbols-outlined text-[#6B7280] text-[18px] transition-transform" :class="{ 'rotate-180': open }">expand_more</span>
             </button>
 
-            <!-- Dropdown Menu (Strictly Displays Name Only, then 2 Options: Profil Saya & Logout) -->
+            <!-- Dropdown Menu (Strictly Displays Name & Username, then 2 Options: Profil & Logout) -->
             <div x-show="open"
                  @click.away="open = false"
                  x-transition:enter="transition ease-out duration-100"
@@ -77,16 +162,17 @@
                  x-transition:leave-end="transform opacity-0 scale-95"
                  class="origin-top-right absolute right-0 mt-2 w-48 rounded-xl shadow-lg bg-white ring-1 ring-black/5 divide-y divide-gray-100 focus:outline-none z-50 overflow-hidden border border-[#D9E4E2]"
                  style="display: none;">
-                <!-- Header: Displays Name Only -->
+                <!-- Header: Displays Name & Username -->
                 <div class="px-4 py-3 bg-[#F0FDFA]">
                     <p class="text-xs font-bold text-[#1F2937] truncate">{{ auth()->user()->name ?? 'Admin Sarpras' }}</p>
+                    <p class="text-[10px] text-[#0F766E] font-medium font-mono truncate">{{ '@' . (auth()->user()->username ?? 'admin') }}</p>
                 </div>
 
-                <!-- 1. Profil Saya -->
+                <!-- 1. Profil Admin -->
                 <div class="py-1">
-                    <a href="{{ route('admin.profil.index') }}" class="group flex items-center px-4 py-2.5 text-xs text-[#1F2937] hover:bg-[#F0FDFA] hover:text-[#0F766E] transition-colors font-medium">
+                    <a href="{{ route('admin.profile.index') }}" class="group flex items-center px-4 py-2.5 text-xs text-[#1F2937] hover:bg-[#F0FDFA] hover:text-[#0F766E] transition-colors font-medium">
                         <span class="material-symbols-outlined text-[18px] mr-2.5 text-[#6B7280] group-hover:text-[#0F766E]">account_circle</span>
-                        Profil Saya
+                        Profil
                     </a>
                 </div>
 
