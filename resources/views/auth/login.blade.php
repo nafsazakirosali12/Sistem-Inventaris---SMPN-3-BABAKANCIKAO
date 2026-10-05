@@ -12,7 +12,7 @@
             <!-- School Header Branding -->
             <div class="flex flex-col items-center text-center">
                 <div class="w-[72px] h-[72px] mb-3 flex items-center justify-center p-1.5 bg-[#F0FDFA] rounded-xl border border-[#CCFBF1] shadow-sm">
-                    <img src="{{ asset('images/logo-sekolah.svg') }}"
+                    <img src="{{ (!empty($schoolProfile->logo) && file_exists(public_path($schoolProfile->logo))) ? asset($schoolProfile->logo) : asset('images/logo-sekolah.png') }}"
                          alt="Logo Resmi {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}"
                          class="w-full h-full object-contain">
                 </div>
@@ -62,9 +62,9 @@
                         Nama pengguna <span class="text-[#DC2626]">*</span>
                     </label>
                     <div class="relative flex items-center">
-                        <span class="material-symbols-outlined absolute left-3 text-[#6B7280] pointer-events-none text-[18px]">
-                            badge
-                        </span>
+                        <div class="absolute left-3 inset-y-0 flex items-center pointer-events-none text-[#6B7280]">
+                            <span class="material-symbols-outlined text-[18px] leading-none select-none">badge</span>
+                        </div>
                         <input type="text"
                                id="username"
                                name="username"
@@ -89,9 +89,9 @@
                         </a>
                     </div>
                     <div class="relative flex items-center">
-                        <span class="material-symbols-outlined absolute left-3 text-[#6B7280] pointer-events-none text-[18px]">
-                            lock
-                        </span>
+                        <div class="absolute left-3 inset-y-0 flex items-center pointer-events-none text-[#6B7280]">
+                            <span class="material-symbols-outlined text-[18px] leading-none select-none">lock</span>
+                        </div>
                         <input type="password"
                                id="password"
                                name="password"
@@ -102,8 +102,8 @@
                                 id="togglePassword"
                                 onclick="togglePasswordVisibility()"
                                 aria-label="Tampilkan atau sembunyikan kata sandi"
-                                class="absolute right-2.5 w-7 h-7 flex items-center justify-center text-[#6B7280] hover:text-[#1F2937] rounded transition-colors focus:outline-none">
-                            <span class="material-symbols-outlined text-[19px]" id="eyeIcon">visibility</span>
+                                class="absolute right-2.5 inset-y-0 flex items-center justify-center text-[#6B7280] hover:text-[#1F2937] rounded transition-colors focus:outline-none">
+                            <span class="material-symbols-outlined text-[19px] leading-none select-none" id="eyeIcon">visibility</span>
                         </button>
                     </div>
                 </div>
