@@ -46,11 +46,18 @@ class LoginController extends Controller
         $password = $request->input('password');
         $remember = $request->boolean('remember');
 
-        // Check if user credentials match username OR nip_nuptk OR email
-        $user = User::where('username', $loginInput)
-            ->orWhere('nip_nuptk', $loginInput)
-            ->orWhere('email', $loginInput)
-            ->first();
+        // Check if user credentials match username OR nip_nuptk OR email safely
+        $query = User::where('username', $loginInput);
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'nip_nuptk')) {
+            $query->orWhere('nip_nuptk', $loginInput);
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'email')) {
+            $query->orWhere('email', $loginInput);
+        }
+
+        $user = $query->first();
 
         if ($user && Auth::attempt(['username' => $user->username, 'password' => $password], $remember)) {
             $request->session()->regenerate();
