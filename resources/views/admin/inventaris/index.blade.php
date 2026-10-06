@@ -146,6 +146,7 @@
                             <option value="">Semua Status Unit</option>
                             <option value="baik" {{ request('status') == 'baik' ? 'selected' : '' }}>Baik</option>
                             <option value="rusak" {{ request('status') == 'rusak' ? 'selected' : '' }}>Rusak</option>
+                            <option value="perlu_perbaikan" {{ request('status') == 'perlu_perbaikan' ? 'selected' : '' }}>Perlu Perbaikan</option>
                             <option value="hilang" {{ request('status') == 'hilang' ? 'selected' : '' }}>Hilang</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">
@@ -209,13 +210,9 @@
                 </thead>
                 <tbody class="divide-y divide-[#D9E4E2] text-xs text-[#1F2937]">
                     @forelse ($inventories as $inv)
-                        <!-- @php
-                            $activeLoan = $inv->loans->where('status', 'dipinjam')->first();
+                        @php
                             $statusUnit = strtolower($inv->status ?? 'baik');
-                            if (in_array($statusUnit, ['tersedia', 'dipinjam'])) {
-                                $statusUnit = 'baik';
-                            }
-                        @endphp -->
+                        @endphp
                         <tr class="hover:bg-[#F8FBFA] transition-colors">
                             <!-- No -->
                             <td class="py-3.5 px-4 text-center text-[#6B7280] font-medium">
@@ -274,18 +271,28 @@
                                 {{ $inv->room->nama_ruangan ?? '-' }}
                             </td>
 
-                            <!-- Status Unit (Kondisi Fisik) & Status Peminjaman (Terpisah Jelas) -->
+                            <!-- Status Unit (Kondisi Fisik) -->
                             <td class="py-3.5 px-4 text-center">
                                 <div class="flex flex-col items-center gap-1">
                                     @if($statusUnit === 'rusak')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#FEF3C7] text-[#92400E]">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#FEE2E2] text-[#991B1B]">
                                             <span class="w-1.5 h-1.5 rounded-full bg-[#DC2626] mr-1.5"></span>
                                             Rusak
                                         </span>
+                                    @elseif($statusUnit === 'perlu_perbaikan')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#FEF3C7] text-[#92400E]">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-[#F59E0B] mr-1.5"></span>
+                                            Perlu Perbaikan
+                                        </span>
                                     @elseif($statusUnit === 'hilang')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#FEE2E2] text-[#991B1B]">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-[#D97706] mr-1.5"></span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#F3F4F6] text-[#374151]">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-[#6B7280] mr-1.5"></span>
                                             Hilang
+                                        </span>
+                                    @elseif($statusUnit === 'dipinjam')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#DBEAFE] text-[#1E40AF]">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-[#2563EB] mr-1.5"></span>
+                                            Dipinjam
                                         </span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#DCFCE7] text-[#166534]">
@@ -293,15 +300,6 @@
                                             Baik
                                         </span>
                                     @endif
-
-                                    <!-- Status Transaksi Peminjaman (Jika Sedang Dipinjam) -->
-                                    <!-- @if($inv->is_currently_borrowed)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-[#DBEAFE] text-[#1E40AF]"
-                                              title="Sedang dipinjam{{ ($activeLoan && $activeLoan->nama_peminjam) ? ' oleh ' . $activeLoan->nama_peminjam : '' }}">
-                                            <span class="w-1 h-1 rounded-full bg-[#2563EB] mr-1"></span>
-                                            Dipinjam
-                                        </span>
-                                    @endif -->
                                 </div>
                             </td>
 

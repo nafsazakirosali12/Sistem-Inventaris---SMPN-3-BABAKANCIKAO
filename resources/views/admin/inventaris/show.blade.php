@@ -58,9 +58,6 @@
                 <!-- Status Unit Badge Banner (Kondisi Fisik) -->
                 @php
                     $statusUnit = strtolower($inventory->status ?? 'baik');
-                    if (in_array($statusUnit, ['tersedia', 'dipinjam'])) {
-                        $statusUnit = 'baik';
-                    }
                 @endphp
                 <div class="w-full mt-4 p-3 bg-[#F8FBFA] rounded-lg border border-[#D9E4E2] flex items-center justify-between">
                     <span class="text-xs font-semibold text-[#4B5563]">Status Unit:</span>
@@ -69,10 +66,20 @@
                             <span class="w-2 h-2 rounded-full bg-[#DC2626] mr-2"></span>
                             Rusak
                         </span>
-                    @elseif($statusUnit === 'hilang')
+                    @elseif($statusUnit === 'perlu_perbaikan')
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#FEF3C7] text-[#92400E]">
-                            <span class="w-2 h-2 rounded-full bg-[#D97706] mr-2"></span>
+                            <span class="w-2 h-2 rounded-full bg-[#F59E0B] mr-2"></span>
+                            Perlu Perbaikan
+                        </span>
+                    @elseif($statusUnit === 'hilang')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#F3F4F6] text-[#374151]">
+                            <span class="w-2 h-2 rounded-full bg-[#6B7280] mr-2"></span>
                             Hilang
+                        </span>
+                    @elseif($statusUnit === 'dipinjam')
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#DBEAFE] text-[#1E40AF]">
+                            <span class="w-2 h-2 rounded-full bg-[#2563EB] mr-2"></span>
+                            Dipinjam
                         </span>
                     @else
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#DCFCE7] text-[#166534]">

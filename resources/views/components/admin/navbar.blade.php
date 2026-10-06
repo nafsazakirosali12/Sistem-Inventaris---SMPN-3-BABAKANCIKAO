@@ -148,10 +148,10 @@
                         <span class="material-symbols-outlined text-[18px]">person</span>
                     @endif
                 </div>
-                <span class="material-symbols-outlined text-[#6B7280] text-[18px] transition-transform" :class="{ 'rotate-180': open }">expand_more</span>
+                <span class="material-symbols-outlined text-[#6B7280] text-[18px]" :class="{ 'rotate-180': open }">menu</span>
             </button>
 
-            <!-- Dropdown Menu (Strictly Displays Name & Username, then 2 Options: Profil & Logout) -->
+            <!-- Dropdown Menu (2 Options Only: Profil & Keluar) -->
             <div x-show="open"
                  @click.away="open = false"
                  x-transition:enter="transition ease-out duration-100"
@@ -160,31 +160,22 @@
                  x-transition:leave="transition ease-in duration-75"
                  x-transition:leave-start="transform opacity-100 scale-100"
                  x-transition:leave-end="transform opacity-0 scale-95"
-                 class="origin-top-right absolute right-0 mt-2 w-48 rounded-xl shadow-lg bg-white ring-1 ring-black/5 divide-y divide-gray-100 focus:outline-none z-50 overflow-hidden border border-[#D9E4E2]"
+                 class="origin-top-right absolute right-0 mt-2 w-48 rounded-xl shadow-lg bg-white ring-1 ring-black/5 focus:outline-none z-50 overflow-hidden border border-[#D9E4E2]"
                  style="display: none;">
-                <!-- Header: Displays Name & Username -->
-                <div class="px-4 py-3 bg-[#F0FDFA]">
-                    <p class="text-xs font-bold text-[#1F2937] truncate">{{ auth()->user()->name ?? 'Admin Sarpras' }}</p>
-                    <p class="text-[10px] text-[#0F766E] font-medium font-mono truncate">{{ '@' . (auth()->user()->username ?? 'admin') }}</p>
-                </div>
 
                 <!-- 1. Profil Admin -->
-                <div class="py-1">
-                    <a href="{{ route('admin.profile.index') }}" class="group flex items-center px-4 py-2.5 text-xs text-[#1F2937] hover:bg-[#F0FDFA] hover:text-[#0F766E] transition-colors font-medium">
-                        <span class="material-symbols-outlined text-[18px] mr-2.5 text-[#6B7280] group-hover:text-[#0F766E]">account_circle</span>
-                        Profil
-                    </a>
-                </div>
+                <a href="{{ route('admin.profile.index') }}" class="group flex items-center px-4 py-2.5 text-xs text-[#1F2937] hover:bg-[#F0FDFA] hover:text-[#0F766E] transition-colors font-medium">
+                    <span class="material-symbols-outlined text-[18px] mr-2.5 text-[#6B7280] group-hover:text-[#0F766E]">manage_accounts</span>
+                    Profil
+                </a>
 
                 <!-- 2. Keluar -->
-                <div class="py-1">
-                    <button type="button"
-                            onclick="confirmAdminLogout()"
-                            class="w-full group flex items-center px-4 py-2.5 text-xs text-[#DC2626] hover:bg-[#FEE2E2]/50 transition-colors font-medium">
-                        <span class="material-symbols-outlined text-[18px] mr-2.5 text-[#DC2626]">logout</span>
-                        Keluar
-                    </button>
-                </div>
+                <button type="button"
+                        onclick="confirmAdminLogout()"
+                        class="w-full group flex items-center px-4 py-2.5 text-xs text-[#DC2626] hover:bg-[#FEE2E2]/50 transition-colors font-medium border-t border-[#D9E4E2]">
+                    <span class="material-symbols-outlined text-[18px] mr-2.5 text-[#DC2626]">logout</span>
+                    Keluar
+                </button>
             </div>
         </div>
     </div>

@@ -5,12 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SchoolProfile;
 use App\Models\Category;
-use App\Models\Room;
 use App\Models\Inventory;
 use App\Models\Loan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -19,113 +17,86 @@ class DashboardController extends Controller
         $schoolProfile = SchoolProfile::first();
         $user = Auth::user();
 
-        // 1. Stat Cards Data
-        $totalAset = Inventory::count();
-        $totalKategori = Category::count();
-        $totalRuangan = Room::count();
+        // ── Stat Cards ────────────────────────────────────────────────────────
+        $totalAset      = Inventory::count();
+        $totalKategori  = Category::count();
+        $totalPeminjaman = Loan::count();
+
+        // ── Ketersediaan Barang (dari Data Peminjaman & Data Inventaris) ─────
         $sedangDipinjam = Loan::where('status', 'dipinjam')->count();
-        $perluTindakanCount = Loan::where('status', 'menunggu')->count();
-        $totalGuruAktif = Loan::whereIn('status', ['dipinjam', 'menunggu'])
-            ->whereNotNull('nama_peminjam')
-            ->distinct('nama_peminjam')
-            ->count('nama_peminjam');
+        $tersedia       = Inventory::where('status', 'baik')
+            ->whereDoesntHave('loans', function ($q) {
+                $q->where('status', 'dipinjam');
+            })->count();
 
-        $pendingHariIni = Loan::where('status', 'menunggu')
-            ->whereDate('created_at', Carbon::today())
-            ->count();
+        // ── Kondisi Inventaris (4 status) ─────────────────────────────────────
+        $baikCount           = Inventory::where('status', 'baik')->count();
+        $dipinjamCount       = Inventory::where('status', 'dipinjam')->count();
+        $rusakCount          = Inventory::where('status', 'rusak')->count();
+        $perluPerbaikanCount = Inventory::where('status', 'perlu_perbaikan')->count();
+        $hilangCount         = Inventory::where('status', 'hilang')->count();
 
-        // 2. Condition & Status Breakdown (Donut Chart)
-        $baikCount = Inventory::whereIn('status', ['baik', 'tersedia'])->count();
-        $dipinjamCount = $sedangDipinjam;
-        $rusakCount = Inventory::where('status', 'rusak')->count();
-        $menungguCount = $perluTindakanCount;
+        // ── Donut Chart (4 segments: Baik+Dipinjam, Rusak, Perlu Perbaikan, Hilang) ─
+        $totalForChart = max($totalAset, 1);
 
-        $totalUnitsChart = max($totalAset + $menungguCount, 1);
+        $baikPct           = round(($baikCount / $totalForChart) * 100);
+        $dipinjamChartPct  = round(($dipinjamCount / $totalForChart) * 100);
+        $rusakPct          = round(($rusakCount / $totalForChart) * 100);
+        $perluPerbaikanPct = round(($perluPerbaikanCount / $totalForChart) * 100);
+        $hilangPct         = round(($hilangCount / $totalForChart) * 100);
 
-        $baikPct = round(($baikCount / $totalUnitsChart) * 100);
-        $dipinjamPct = round(($dipinjamCount / $totalUnitsChart) * 100);
-        $rusakPct = round(($rusakCount / $totalUnitsChart) * 100);
-        $menungguPct = round(($menungguCount / $totalUnitsChart) * 100);
-
-        // Calculate SVG stroke dash offsets (circumference = 238.7 for r=38)
-        $circumference = 238.7;
-        $baikDash = round(($baikPct / 100) * $circumference, 1);
-        $dipinjamDash = round(($dipinjamPct / 100) * $circumference, 1);
-        $rusakDash = round(($rusakPct / 100) * $circumference, 1);
-        $menungguDash = round(($menungguPct / 100) * $circumference, 1);
+        // SVG stroke-dasharray (circumference = 238.7 for r=38)
+        $circumference      = 238.7;
+        $baikDash           = round(($baikPct / 100) * $circumference, 1);
+        $dipinjamChartDash  = round(($dipinjamChartPct / 100) * $circumference, 1);
+        $rusakDash          = round(($rusakPct / 100) * $circumference, 1);
+        $perluPerbaikanDash = round(($perluPerbaikanPct / 100) * $circumference, 1);
+        $hilangDash         = round(($hilangPct / 100) * $circumference, 1);
 
         $offset1 = -$baikDash;
-        $offset2 = $offset1 - $dipinjamDash;
+        $offset2 = $offset1 - $dipinjamChartDash;
         $offset3 = $offset2 - $rusakDash;
+        $offset4 = $offset3 - $perluPerbaikanDash;
 
-        // 3. Pending Loans Queue (Persetujuan Cepat)
-        $pendingLoans = Loan::with(['category', 'inventory.room', 'user'])
-            ->where('status', 'menunggu')
-            ->orderBy('created_at', 'desc')
+        // ── Tabel Inventaris Terbaru (5 data saja) ────────────────────────────
+        $latestInventories = Inventory::with(['category', 'room'])
+            ->latest()
             ->take(5)
             ->get();
 
-        // 4. Inventory Table List with Search & Filtering
-        $query = Inventory::with(['category', 'room', 'loans' => function ($q) {
-            $q->whereIn('status', ['menunggu', 'dipinjam'])->latest();
-        }]);
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('kode_barang', 'like', "%{$search}%")
-                  ->orWhere('nama_barang', 'like', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('room_id')) {
-            $query->where('room_id', $request->input('room_id'));
-        }
-
-        if ($request->filled('status')) {
-            $status = $request->input('status');
-            if ($status === 'baik' || $status === 'tersedia') {
-                $query->whereIn('status', ['baik', 'tersedia']);
-            } else {
-                $query->where('status', $status);
-            }
-        }
-
-        $inventories = $query->orderBy('updated_at', 'desc')->paginate(15);
-        $rooms = Room::all();
-        $categories = Category::all();
+        // ── Notification bell count ────────────────────────────────────────────
+        $pendingLoansCount = Loan::where('status', 'dipinjam')->count();
 
         return view('admin.dashboard', compact(
             'schoolProfile',
             'user',
             'totalAset',
             'totalKategori',
-            'totalRuangan',
+            'totalPeminjaman',
             'sedangDipinjam',
-            'perluTindakanCount',
-            'totalGuruAktif',
-            'pendingHariIni',
+            'tersedia',
             'baikCount',
             'dipinjamCount',
             'rusakCount',
-            'menungguCount',
-            'totalUnitsChart',
+            'perluPerbaikanCount',
+            'hilangCount',
             'baikPct',
-            'dipinjamPct',
+            'dipinjamChartPct',
             'rusakPct',
-            'menungguPct',
+            'perluPerbaikanPct',
+            'hilangPct',
             'baikDash',
-            'dipinjamDash',
+            'dipinjamChartDash',
             'rusakDash',
-            'menungguDash',
+            'perluPerbaikanDash',
+            'hilangDash',
             'offset1',
             'offset2',
             'offset3',
+            'offset4',
             'circumference',
-            'pendingLoans',
-            'inventories',
-            'rooms',
-            'categories'
+            'latestInventories',
+            'pendingLoansCount'
         ));
     }
 }

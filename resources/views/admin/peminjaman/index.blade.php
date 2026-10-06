@@ -83,7 +83,7 @@
                         <input type="text"
                                name="search"
                                value="{{ request('search') }}"
-                               placeholder="Cari kode, nama peminjam, atau alasan..."
+                               placeholder="Cari kode, atau nama peminjam..."
                                class="w-full h-10 pl-10 pr-10 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] placeholder-[#6B7280] border border-[#D9E4E2] focus:outline-none focus:bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
                         @if(request('search'))
                             <a href="{{ route('admin.peminjaman.index', request()->except('search')) }}"
@@ -102,7 +102,6 @@
                             <option value="">Semua Status</option>
                             <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
                             <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                            <option value="terlambat" {{ request('status') == 'terlambat' ? 'selected' : '' }}>Terlambat</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">
                             <span class="material-symbols-outlined text-[18px]">expand_more</span>
@@ -229,7 +228,7 @@
                             <!-- Jadwal Peminjaman & Pengembalian Aktual -->
                             <td class="py-3.5 px-4 text-[#4B5563]">
                                 <div class="text-[11px]">
-                                    <span class="text-[#6B7280]">Pinjam:</span>
+                                    <span class="text-[#6B7280]">Dipinjam:</span>
                                     <span class="font-medium text-[#1F2937]">{{ $loan->tanggal_pinjam ? $loan->tanggal_pinjam->format('d/m/Y H:i') : '-' }}</span>
                                 </div>
                                 <div class="text-[11px] mt-0.5">
@@ -241,9 +240,15 @@
                                         <span>Dikembalikan: {{ $loan->tanggal_kembali_aktual->format('d/m/Y H:i') }}</span>
                                     </div>
                                 @endif
+                                @if($isTerlambat && $loan->status === 'dipinjam')
+                                    <div class="text-[11px] mt-1 flex items-center gap-1 text-[#DC2626] font-bold">
+                                        <span class="w-2 h-2 rounded-full bg-[#DC2626] inline-block"></span>
+                                        Terlambat
+                                    </div>
+                                @endif
                             </td>
 
-                            <!-- Status Badge: Hanya Dipinjam & Selesai (+ Indikator Terlambat) -->
+                            <!-- Status Badge: Hanya Dipinjam & Selesai -->
                             <td class="py-3.5 px-4 text-center">
                                 <div class="flex flex-col items-center gap-1 justify-center">
                                     @if ($loan->status === 'dipinjam')
@@ -251,23 +256,10 @@
                                             <span class="w-1.5 h-1.5 rounded-full bg-[#2563EB] mr-1.5"></span>
                                             Dipinjam
                                         </span>
-                                    @elseif ($loan->status === 'selesai')
+                                    @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#DCFCE7] text-[#166534]">
                                             <span class="w-1.5 h-1.5 rounded-full bg-[#16A34A] mr-1.5"></span>
                                             Selesai
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#DBEAFE] text-[#1E40AF]">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-[#2563EB] mr-1.5"></span>
-                                            Dipinjam
-                                        </span>
-                                    @endif
-
-                                    <!-- Indikator Terlambat Tambahan -->
-                                    @if ($isTerlambat)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#FEE2E2] text-[#991B1B]">
-                                            <span class="w-1 h-1 rounded-full bg-[#DC2626] mr-1"></span>
-                                            Terlambat
                                         </span>
                                     @endif
                                 </div>

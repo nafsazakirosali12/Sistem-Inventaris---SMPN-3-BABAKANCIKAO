@@ -205,7 +205,7 @@
                     @enderror
                 </div>
 
-                <!-- Status Unit: Baik, Rusak, Hilang -->
+                <!-- Status Unit: Baik, Rusak, Perlu Perbaikan, Hilang -->
                 <div class="flex flex-col gap-1.5">
                     <label for="status" class="text-xs font-semibold text-[#1F2937]">
                         Status Unit <span class="text-[#DC2626]">*</span>
@@ -213,7 +213,8 @@
                     <div class="relative">
                         @php
                             $currStatus = strtolower(old('status', $inventory->status ?? 'baik'));
-                            if (in_array($currStatus, ['tersedia', 'dipinjam'])) {
+                            // Jangan tampilkan 'dipinjam' di form edit — status dipinjam dikelola oleh sistem peminjaman
+                            if ($currStatus === 'dipinjam') {
                                 $currStatus = 'baik';
                             }
                         @endphp
@@ -223,6 +224,7 @@
                                 class="w-full h-10 pl-3 pr-8 bg-[#F3F7F6] text-xs text-[#1F2937] rounded-lg appearance-none cursor-pointer border {{ $errors->has('status') ? 'border-[#DC2626]' : 'border-[#D9E4E2]' }} focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
                             <option value="baik" {{ $currStatus === 'baik' ? 'selected' : '' }}>Baik</option>
                             <option value="rusak" {{ $currStatus === 'rusak' ? 'selected' : '' }}>Rusak</option>
+                            <option value="perlu_perbaikan" {{ $currStatus === 'perlu_perbaikan' ? 'selected' : '' }}>Perlu Perbaikan</option>
                             <option value="hilang" {{ $currStatus === 'hilang' ? 'selected' : '' }}>Hilang</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">

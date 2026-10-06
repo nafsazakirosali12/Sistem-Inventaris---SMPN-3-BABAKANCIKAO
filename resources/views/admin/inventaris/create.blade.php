@@ -203,6 +203,7 @@
                                 class="w-full h-10 pl-3 pr-8 bg-[#F3F7F6] text-xs text-[#1F2937] rounded-lg appearance-none cursor-pointer border {{ $errors->has('status') ? 'border-[#DC2626]' : 'border-[#D9E4E2]' }} focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
                             <option value="baik" {{ old('status', 'baik') == 'baik' ? 'selected' : '' }}>Baik</option>
                             <option value="rusak" {{ old('status') == 'rusak' ? 'selected' : '' }}>Rusak</option>
+                            <option value="perlu_perbaikan" {{ old('status') == 'perlu_perbaikan' ? 'selected' : '' }}>Perlu Perbaikan</option>
                             <option value="hilang" {{ old('status') == 'hilang' ? 'selected' : '' }}>Hilang</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">

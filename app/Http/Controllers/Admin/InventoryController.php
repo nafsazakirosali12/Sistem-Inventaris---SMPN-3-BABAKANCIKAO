@@ -53,15 +53,11 @@ class InventoryController extends Controller
             $query->where('room_id', $request->input('room_id'));
         }
 
-        // Filter: Status Unit (Baik, Rusak, Hilang)
+        // Filter: Status Unit (Baik, Rusak, Perlu Perbaikan, Hilang)
         $statusInput = $request->input('status_unit', $request->input('status'));
         if (!empty($statusInput)) {
             $status = strtolower($statusInput);
-            if ($status === 'baik') {
-                $query->whereIn('status', ['baik', 'tersedia']);
-            } else {
-                $query->where('status', $status);
-            }
+            $query->where('status', $status);
         }
 
         // Filter: Rentang Tanggal / Tahun Pembelian (Date Range Picker)
@@ -223,7 +219,7 @@ class InventoryController extends Controller
             'nama_barang' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'room_id' => 'required|exists:rooms,id',
-            'status' => 'required|in:baik,rusak,hilang,Baik,Rusak,Hilang',
+            'status' => 'required|in:baik,rusak,perlu_perbaikan,hilang,Baik,Rusak,Perlu Perbaikan,Hilang',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
 
             // Detail Aset & Rekapitulasi (Opsional)
@@ -249,7 +245,7 @@ class InventoryController extends Controller
             'room_id.required' => 'Ruangan penempatan wajib dipilih.',
             'room_id.exists' => 'Ruangan yang dipilih tidak valid.',
             'status.required' => 'Status unit wajib dipilih.',
-            'status.in' => 'Status unit harus berupa Baik, Rusak, atau Hilang.',
+            'status.in' => 'Status unit harus berupa Baik, Rusak, Perlu Perbaikan, atau Hilang.',
             'foto.image' => 'File foto harus berupa gambar.',
             'foto.mimes' => 'Format foto harus JPG, PNG, atau WebP.',
             'foto.max' => 'Ukuran file foto maksimal 2 MB.',
@@ -356,7 +352,7 @@ class InventoryController extends Controller
             'nama_barang' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'room_id' => 'required|exists:rooms,id',
-            'status' => 'required|in:baik,rusak,hilang,Baik,Rusak,Hilang',
+            'status' => 'required|in:baik,rusak,perlu_perbaikan,hilang,Baik,Rusak,Perlu Perbaikan,Hilang',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
 
             // Detail Aset & Rekapitulasi (Opsional)
@@ -382,7 +378,7 @@ class InventoryController extends Controller
             'room_id.required' => 'Ruangan penempatan wajib dipilih.',
             'room_id.exists' => 'Ruangan yang dipilih tidak valid.',
             'status.required' => 'Status unit wajib dipilih.',
-            'status.in' => 'Status unit harus berupa Baik, Rusak, atau Hilang.',
+            'status.in' => 'Status unit harus berupa Baik, Rusak, Perlu Perbaikan, atau Hilang.',
             'foto.image' => 'File foto harus berupa gambar.',
             'foto.mimes' => 'Format foto harus JPG, PNG, atau WebP.',
             'foto.max' => 'Ukuran file foto maksimal 2 MB.',

@@ -52,15 +52,11 @@ class Inventory extends Model
     }
 
     /**
-     * Alias for Status Unit (Kondisi Fisik: Baik, Rusak, Hilang)
+     * Status Unit Label (Tersedia, Dipinjam, Rusak, Perlu Perbaikan, Hilang)
      */
     public function getStatusUnitAttribute(): string
     {
-        $status = strtolower($this->status ?? 'baik');
-        if (in_array($status, ['tersedia', 'dipinjam'])) {
-            return 'baik';
-        }
-        return $status;
+        return strtolower($this->status ?? 'baik');
     }
 
     public function setStatusUnitAttribute($value): void
@@ -102,28 +98,32 @@ class Inventory extends Model
     }
 
     /**
-     * Status Unit Label (Baik, Rusak, Hilang)
+     * Status Unit Label (Baik/Tersedia, Dipinjam, Rusak, Perlu Perbaikan, Hilang)
      */
     public function getStatusLabelAttribute(): string
     {
         $status = strtolower($this->status ?? 'baik');
         return match ($status) {
-            'rusak' => 'Rusak',
-            'hilang' => 'Hilang',
-            default => 'Baik',
+            'dipinjam'        => 'Dipinjam',
+            'rusak'           => 'Rusak',
+            'perlu_perbaikan' => 'Perlu Perbaikan',
+            'hilang'          => 'Hilang',
+            default           => 'Tersedia',
         };
     }
 
     /**
-     * Status Unit badge CSS classes (Baik: Green, Rusak: Red, Hilang: Amber)
+     * Status Unit badge CSS classes
      */
     public function getStatusBadgeClassAttribute(): string
     {
         $status = strtolower($this->status ?? 'baik');
         return match ($status) {
-            'rusak' => 'bg-[#FEE2E2] text-[#991B1B]',
-            'hilang' => 'bg-[#FEF3C7] text-[#92400E]',
-            default => 'bg-[#DCFCE7] text-[#166534]',
+            'dipinjam'        => 'bg-[#DBEAFE] text-[#1E40AF]',
+            'rusak'           => 'bg-[#FEE2E2] text-[#991B1B]',
+            'perlu_perbaikan' => 'bg-[#FEF3C7] text-[#92400E]',
+            'hilang'          => 'bg-[#F3F4F6] text-[#374151]',
+            default           => 'bg-[#DCFCE7] text-[#166534]',
         };
     }
 
@@ -134,9 +134,11 @@ class Inventory extends Model
     {
         $status = strtolower($this->status ?? 'baik');
         return match ($status) {
-            'rusak' => 'bg-[#DC2626]',
-            'hilang' => 'bg-[#D97706]',
-            default => 'bg-[#16A34A]',
+            'dipinjam'        => 'bg-[#2563EB]',
+            'rusak'           => 'bg-[#DC2626]',
+            'perlu_perbaikan' => 'bg-[#F59E0B]',
+            'hilang'          => 'bg-[#6B7280]',
+            default           => 'bg-[#16A34A]',
         };
     }
 

@@ -48,18 +48,7 @@ class LoanController extends Controller
         // 2. Status Filter: strictly 'dipinjam' and 'selesai'
         if ($request->filled('status')) {
             $status = strtolower(trim($request->input('status')));
-            if ($status === 'terlambat') {
-                $query->where(function ($q) {
-                    $q->where(function ($sub) {
-                        $sub->where('status', 'dipinjam')
-                            ->where('tanggal_kembali', '<', Carbon::now());
-                    })->orWhere(function ($sub) {
-                        $sub->where('status', 'selesai')
-                            ->whereNotNull('tanggal_kembali_aktual')
-                            ->whereColumn('tanggal_kembali_aktual', '>', 'tanggal_kembali');
-                    });
-                });
-            } elseif (in_array($status, ['dipinjam', 'selesai'])) {
+            if (in_array($status, ['dipinjam', 'selesai'])) {
                 $query->where('status', $status);
             }
         }
@@ -170,6 +159,9 @@ class LoanController extends Controller
                 'alasan_tujuan' => $validated['alasan_tujuan'] ?? null,
             ]);
 
+            // Mark the allocated unit as 'dipinjam' (unavailable for other loans)
+            $availableInventory->update(['status' => 'dipinjam']);
+
             return redirect()->route('admin.peminjaman.index', ['highlight' => $loan->id])
                 ->with('success', "Peminjaman '{$loan->kode_peminjaman}' berhasil dibuat dengan status Dipinjam.");
         });
@@ -192,6 +184,11 @@ class LoanController extends Controller
                 'status' => 'selesai',
                 'tanggal_kembali_aktual' => $now,
             ]);
+
+            // Release the allocated inventory unit back to available
+            if ($loan->inventory) {
+                $loan->inventory->update(['status' => 'baik']);
+            }
 
             return redirect()->back()
                 ->with('success', "Peminjaman '{$loan->kode_peminjaman}' telah diselesaikan. Unit barang kembali berstatus Tersedia.");

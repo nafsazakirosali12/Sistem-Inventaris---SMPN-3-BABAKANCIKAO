@@ -14,6 +14,20 @@
                     Informasi akun dan kredensial Administrator Sarana & Prasarana {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}.
                 </p>
             </div>
+            <!-- Top Action Buttons: Kembali & Edit -->
+            <div class="flex items-center gap-2">
+                <a href="{{ route('admin.dashboard') }}"
+                   class="h-10 px-4 rounded-lg border border-[#D9E4E2] bg-white text-xs font-semibold text-[#4B5563] hover:text-[#1F2937] hover:bg-[#F3F7F6] transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                    <span>Kembali</span>
+                </a>
+                <button type="button"
+                        onclick="openEditProfileModal()"
+                        class="h-10 px-4 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40">
+                    <span class="material-symbols-outlined text-[16px]">edit</span>
+                    <span>Edit</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -70,14 +84,14 @@
                     <span class="text-[11px] text-[#6B7280] mt-1">Digunakan untuk login ke sistem inventaris.</span>
                 </div>
 
-                <!-- Password Block (Strictly Masked, Read-Only) -->
+                <!-- Password Block (Read-Only, Bcrypt Masked) -->
                 <div class="p-4 rounded-xl bg-[#F8FBFA] border border-[#D9E4E2] flex flex-col gap-1">
                     <span class="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider">Password</span>
                     <div class="flex items-center justify-between mt-1">
                         <span class="text-sm font-bold text-[#1F2937] tracking-widest font-mono select-none">••••••••</span>
                         <span class="material-symbols-outlined text-[18px] text-[#6B7280]">lock</span>
                     </div>
-                    <span class="text-[11px] text-[#6B7280] mt-1">Password terenkripsi dengan aman (hashing Bcrypt).</span>
+                    <span class="text-[11px] text-[#6B7280] mt-1">Password tersimpan aman dengan enkripsi hashing Bcrypt.</span>
                 </div>
 
                 <!-- Nama Lengkap Block -->
@@ -99,19 +113,6 @@
                     </div>
                     <span class="text-[11px] text-[#6B7280] mt-1">Akses penuh ke seluruh menu kelola admin.</span>
                 </div>
-            </div>
-
-            <!-- Bottom Actions: Kembali | Edit (Consistent button pattern) -->
-            <div class="mt-6 pt-6 border-t border-[#D9E4E2] flex items-center justify-end gap-3">
-                <a href="{{ route('admin.dashboard') }}"
-                   class="h-10 px-5 rounded-lg border border-[#D9E4E2] bg-white text-xs font-semibold text-[#4B5563] hover:text-[#1F2937] hover:bg-[#F3F7F6] transition-colors flex items-center justify-center">
-                    <span>Kembali</span>
-                </a>
-                <button type="button"
-                        onclick="openEditProfileModal()"
-                        class="h-10 px-5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-semibold flex items-center justify-center shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40">
-                    <span>Edit</span>
-                </button>
             </div>
         </div>
     </div>
@@ -245,7 +246,7 @@
         document.getElementById('modalEditProfile').classList.add('hidden');
     }
 
-    // Toggle Password Visibility (Eye icon)
+    // Toggle Password Visibility (Eye icon) — untuk modal Edit
     function togglePasswordVisibility(inputId, iconId) {
         const input = document.getElementById(inputId);
         const icon = document.getElementById(iconId);
