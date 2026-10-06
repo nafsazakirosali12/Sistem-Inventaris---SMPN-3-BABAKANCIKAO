@@ -44,14 +44,14 @@
             </a>
 
             <!-- 5. Data Inventaris -->
-            <a href="#"
+            <a href="{{ route('admin.inventaris.index') }}"
                class="flex items-center h-11 px-4 transition-all text-xs rounded-lg {{ request()->routeIs('admin.inventaris*') ? 'bg-[#0F766E] text-white font-bold border-l-4 border-[#2DD4BF] shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white font-medium' }}">
                 <span class="material-symbols-outlined mr-3 text-[20px] {{ request()->routeIs('admin.inventaris*') ? 'text-[#2DD4BF]' : '' }}">inventory_2</span>
                 <span>Data Inventaris</span>
             </a>
 
             <!-- 6. Data Peminjaman -->
-            <a href="#"
+            <a href="{{ route('admin.peminjaman.index') }}"
                class="flex items-center h-11 px-4 transition-all text-xs rounded-lg {{ request()->routeIs('admin.peminjaman*') ? 'bg-[#0F766E] text-white font-bold border-l-4 border-[#2DD4BF] shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white font-medium' }}">
                 <span class="material-symbols-outlined mr-3 text-[20px] {{ request()->routeIs('admin.peminjaman*') ? 'text-[#2DD4BF]' : '' }}">assignment_return</span>
                 <span>Data Peminjaman</span>

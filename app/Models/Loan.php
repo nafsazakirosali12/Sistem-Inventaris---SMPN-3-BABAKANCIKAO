@@ -16,6 +16,7 @@ class Loan extends Model
         'inventory_id',
         'tanggal_pinjam',
         'tanggal_kembali',
+        'tanggal_kembali_aktual',
         'status',
         'alasan_tujuan',
     ];
@@ -23,6 +24,7 @@ class Loan extends Model
     protected $casts = [
         'tanggal_pinjam' => 'datetime',
         'tanggal_kembali' => 'datetime',
+        'tanggal_kembali_aktual' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -40,8 +42,17 @@ class Loan extends Model
         return $this->belongsTo(Inventory::class);
     }
 
+    /**
+     * Check if loan is late (either currently overdue or returned past schedule)
+     */
     public function getIsTerlambatAttribute(): bool
     {
-        return $this->status === 'dipinjam' && Carbon::now()->greaterThan($this->tanggal_kembali);
+        if ($this->status === 'dipinjam') {
+            return Carbon::now()->greaterThan($this->tanggal_kembali);
+        }
+        if ($this->status === 'selesai' && $this->tanggal_kembali_aktual) {
+            return $this->tanggal_kembali_aktual->greaterThan($this->tanggal_kembali);
+        }
+        return false;
     }
 }
