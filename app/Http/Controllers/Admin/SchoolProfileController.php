@@ -68,6 +68,10 @@ class SchoolProfileController extends Controller
             'sub_unit_organisasi' => 'nullable|string|max:255',
             'upb' => 'nullable|string|max:255',
             'no_kode_lokasi' => 'nullable|string|max:255',
+            'nama_kepala_sekolah' => 'nullable|string|max:255',
+            'nip_kepala_sekolah' => 'nullable|string|max:255',
+            'nama_pembuat' => 'nullable|string|max:255',
+            'nip_pembuat' => 'nullable|string|max:255',
         ], [
             'nama_sekolah.required' => 'Nama sekolah wajib diisi.',
             'npsn.required' => 'NPSN wajib diisi.',

@@ -429,6 +429,59 @@
                            placeholder="mis. 12.34.56.78.90"
                            class="w-full h-10 px-3 bg-[#F3F7F6] disabled:bg-[#F3F7F6]/60 rounded-lg font-mono text-xs font-bold text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
                 </div>
+
+                <!-- Penandatangan Laporan / Form Approval Header -->
+                <div class="md:col-span-2 lg:col-span-3 pt-3 border-t border-[#D9E4E2]">
+                    <h3 class="text-xs font-bold text-[#0F766E] uppercase tracking-wider">Penandatangan Laporan</h3>
+                </div>
+
+                <!-- Nama Kepala Sekolah -->
+                <div class="flex flex-col gap-1.5">
+                    <label for="nama_kepala_sekolah" class="text-xs font-semibold text-[#1F2937]">Nama Kepala Sekolah</label>
+                    <input type="text"
+                           id="nama_kepala_sekolah"
+                           name="nama_kepala_sekolah"
+                           value="{{ old('nama_kepala_sekolah', $schoolProfile->nama_kepala_sekolah) }}"
+                           :disabled="!isEditing"
+                           placeholder="Nama Lengkap & Gelar"
+                           class="w-full h-10 px-3 bg-[#F3F7F6] disabled:bg-[#F3F7F6]/60 rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
+                </div>
+
+                <!-- NIP Kepala Sekolah -->
+                <div class="flex flex-col gap-1.5">
+                    <label for="nip_kepala_sekolah" class="text-xs font-semibold text-[#1F2937]">NIP Kepala Sekolah</label>
+                    <input type="text"
+                           id="nip_kepala_sekolah"
+                           name="nip_kepala_sekolah"
+                           value="{{ old('nip_kepala_sekolah', $schoolProfile->nip_kepala_sekolah) }}"
+                           :disabled="!isEditing"
+                           placeholder="mis. 19750101 200003 1 001"
+                           class="w-full h-10 px-3 bg-[#F3F7F6] disabled:bg-[#F3F7F6]/60 rounded-lg font-mono text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
+                </div>
+
+                <!-- Nama Pembuat -->
+                <div class="flex flex-col gap-1.5">
+                    <label for="nama_pembuat" class="text-xs font-semibold text-[#1F2937]">Nama Pembuat / Pengurus Barang</label>
+                    <input type="text"
+                           id="nama_pembuat"
+                           name="nama_pembuat"
+                           value="{{ old('nama_pembuat', $schoolProfile->nama_pembuat) }}"
+                           :disabled="!isEditing"
+                           placeholder="Nama Lengkap Pembuat Laporan"
+                           class="w-full h-10 px-3 bg-[#F3F7F6] disabled:bg-[#F3F7F6]/60 rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
+                </div>
+
+                <!-- NIP Pembuat -->
+                <div class="flex flex-col gap-1.5 md:col-span-2 lg:col-span-1">
+                    <label for="nip_pembuat" class="text-xs font-semibold text-[#1F2937]">NIP Pembuat / Pengurus Barang</label>
+                    <input type="text"
+                           id="nip_pembuat"
+                           name="nip_pembuat"
+                           value="{{ old('nip_pembuat', $schoolProfile->nip_pembuat) }}"
+                           :disabled="!isEditing"
+                           placeholder="mis. 19820512 201001 2 005"
+                           class="w-full h-10 px-3 bg-[#F3F7F6] disabled:bg-[#F3F7F6]/60 rounded-lg font-mono text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
+                </div>
             </div>
         </div>
 
