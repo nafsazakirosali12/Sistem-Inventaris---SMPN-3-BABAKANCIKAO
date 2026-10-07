@@ -100,7 +100,7 @@ class AdminProfileTest extends TestCase
 
     public function test_admin_can_upload_profile_photo(): void
     {
-        $photo = UploadedFile::fake()->image('avatar.jpg', 200, 200);
+        $photo = UploadedFile::fake()->create('avatar.jpg', 100, 'image/jpeg');
 
         $response = $this->actingAs($this->admin)->put(route('admin.profile.update'), [
             'name' => $this->admin->name,

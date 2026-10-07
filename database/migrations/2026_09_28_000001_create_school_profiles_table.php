@@ -30,6 +30,10 @@ return new class extends Migration
             $table->string('sub_unit_organisasi')->default('SMPN 3 Babakancikao');
             $table->string('upb')->default('SMPN 3 Babakancikao');
             $table->string('no_kode_lokasi')->default('12.34.56.78.90');
+            $table->string('nama_kepala_sekolah')->nullable();
+            $table->string('nip_kepala_sekolah')->nullable();
+            $table->string('nama_pembuat')->nullable();
+            $table->string('nip_pembuat')->nullable();
             $table->string('instagram')->nullable();
             $table->string('youtube')->nullable();
             $table->string('facebook')->nullable();
