@@ -432,7 +432,7 @@
 
                 <!-- Penandatangan Laporan / Form Approval Header -->
                 <div class="md:col-span-2 lg:col-span-3 pt-3 border-t border-[#D9E4E2]">
-                    <h3 class="text-xs font-bold text-[#0F766E] uppercase tracking-wider">Pejabat & Penandatangan Laporan</h3>
+                    <h3 class="text-xs font-bold text-[#0F766E] uppercase tracking-wider">Penandatangan Laporan</h3>
                 </div>
 
                 <!-- Nama Kepala Sekolah -->
