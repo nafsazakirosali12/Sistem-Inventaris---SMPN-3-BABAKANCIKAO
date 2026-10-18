@@ -108,29 +108,23 @@
                                 stroke-dasharray="{{ $baikDash }} {{ $circumference }}"
                                 stroke-dashoffset="0"
                                 stroke-width="12"></circle>
-                        {{-- Dipinjam --}}
-                        <circle cx="50" cy="50" fill="transparent" r="38"
-                                stroke="#2563EB"
-                                stroke-dasharray="{{ $dipinjamChartDash }} {{ $circumference }}"
-                                stroke-dashoffset="{{ $offset1 }}"
-                                stroke-width="12"></circle>
                         {{-- Rusak --}}
                         <circle cx="50" cy="50" fill="transparent" r="38"
                                 stroke="#DC2626"
                                 stroke-dasharray="{{ $rusakDash }} {{ $circumference }}"
-                                stroke-dashoffset="{{ $offset2 }}"
+                                stroke-dashoffset="{{ $offset1 }}"
                                 stroke-width="12"></circle>
                         {{-- Perlu Perbaikan --}}
                         <circle cx="50" cy="50" fill="transparent" r="38"
                                 stroke="#F59E0B"
                                 stroke-dasharray="{{ $perluPerbaikanDash }} {{ $circumference }}"
-                                stroke-dashoffset="{{ $offset3 }}"
+                                stroke-dashoffset="{{ $offset2 }}"
                                 stroke-width="12"></circle>
                         {{-- Hilang --}}
                         <circle cx="50" cy="50" fill="transparent" r="38"
                                 stroke="#6B7280"
                                 stroke-dasharray="{{ $hilangDash }} {{ $circumference }}"
-                                stroke-dashoffset="{{ $offset4 }}"
+                                stroke-dashoffset="{{ $offset3 }}"
                                 stroke-width="12"></circle>
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
@@ -149,16 +143,6 @@
                         <div class="text-right">
                             <span class="text-xs font-semibold text-[#166534]">{{ $baikCount }} Unit</span>
                             <span class="text-[11px] text-[#6B7280] ml-1">({{ $baikPct }}%)</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between p-2 rounded-lg bg-[#DBEAFE]/40 border border-[#DBEAFE]">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-[#2563EB] flex-shrink-0"></span>
-                            <span class="text-xs font-semibold text-[#1F2937]">Dipinjam</span>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs font-semibold text-[#1E40AF]">{{ $dipinjamCount }} Unit</span>
-                            <span class="text-[11px] text-[#6B7280] ml-1">({{ $dipinjamChartPct }}%)</span>
                         </div>
                     </div>
                     <div class="flex items-center justify-between p-2 rounded-lg bg-[#FEE2E2]/40 border border-[#FEE2E2]">

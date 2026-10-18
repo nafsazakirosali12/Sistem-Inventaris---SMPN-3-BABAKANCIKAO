@@ -74,7 +74,7 @@
     @include('components.peminjam.navbar')
 
     <!-- Main Workspace Content -->
-    <main class="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6">
+    <main class="flex-1 w-full">
         @yield('content')
     </main>
 

@@ -7,9 +7,9 @@
     <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         @if(! $onlyCopyright)
-            <div class="grid grid-cols-1 md:grid-cols-[1.2fr_1fr_1fr] gap-8 lg:gap-12 items-start">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 items-start">
 
-                {{-- Profil Sekolah --}}
+                {{-- Kolom 1: Profil Sekolah & NPSN --}}
                 <div class="flex flex-col items-center md:items-start text-center md:text-left gap-4">
                     <div class="flex items-center gap-3">
                         <img
@@ -29,14 +29,47 @@
                     </div>
 
                     <p class="text-xs leading-relaxed max-w-sm text-center md:text-left {{ $isLight ? 'text-[#6B7280]' : 'text-[#CCFBF1]/80' }}">
-                        Sistem Informasi Inventaris & Peminjaman Sarana Prasarana Sekolah.
+                        {{ $schoolProfile->tagline ?? 'Portal Terpadu Sarana & Prasarana' }}. Layanan peminjaman fasilitas dan sarana prasarana sekolah terpadu.
                     </p>
                 </div>
 
-                {{-- Kontak Resmi --}}
+                {{-- Kolom 2: Tautan Cepat Peminjam --}}
                 <div class="flex flex-col items-center md:items-start text-center md:text-left gap-3">
                     <h4 class="w-full text-xs font-bold uppercase tracking-wider text-center md:text-left mb-1 {{ $isLight ? 'text-[#1F2937]' : 'text-white' }}">
-                        Kontak Resmi
+                        Tautan Cepat
+                    </h4>
+                    <ul class="flex flex-col gap-2 text-xs {{ $isLight ? 'text-[#4B5563]' : 'text-[#CCFBF1]/80' }}">
+                        <li>
+                            <a href="{{ route('admin.inventaris.index') }}" class="hover:text-white hover:underline transition-colors flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                                <span>Katalog Barang</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.peminjaman.index') }}" class="hover:text-white hover:underline transition-colors flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                                <span>Riwayat Pinjaman</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.peminjaman.index') }}" class="hover:text-white hover:underline transition-colors flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                                <span>Cek Status Pinjaman</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('home') }}#denah-sekolah" class="hover:text-white hover:underline transition-colors flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                                <span>Denah Sekolah</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                {{-- Kolom 3: Kontak Resmi --}}
+                <div class="flex flex-col items-center md:items-start text-center md:text-left gap-3">
+                    <h4 class="w-full text-xs font-bold uppercase tracking-wider text-center md:text-left mb-1 {{ $isLight ? 'text-[#1F2937]' : 'text-white' }}">
+                        Alamat & Kontak
                     </h4>
 
                     @if(isset($schoolProfile->alamat) && $schoolProfile->alamat)
@@ -44,7 +77,7 @@
                             href="https://www.google.com/maps/search/?api=1&query={{ urlencode($schoolProfile->alamat) }}"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="group flex items-start justify-center md:justify-start gap-3 text-xs transition-colors w-full max-w-sm text-center md:text-left {{ $isLight ? 'text-[#4B5563] hover:text-[#0F766E]' : 'text-[#CCFBF1]/90 hover:text-white' }}"
+                            class="group flex items-start justify-center md:justify-start gap-2.5 text-xs transition-colors w-full text-center md:text-left {{ $isLight ? 'text-[#4B5563] hover:text-[#0F766E]' : 'text-[#CCFBF1]/90 hover:text-white' }}"
                             title="Buka lokasi di Google Maps"
                         >
                             <span class="material-symbols-outlined text-[18px] shrink-0 mt-0.5 group-hover:scale-110 transition-transform {{ $isLight ? 'text-[#0F766E]' : 'text-[#2DD4BF]' }}">
@@ -55,7 +88,7 @@
                             </span>
                         </a>
                     @else
-                        <div class="flex items-center justify-center md:justify-start gap-3 text-xs w-full {{ $isLight ? 'text-[#9CA3AF]' : 'text-[#CCFBF1]/60' }}">
+                        <div class="flex items-center justify-center md:justify-start gap-2.5 text-xs w-full {{ $isLight ? 'text-[#9CA3AF]' : 'text-[#CCFBF1]/60' }}">
                             <span class="material-symbols-outlined text-[18px] shrink-0 {{ $isLight ? 'text-[#0F766E]' : 'text-[#2DD4BF]' }}">
                                 location_on
                             </span>
@@ -75,7 +108,7 @@
                             href="{{ $waUrl }}"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="group flex items-center justify-center md:justify-start gap-3 text-xs transition-colors w-full {{ $isLight ? 'text-[#4B5563] hover:text-[#0F766E]' : 'text-[#CCFBF1]/90 hover:text-white' }}"
+                            class="group flex items-center justify-center md:justify-start gap-2.5 text-xs transition-colors w-full {{ $isLight ? 'text-[#4B5563] hover:text-[#0F766E]' : 'text-[#CCFBF1]/90 hover:text-white' }}"
                             title="Hubungi WhatsApp {{ $schoolProfile->telepon }}"
                         >
                             <span class="material-symbols-outlined text-[18px] shrink-0 {{ $isLight ? 'text-[#0F766E]' : 'text-[#2DD4BF]' }}">
@@ -88,7 +121,7 @@
                     @if(isset($schoolProfile->email) && $schoolProfile->email)
                         <a
                             href="mailto:{{ $schoolProfile->email }}"
-                            class="group flex items-center justify-center md:justify-start gap-3 text-xs transition-colors w-full {{ $isLight ? 'text-[#4B5563] hover:text-[#0F766E]' : 'text-[#CCFBF1]/90 hover:text-white' }}"
+                            class="group flex items-center justify-center md:justify-start gap-2.5 text-xs transition-colors w-full {{ $isLight ? 'text-[#4B5563] hover:text-[#0F766E]' : 'text-[#CCFBF1]/90 hover:text-white' }}"
                             title="Kirim email"
                         >
                             <span class="material-symbols-outlined text-[18px] shrink-0 {{ $isLight ? 'text-[#0F766E]' : 'text-[#2DD4BF]' }}">
@@ -99,7 +132,7 @@
                     @endif
                 </div>
 
-                {{-- Media Sosial Resmi --}}
+                {{-- Kolom 4: Media Sosial Resmi & Tautan --}}
                 <div class="flex flex-col items-center md:items-start text-center md:text-left gap-3">
                     <h4 class="w-full text-xs font-bold uppercase tracking-wider text-center md:text-left mb-1 {{ $isLight ? 'text-[#1F2937]' : 'text-white' }}">
                         Media Sosial Resmi
@@ -114,7 +147,7 @@
                                 href="{{ Str::startsWith($schoolProfile->instagram, 'http') ? $schoolProfile->instagram : 'https://instagram.com/' . ltrim($schoolProfile->instagram, '@') }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="group flex items-center justify-center md:justify-start gap-3 text-xs transition-colors w-full {{ $isLight ? 'text-[#4B5563] hover:text-[#0F766E]' : 'text-[#CCFBF1]/90 hover:text-white' }}"
+                                class="group flex items-center justify-center md:justify-start gap-2.5 text-xs transition-colors w-full {{ $isLight ? 'text-[#4B5563] hover:text-[#0F766E]' : 'text-[#CCFBF1]/90 hover:text-white' }}"
                                 title="Buka Instagram {{ $igText }}"
                             >
                                 <span class="material-symbols-outlined text-[18px] shrink-0 {{ $isLight ? 'text-[#0F766E]' : 'text-[#2DD4BF]' }}">
@@ -132,7 +165,7 @@
                                 href="{{ Str::startsWith($schoolProfile->youtube, 'http') ? $schoolProfile->youtube : (Str::startsWith($schoolProfile->youtube, '@') ? 'https://youtube.com/' . $schoolProfile->youtube : 'https://youtube.com/@' . ltrim($schoolProfile->youtube, '@')) }}"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="group flex items-center justify-center md:justify-start gap-3 text-xs transition-colors w-full {{ $isLight ? 'text-[#4B5563] hover:text-[#0F766E]' : 'text-[#CCFBF1]/90 hover:text-white' }}"
+                                class="group flex items-center justify-center md:justify-start gap-2.5 text-xs transition-colors w-full {{ $isLight ? 'text-[#4B5563] hover:text-[#0F766E]' : 'text-[#CCFBF1]/90 hover:text-white' }}"
                                 title="Buka YouTube {{ $ytText }}"
                             >
                                 <span class="material-symbols-outlined text-[18px] shrink-0 {{ $isLight ? 'text-[#0F766E]' : 'text-[#2DD4BF]' }}">
@@ -142,8 +175,22 @@
                             </a>
                         @endif
 
-                        @if(empty($schoolProfile->instagram) && empty($schoolProfile->youtube))
-                            <div class="flex items-center justify-center md:justify-start gap-3 text-xs w-full {{ $isLight ? 'text-[#9CA3AF]' : 'text-[#CCFBF1]/60' }}">
+                        @if(isset($schoolProfile->facebook) && $schoolProfile->facebook)
+                            <a
+                                href="{{ Str::startsWith($schoolProfile->facebook, 'http') ? $schoolProfile->facebook : 'https://facebook.com/' . $schoolProfile->facebook }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="group flex items-center justify-center md:justify-start gap-2.5 text-xs transition-colors w-full {{ $isLight ? 'text-[#4B5563] hover:text-[#0F766E]' : 'text-[#CCFBF1]/90 hover:text-white' }}"
+                            >
+                                <span class="material-symbols-outlined text-[18px] shrink-0 {{ $isLight ? 'text-[#0F766E]' : 'text-[#2DD4BF]' }}">
+                                    public
+                                </span>
+                                <span class="group-hover:underline">Facebook Resmi</span>
+                            </a>
+                        @endif
+
+                        @if(empty($schoolProfile->instagram) && empty($schoolProfile->youtube) && empty($schoolProfile->facebook))
+                            <div class="flex items-center justify-center md:justify-start gap-2.5 text-xs w-full {{ $isLight ? 'text-[#9CA3AF]' : 'text-[#CCFBF1]/60' }}">
                                 <span class="material-symbols-outlined text-[18px] shrink-0 {{ $isLight ? 'text-[#0F766E]' : 'text-[#2DD4BF]' }}">
                                     share
                                 </span>

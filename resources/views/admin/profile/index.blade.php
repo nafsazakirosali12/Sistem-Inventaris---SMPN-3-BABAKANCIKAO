@@ -11,7 +11,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-[#1F2937] tracking-tight">Profil Admin</h1>
                 <p class="text-xs text-[#4B5563] mt-1 max-w-3xl">
-                    Informasi akun dan kredensial Administrator Sarana & Prasarana {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}.
+                    Informasi akun Administrator Sarana & Prasarana {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}.
                 </p>
             </div>
             <!-- Top Action Buttons: Kembali & Edit -->
@@ -66,17 +66,17 @@
             </div>
         </div>
 
-        <!-- Detail Credentials Section (Read-Only) -->
+        <!-- Detail Akun Section (Read-Only) -->
         <div class="p-6 sm:p-8">
             <h3 class="text-sm font-bold text-[#1F2937] mb-4 flex items-center gap-2">
                 <span class="material-symbols-outlined text-[20px] text-[#0F766E]">shield_person</span>
-                <span>Rincian Akun & Kredensial</span>
+                <span>Rincian Akun</span>
             </h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <!-- Username Block -->
+                <!-- Nama Pengguna Block -->
                 <div class="p-4 rounded-xl bg-[#F8FBFA] border border-[#D9E4E2] flex flex-col gap-1">
-                    <span class="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider">Username Akun</span>
+                    <span class="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider">Nama Pengguna</span>
                     <div class="flex items-center justify-between mt-1">
                         <span class="text-sm font-bold text-[#1F2937] font-mono">{{ $user->username ?? 'admin' }}</span>
                         <span class="material-symbols-outlined text-[18px] text-[#0F766E]">alternate_email</span>
@@ -84,14 +84,14 @@
                     <span class="text-[11px] text-[#6B7280] mt-1">Digunakan untuk login ke sistem inventaris.</span>
                 </div>
 
-                <!-- Password Block (Read-Only, Bcrypt Masked) -->
+                <!-- Kata Sandi Block (Read-Only, Bcrypt Masked) -->
                 <div class="p-4 rounded-xl bg-[#F8FBFA] border border-[#D9E4E2] flex flex-col gap-1">
-                    <span class="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider">Password</span>
+                    <span class="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider">Kata Sandi</span>
                     <div class="flex items-center justify-between mt-1">
                         <span class="text-sm font-bold text-[#1F2937] tracking-widest font-mono select-none">••••••••</span>
                         <span class="material-symbols-outlined text-[18px] text-[#6B7280]">lock</span>
                     </div>
-                    <span class="text-[11px] text-[#6B7280] mt-1">Password tersimpan aman dengan enkripsi hashing Bcrypt.</span>
+                    <span class="text-[11px] text-[#6B7280] mt-1">Kata sandi tersimpan aman dengan enkripsi hashing Bcrypt.</span>
                 </div>
 
                 <!-- Nama Lengkap Block -->
@@ -183,10 +183,10 @@
                        class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
             </div>
 
-            <!-- Username -->
+            <!-- Nama Pengguna -->
             <div class="flex flex-col gap-1.5">
                 <label for="edit_admin_username" class="text-xs font-semibold text-[#1F2937]">
-                    Username <span class="text-[#DC2626]">*</span>
+                    Nama Pengguna <span class="text-[#DC2626]">*</span>
                 </label>
                 <input type="text"
                        id="edit_admin_username"
@@ -198,25 +198,25 @@
                 <span class="text-[11px] text-[#6B7280]">Gunakan huruf, angka, titik, atau garis bawah tanpa spasi.</span>
             </div>
 
-            <!-- Password Baru (Optional, with eye toggle) -->
+            <!-- Kata Sandi Baru (Optional, with eye toggle) -->
             <div class="flex flex-col gap-1.5">
                 <label for="edit_admin_password" class="text-xs font-semibold text-[#1F2937]">
-                    Password Baru <span class="text-[#6B7280] font-normal">(Opsional)</span>
+                    Kata Sandi Baru <span class="text-[#6B7280] font-normal">(Opsional)</span>
                 </label>
                 <div class="relative">
                     <input type="password"
                            id="edit_admin_password"
                            name="password"
-                           placeholder="Kosongkan jika tidak ingin mengubah password"
+                           placeholder="Kosongkan jika tidak ingin mengubah kata sandi"
                            class="w-full h-10 px-3 pr-10 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
                     <button type="button"
                             onclick="togglePasswordVisibility('edit_admin_password', 'toggle_pass_icon')"
                             class="absolute inset-y-0 right-0 pr-3 flex items-center text-[#6B7280] hover:text-[#1F2937] focus:outline-none"
-                            title="Tampilkan / Sembunyikan Password">
+                            title="Tampilkan / Sembunyikan Kata Sandi">
                         <span id="toggle_pass_icon" class="material-symbols-outlined text-[18px]">visibility</span>
                     </button>
                 </div>
-                <span class="text-[11px] text-[#6B7280]">Minimal 6 karakter jika ingin mengganti password.</span>
+                <span class="text-[11px] text-[#6B7280]">Minimal 6 karakter jika ingin mengganti kata sandi.</span>
             </div>
 
             <!-- Modal Footer -->
@@ -303,7 +303,7 @@
         if (!usernameInput.value.trim() || !nameInput.value.trim()) {
             Swal.fire({
                 title: 'Form Belum Lengkap',
-                text: 'Nama lengkap dan username admin wajib diisi.',
+                text: 'Nama lengkap dan nama pengguna admin wajib diisi.',
                 confirmButtonColor: '#0F766E',
                 width: '22rem',
                 customClass: {
@@ -318,8 +318,8 @@
 
         if (passwordInput.value && passwordInput.value.length < 6) {
             Swal.fire({
-                title: 'Password Terlalu Pendek',
-                text: 'Password baru minimal harus terdiri dari 6 karakter.',
+                title: 'Kata Sandi Terlalu Pendek',
+                text: 'Kata sandi baru minimal harus terdiri dari 6 karakter.',
                 confirmButtonColor: '#0F766E',
                 width: '22rem',
                 customClass: {
