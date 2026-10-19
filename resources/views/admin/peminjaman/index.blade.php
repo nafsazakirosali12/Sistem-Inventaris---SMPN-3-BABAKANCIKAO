@@ -265,22 +265,25 @@
                                 </div>
                             </td>
 
-                            <!-- Aksi: Selesaikan (Jika Dipinjam) -->
+                            <!-- Aksi: Selesaikan (Jika Dipinjam) atau Edit Status (Jika Selesai) -->
                             <td class="py-3.5 px-4 text-center">
-                                <div class="inline-flex items-center gap-1 justify-center">
+                                <div class="inline-flex items-center gap-1.5 justify-center">
                                     @if ($loan->status === 'dipinjam')
                                         <button type="button"
                                                 onclick="confirmCompleteLoan({{ $loan->id }}, '{{ addslashes($loan->nama_peminjam) }}', '{{ addslashes($loan->kode_peminjaman) }}')"
-                                                class="px-3 py-1.5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 active:scale-[0.99]"
+                                                class="px-2.5 py-1.5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-semibold flex items-center gap-1 shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 active:scale-[0.99]"
                                                 title="Selesaikan Peminjaman (Barang Dikembalikan)">
                                             <span class="material-symbols-outlined text-[16px]">task_alt</span>
                                             <span>Selesaikan</span>
                                         </button>
                                     @else
-                                        <span class="text-[#16A34A] text-xs font-semibold flex items-center gap-1">
+                                        <button type="button"
+                                                onclick="confirmRevertLoan({{ $loan->id }}, '{{ addslashes($loan->nama_peminjam) }}', '{{ addslashes($loan->kode_peminjaman) }}')"
+                                                class="text-[#16A34A] hover:text-[#15803D] hover:bg-[#DCFCE7]/70 px-2 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all focus:outline-none focus:ring-2 focus:ring-[#16A34A]/30 active:scale-[0.98] cursor-pointer"
+                                                title="Klik jika ingin membatalkan status selesai (kembali ke Dipinjam)">
                                             <span class="material-symbols-outlined text-[16px]">check_circle</span>
                                             <span>Selesai</span>
-                                        </span>
+                                        </button>
                                     @endif
                                 </div>
                             </td>
@@ -321,11 +324,11 @@
 
 </div>
 
-<!-- Hidden Form for Completing Loan Status -->
+<!-- Hidden Form for Completing/Updating Loan Status -->
 <form id="formCompleteLoan" method="POST" class="hidden">
     @csrf
     @method('PUT')
-    <input type="hidden" name="status" value="selesai">
+    <input type="hidden" id="input_loan_status" name="status" value="selesai">
 </form>
 
 @push('scripts')
@@ -386,6 +389,38 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 const form = document.getElementById('formCompleteLoan');
+                const statusInput = document.getElementById('input_loan_status');
+                if (statusInput) statusInput.value = 'selesai';
+                form.action = `/admin/peminjaman/${id}`;
+                form.submit();
+            }
+        });
+    }
+
+    // Batal Selesai Confirmation Dialog (Jika tidak sengaja terpencet selesai)
+    function confirmRevertLoan(id, borrowerName, loanCode) {
+        Swal.fire({
+            title: 'Batal selesai peminjaman?',
+            text: `Apakah Anda yakin ingin membatalkan status selesai pada peminjaman '${loanCode}' oleh '${borrowerName}'? Unit barang akan kembali berstatus Sedang Dipinjam.`,
+            showCancelButton: true,
+            confirmButtonColor: '#0F766E',
+            cancelButtonColor: '#9CA3AF',
+            confirmButtonText: 'Ya, Batal Selesai',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            width: '24rem',
+            customClass: {
+                popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm',
+                cancelButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-gray-200 hover:bg-gray-300 text-gray-700 mr-2'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('formCompleteLoan');
+                const statusInput = document.getElementById('input_loan_status');
+                if (statusInput) statusInput.value = 'dipinjam';
                 form.action = `/admin/peminjaman/${id}`;
                 form.submit();
             }

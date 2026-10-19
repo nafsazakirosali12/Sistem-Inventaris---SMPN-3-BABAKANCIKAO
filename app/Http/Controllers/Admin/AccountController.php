@@ -79,11 +79,11 @@ class AccountController extends Controller
             ],
             'password' => 'required|string|min:6',
         ], [
-            'username.required' => 'Username wajib diisi.',
-            'username.unique' => 'Username sudah digunakan oleh akun lain.',
-            'username.regex' => 'Username hanya boleh berisi huruf, angka, titik, dan garis bawah.',
-            'password.required' => 'Password wajib diisi.',
-            'password.min' => 'Password minimal terdiri dari 6 karakter.',
+            'username.required' => 'Nama pengguna wajib diisi.',
+            'username.unique' => 'Nama pengguna sudah digunakan oleh akun lain.',
+            'username.regex' => 'Nama pengguna hanya boleh berisi huruf, angka, titik, dan garis bawah.',
+            'password.required' => 'Kata sandi wajib diisi.',
+            'password.min' => 'Kata sandi minimal terdiri dari 6 karakter.',
         ]);
 
         $username = strtolower(trim($validated['username']));
@@ -120,10 +120,10 @@ class AccountController extends Controller
             ],
             'password' => 'nullable|string|min:6',
         ], [
-            'username.required' => 'Username wajib diisi.',
-            'username.unique' => 'Username sudah digunakan oleh akun lain.',
-            'username.regex' => 'Username hanya boleh berisi huruf, angka, titik, dan garis bawah.',
-            'password.min' => 'Password minimal 6 karakter.',
+            'username.required' => 'Nama pengguna wajib diisi.',
+            'username.unique' => 'Nama pengguna sudah digunakan oleh akun lain.',
+            'username.regex' => 'Nama pengguna hanya boleh berisi huruf, angka, titik, dan garis bawah.',
+            'password.min' => 'Kata sandi minimal 6 karakter.',
         ]);
 
         $username = strtolower(trim($validated['username']));

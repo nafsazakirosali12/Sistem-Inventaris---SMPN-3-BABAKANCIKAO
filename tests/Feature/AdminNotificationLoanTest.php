@@ -156,6 +156,33 @@ class AdminNotificationLoanTest extends TestCase
         $this->assertFalse($this->inventory->refresh()->is_currently_borrowed);
     }
 
+    public function test_admin_can_revert_completed_loan_back_to_dipinjam_status(): void
+    {
+        $loan = Loan::create([
+            'kode_peminjaman' => 'PINJAM-2026-REV',
+            'nama_peminjam' => 'Dewi Lestari',
+            'user_id' => $this->peminjam->id,
+            'category_id' => $this->category->id,
+            'inventory_id' => $this->inventory->id,
+            'tanggal_pinjam' => Carbon::now()->subHours(4),
+            'tanggal_kembali' => Carbon::now()->subHour(),
+            'tanggal_kembali_aktual' => Carbon::now()->subHour(),
+            'status' => 'selesai',
+        ]);
+        $this->inventory->update(['status' => 'baik']);
+
+        $response = $this->actingAs($this->admin)->put(route('admin.peminjaman.update', $loan->id), [
+            'status' => 'dipinjam',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+        $loan->refresh();
+        $this->assertEquals('dipinjam', $loan->status);
+        $this->assertNull($loan->tanggal_kembali_aktual);
+        $this->assertEquals('dipinjam', $this->inventory->refresh()->status);
+    }
+
     public function test_double_borrowing_prevention_auto_selects_next_available_unit(): void
     {
         // Loan 1 takes inventory 1
