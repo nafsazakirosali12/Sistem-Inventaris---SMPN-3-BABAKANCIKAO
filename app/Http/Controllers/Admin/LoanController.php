@@ -168,30 +168,48 @@ class LoanController extends Controller
     }
 
     /**
-     * Mark a loan transaction as 'selesai' (Item returned by borrower).
-     * Saves tanggal_kembali_aktual and releases inventory unit back to available.
+     * Update loan transaction status:
+     * - 'selesai': item returned, records tanggal_kembali_aktual, releases inventory to 'baik'
+     * - 'dipinjam': reverts finished loan back to active loan if accidentally completed, clears tanggal_kembali_aktual, sets inventory back to 'dipinjam'
      */
     public function update(Request $request, Loan $loan)
     {
         $validated = $request->validate([
-            'status' => 'required|in:selesai',
+            'status' => 'required|in:selesai,dipinjam',
+            'alasan_tujuan' => 'nullable|string|max:500',
         ]);
 
-        return DB::transaction(function () use ($loan) {
-            $now = Carbon::now();
+        return DB::transaction(function () use ($validated, $loan) {
+            if ($validated['status'] === 'selesai') {
+                $now = Carbon::now();
 
-            $loan->update([
-                'status' => 'selesai',
-                'tanggal_kembali_aktual' => $now,
-            ]);
+                $loan->update([
+                    'status' => 'selesai',
+                    'tanggal_kembali_aktual' => $now,
+                ]);
 
-            // Release the allocated inventory unit back to available
-            if ($loan->inventory) {
-                $loan->inventory->update(['status' => 'baik']);
+                // Release the allocated inventory unit back to available
+                if ($loan->inventory) {
+                    $loan->inventory->update(['status' => 'baik']);
+                }
+
+                return redirect()->back()
+                    ->with('success', "Peminjaman '{$loan->kode_peminjaman}' telah diselesaikan. Unit barang kembali berstatus Tersedia.");
+            } else {
+                // Revert to 'dipinjam' if accidentally marked as 'selesai'
+                $loan->update([
+                    'status' => 'dipinjam',
+                    'tanggal_kembali_aktual' => null,
+                ]);
+
+                // Mark the inventory unit back to 'dipinjam'
+                if ($loan->inventory) {
+                    $loan->inventory->update(['status' => 'dipinjam']);
+                }
+
+                return redirect()->back()
+                    ->with('success', "Status peminjaman '{$loan->kode_peminjaman}' berhasil dikembalikan menjadi 'Dipinjam'.");
             }
-
-            return redirect()->back()
-                ->with('success', "Peminjaman '{$loan->kode_peminjaman}' telah diselesaikan. Unit barang kembali berstatus Tersedia.");
         });
     }
 }

@@ -74,7 +74,7 @@
             </div>
         </div>
 
-        <!-- Table Content (Strictly Nama Pengguna & Kata Sandi with Proportionate Spacing) -->
+        <!-- Table Content (Strictly Username & Password with Proportionate Spacing) -->
         <div class="overflow-x-auto w-full">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -172,7 +172,7 @@
 </form>
 
 <!-- ========================================================================= -->
-<!-- MODAL 1: TAMBAH AKUN PEMINJAM (2 FIELD: NAMA PENGGUNA & KATA SANDI)       -->
+<!-- MODAL 1: TAMBAH AKUN PEMINJAM (2 FIELD: USERNAME & PASSWORD)              -->
 <!-- ========================================================================= -->
 <div id="modalTambahAkun" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#134E4A]/50 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl max-w-md w-full shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150 border border-[#D9E4E2]">
@@ -196,7 +196,7 @@
             <!-- Role Indicator Info -->
             <div class="p-3 rounded-lg bg-[#F0FDFA] border border-[#CCFBF1] flex items-center gap-2 text-xs text-[#0F766E]">
                 <span class="material-symbols-outlined text-[18px]">verified_user</span>
-                <span>Peran akun otomatis diset sebagai <strong>Peminjam</strong> saat disimpan.</span>
+                <span>Peran akun otomatis diatur sebagai <strong>Peminjam</strong> saat disimpan.</span>
             </div>
 
             <!-- Nama Pengguna -->
@@ -253,7 +253,7 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- MODAL 2: UBAH AKUN PEMINJAM (2 FIELD: NAMA PENGGUNA & KATA SANDI BARU)    -->
+<!-- MODAL 2: UBAH AKUN PEMINJAM (2 FIELD: NAMA PENGGUNA & KATA SANDI BARU)     -->
 <!-- ========================================================================= -->
 <div id="modalEditAkun" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#134E4A]/50 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl max-w-md w-full shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150 border border-[#D9E4E2]">
@@ -354,7 +354,7 @@
 
         if (!username || !password) {
             Swal.fire({
-                title: 'Form Belum Lengkap',
+                title: 'Formulir Belum Lengkap',
                 text: 'Nama pengguna dan kata sandi wajib diisi.',
                 confirmButtonColor: '#0F766E',
                 width: '22rem',
@@ -432,7 +432,7 @@
 
         if (!usernameInput) {
             Swal.fire({
-                title: 'Form Belum Lengkap',
+                title: 'Formulir Belum Lengkap',
                 text: 'Nama pengguna wajib diisi.',
                 confirmButtonColor: '#0F766E',
                 width: '22rem',
@@ -474,7 +474,7 @@
     function handleDeleteAccount(id, username) {
         Swal.fire({
             title: 'Hapus akun peminjam?',
-            text: `Akun '@${username}' akan dihapus. Pengguna tidak dapat login lagi ke sistem.`,
+            text: `Akun '@${username}' akan dihapus. Pengguna tidak dapat masuk lagi ke sistem.`,
             showCancelButton: true,
             confirmButtonColor: '#DC2626',
             cancelButtonColor: '#9CA3AF',

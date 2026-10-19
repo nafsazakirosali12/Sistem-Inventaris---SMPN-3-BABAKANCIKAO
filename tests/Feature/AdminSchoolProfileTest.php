@@ -61,6 +61,10 @@ class AdminSchoolProfileTest extends TestCase
             'sub_unit_organisasi' => 'SMPN 3 Babakancikao',
             'upb' => 'SMPN 3 Babakancikao',
             'no_kode_lokasi' => '12.34.56.78.90',
+            'nama_kepala_sekolah' => 'Drs. H. Ahmad Dahlan, M.Pd',
+            'nip_kepala_sekolah' => '19750101 200003 1 001',
+            'nama_pembuat' => 'Budi Santoso, S.Kom',
+            'nip_pembuat' => '19820512 201001 2 005',
         ]);
 
         $response->assertRedirect(route('admin.profil.index'));
@@ -70,6 +74,10 @@ class AdminSchoolProfileTest extends TestCase
             'nama_sekolah' => 'SMPN 3 BABAKANCIKAO UPDATED',
             'npsn' => '87654321',
             'instagram' => '@smpn3_official',
+            'nama_kepala_sekolah' => 'Drs. H. Ahmad Dahlan, M.Pd',
+            'nip_kepala_sekolah' => '19750101 200003 1 001',
+            'nama_pembuat' => 'Budi Santoso, S.Kom',
+            'nip_pembuat' => '19820512 201001 2 005',
         ]);
     }
 

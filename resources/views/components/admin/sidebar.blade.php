@@ -5,11 +5,11 @@
     
     <div class="flex flex-col h-full overflow-y-auto">
         <!-- 1. Top Section: Logo & Nama Sekolah (Khusus Sidebar Admin) -->
-        <div class="h-16 px-4 bg-[#134E4A] flex items-center gap-3 border-b border-[#115E59] shrink-0">
+        <div class="min-h-[64px] h-auto py-3 px-4 bg-[#134E4A] flex items-center gap-3 border-b border-[#115E59] shrink-0">
             <img src="{{ (!empty($schoolProfile->logo) && file_exists(public_path($schoolProfile->logo))) ? asset($schoolProfile->logo) : asset('images/logo-sekolah.png') }}" alt="Logo {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKANCIKAO' }}" class="h-9 w-auto object-contain shrink-0">
-            <div class="flex flex-col overflow-hidden">
-                <span class="font-bold text-xs tracking-wider text-white uppercase truncate">{{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKANCIKAO' }}</span>
-                <span class="text-[10px] text-[#CCFBF1]/80 truncate">Sistem Inventaris</span>
+            <div class="flex flex-col min-w-0 flex-1">
+                <span class="font-bold text-xs tracking-wider text-white uppercase leading-tight">{{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKANCIKAO' }}</span>
+                <span class="text-[10px] text-[#CCFBF1]/80 leading-tight mt-0.5 whitespace-normal break-words">{{ $schoolProfile->nama_sistem ?? 'Sistem Informasi Inventaris & Peminjaman' }}</span>
             </div>
         </div>
 

@@ -133,4 +133,32 @@ class AdminRoomTest extends TestCase
 
         $this->assertDatabaseMissing('rooms', ['id' => $emptyRoom->id]);
     }
+
+    public function test_room_creation_requires_penanggung_jawab(): void
+    {
+        $response = $this->actingAs($this->admin)->post(route('admin.ruangan.store'), [
+            'kode_ruangan' => 'RUG-REQ-' . rand(100, 999),
+            'nama_ruangan' => 'Ruang Tanpa PJ',
+            'penanggung_jawab' => '',
+        ]);
+
+        $response->assertSessionHasErrors('penanggung_jawab');
+    }
+
+    public function test_room_update_requires_penanggung_jawab(): void
+    {
+        $room = Room::create([
+            'kode_ruangan' => 'RUG-UPD-' . rand(100, 999),
+            'nama_ruangan' => 'Ruang Sebelum Update',
+            'penanggung_jawab' => 'PJ Awal',
+        ]);
+
+        $response = $this->actingAs($this->admin)->put(route('admin.ruangan.update', $room), [
+            'kode_ruangan' => $room->kode_ruangan,
+            'nama_ruangan' => 'Ruang Setelah Update',
+            'penanggung_jawab' => '',
+        ]);
+
+        $response->assertSessionHasErrors('penanggung_jawab');
+    }
 }

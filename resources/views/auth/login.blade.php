@@ -142,7 +142,7 @@
     <!-- Footer -->
     <footer class="w-full py-3 text-center border-t border-[#115E59]/40 mt-4">
         <p class="text-xs text-[#CCFBF1]/80 tracking-wide font-normal">
-            © 2024 {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }} • Purwakarta, Jawa Barat
+            © 2026 {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }} • Purwakarta, Jawa Barat
         </p>
     </footer>
 

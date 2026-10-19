@@ -218,18 +218,13 @@
                 <label for="add_kode_ruangan" class="text-xs font-semibold text-[#1F2937]">
                     Kode Ruangan <span class="text-[#DC2626]">*</span>
                 </label>
-                <div class="relative">
-                    <input type="text"
-                           id="add_kode_ruangan"
-                           name="kode_ruangan"
-                           value="{{ old('kode_ruangan', $nextCode) }}"
-                           placeholder="mis. RUG-LAB-IPA"
-                           required
-                           class="w-full h-10 px-3 pr-10 bg-[#F3F7F6] rounded-lg font-mono text-xs uppercase font-bold text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
-                    <div class="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-[#6B7280]">
-                        <span class="material-symbols-outlined text-[18px]">tag</span>
-                    </div>
-                </div>
+                <input type="text"
+                       id="add_kode_ruangan"
+                       name="kode_ruangan"
+                       value="{{ old('kode_ruangan', $nextCode) }}"
+                       placeholder="mis. RUG-LAB-IPA"
+                       required
+                       class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg font-mono text-xs uppercase font-bold text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
                 <span class="text-[11px] text-[#6B7280]">Kode unik singkat untuk pengkodean ruangan/lokasi inventaris.</span>
             </div>
 
@@ -250,13 +245,14 @@
             <!-- Penanggung Jawab -->
             <div class="flex flex-col gap-1.5">
                 <label for="add_penanggung_jawab" class="text-xs font-semibold text-[#1F2937]">
-                    Penanggung Jawab (PJ Ruangan)
+                    Penanggung Jawab (PJ Ruangan) <span class="text-[#DC2626]">*</span>
                 </label>
                 <input type="text"
                        id="add_penanggung_jawab"
                        name="penanggung_jawab"
                        value="{{ old('penanggung_jawab') }}"
                        placeholder="mis. Dra. Hj. Siti Rahmah, M.Pd"
+                       required
                        class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
             </div>
 
@@ -316,16 +312,11 @@
                 <label for="edit_kode_ruangan" class="text-xs font-semibold text-[#1F2937]">
                     Kode Ruangan <span class="text-[#DC2626]">*</span>
                 </label>
-                <div class="relative">
-                    <input type="text"
-                           id="edit_kode_ruangan"
-                           name="kode_ruangan"
-                           required
-                           class="w-full h-10 px-3 pr-10 bg-[#F3F7F6] rounded-lg font-mono text-xs uppercase font-bold text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
-                    <div class="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-[#6B7280]">
-                        <span class="material-symbols-outlined text-[18px]">tag</span>
-                    </div>
-                </div>
+                <input type="text"
+                       id="edit_kode_ruangan"
+                       name="kode_ruangan"
+                       required
+                       class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg font-mono text-xs uppercase font-bold text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
             </div>
 
             <!-- Nama Ruangan -->
@@ -343,11 +334,12 @@
             <!-- Penanggung Jawab -->
             <div class="flex flex-col gap-1.5">
                 <label for="edit_penanggung_jawab" class="text-xs font-semibold text-[#1F2937]">
-                    Penanggung Jawab (PJ Ruangan)
+                    Penanggung Jawab (PJ Ruangan) <span class="text-[#DC2626]">*</span>
                 </label>
                 <input type="text"
                        id="edit_penanggung_jawab"
                        name="penanggung_jawab"
+                       required
                        class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
             </div>
 
@@ -404,11 +396,12 @@
         event.preventDefault();
         const code = document.getElementById('add_kode_ruangan').value.trim();
         const name = document.getElementById('add_nama_ruangan').value.trim();
+        const pj = document.getElementById('add_penanggung_jawab').value.trim();
 
-        if (!code || !name) {
+        if (!code || !name || !pj) {
             Swal.fire({
-                title: 'Form Belum Lengkap',
-                text: 'Kode ruangan dan nama ruangan wajib diisi.',
+                title: 'Formulir Belum Lengkap',
+                text: 'Kode ruangan, nama ruangan, dan penanggung jawab wajib diisi.',
                 confirmButtonColor: '#0F766E',
                 width: '22rem',
                 customClass: {
@@ -469,11 +462,12 @@
     function promptSaveEditRoom() {
         const nameInput = document.getElementById('edit_nama_ruangan');
         const codeInput = document.getElementById('edit_kode_ruangan');
+        const pjInput = document.getElementById('edit_penanggung_jawab');
 
-        if (!nameInput.value.trim() || !codeInput.value.trim()) {
+        if (!nameInput.value.trim() || !codeInput.value.trim() || !pjInput.value.trim()) {
             Swal.fire({
-                title: 'Form Belum Lengkap',
-                text: 'Kode ruangan dan nama ruangan wajib diisi.',
+                title: 'Formulir Belum Lengkap',
+                text: 'Kode ruangan, nama ruangan, dan penanggung jawab wajib diisi.',
                 confirmButtonColor: '#0F766E',
                 width: '22rem',
                 customClass: {
