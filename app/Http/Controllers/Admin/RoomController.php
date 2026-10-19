@@ -92,7 +92,7 @@ class RoomController extends Controller
                 'regex:/^[A-Za-z0-9\-_]+$/',
             ],
             'nama_ruangan' => 'required|string|max:255',
-            'penanggung_jawab' => 'nullable|string|max:255',
+            'penanggung_jawab' => 'required|string|max:255',
             'keterangan' => 'nullable|string|max:1000',
         ], [
             'kode_ruangan.required' => 'Kode ruangan wajib diisi.',
@@ -100,11 +100,13 @@ class RoomController extends Controller
             'kode_ruangan.regex' => 'Format kode ruangan hanya boleh huruf, angka, (-), dan (_).',
             'nama_ruangan.required' => 'Nama ruangan wajib diisi.',
             'nama_ruangan.max' => 'Nama ruangan maksimal 255 karakter.',
+            'penanggung_jawab.required' => 'Penanggung jawab ruangan wajib diisi.',
+            'penanggung_jawab.max' => 'Penanggung jawab ruangan maksimal 255 karakter.',
         ]);
 
         $validated['kode_ruangan'] = strtoupper(trim($validated['kode_ruangan']));
         $validated['nama_ruangan'] = trim($validated['nama_ruangan']);
-        $validated['penanggung_jawab'] = $validated['penanggung_jawab'] ? trim($validated['penanggung_jawab']) : null;
+        $validated['penanggung_jawab'] = trim($validated['penanggung_jawab']);
         $validated['keterangan'] = $validated['keterangan'] ? trim($validated['keterangan']) : null;
 
         $room = Room::create($validated);
@@ -127,7 +129,7 @@ class RoomController extends Controller
                 'regex:/^[A-Za-z0-9\-_]+$/',
             ],
             'nama_ruangan' => 'required|string|max:255',
-            'penanggung_jawab' => 'nullable|string|max:255',
+            'penanggung_jawab' => 'required|string|max:255',
             'keterangan' => 'nullable|string|max:1000',
         ], [
             'kode_ruangan.required' => 'Kode ruangan wajib diisi.',
@@ -135,11 +137,13 @@ class RoomController extends Controller
             'kode_ruangan.regex' => 'Format kode ruangan hanya boleh huruf, angka, (-), dan (_).',
             'nama_ruangan.required' => 'Nama ruangan wajib diisi.',
             'nama_ruangan.max' => 'Nama ruangan maksimal 255 karakter.',
+            'penanggung_jawab.required' => 'Penanggung jawab ruangan wajib diisi.',
+            'penanggung_jawab.max' => 'Penanggung jawab ruangan maksimal 255 karakter.',
         ]);
 
         $validated['kode_ruangan'] = strtoupper(trim($validated['kode_ruangan']));
         $validated['nama_ruangan'] = trim($validated['nama_ruangan']);
-        $validated['penanggung_jawab'] = $validated['penanggung_jawab'] ? trim($validated['penanggung_jawab']) : null;
+        $validated['penanggung_jawab'] = trim($validated['penanggung_jawab']);
         $validated['keterangan'] = $validated['keterangan'] ? trim($validated['keterangan']) : null;
 
         $room->update($validated);

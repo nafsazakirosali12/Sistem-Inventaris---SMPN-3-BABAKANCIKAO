@@ -30,7 +30,7 @@
                     <input type="text"
                            name="search"
                            value="{{ request('search') }}"
-                           placeholder="Cari username akun peminjam..."
+                           placeholder="Cari nama pengguna akun peminjam..."
                            class="w-full h-10 pl-10 pr-10 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] placeholder-[#6B7280] border border-[#D9E4E2] focus:outline-none focus:bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
                     @if(request('search'))
                         <a href="{{ route('admin.akun.index', ['sort' => request('sort')]) }}"
@@ -47,8 +47,8 @@
                     <select name="sort"
                             onchange="this.form.submit()"
                             class="bg-transparent text-xs text-[#1F2937] focus:outline-none cursor-pointer pr-2">
-                        <option value="username_asc" {{ request('sort') == 'username_asc' ? 'selected' : '' }}>Username (A-Z)</option>
-                        <option value="username_desc" {{ request('sort') == 'username_desc' ? 'selected' : '' }}>Username (Z-A)</option>
+                        <option value="username_asc" {{ request('sort') == 'username_asc' ? 'selected' : '' }}>Nama Pengguna (A-Z)</option>
+                        <option value="username_desc" {{ request('sort') == 'username_desc' ? 'selected' : '' }}>Nama Pengguna (Z-A)</option>
                         <option value="recent" {{ request('sort') == 'recent' ? 'selected' : '' }}>Terkini Didaftarkan</option>
                     </select>
                 </div>
@@ -56,9 +56,9 @@
                 @if(request()->hasAny(['search', 'sort']))
                     <a href="{{ route('admin.akun.index') }}"
                        class="h-10 px-3 rounded-lg bg-white border border-[#D9E4E2] text-xs text-[#4B5563] hover:text-[#1F2937] hover:bg-[#F3F7F6] flex items-center justify-center transition-colors shrink-0"
-                       title="Reset filter">
+                       title="Atur ulang filter">
                         <span class="material-symbols-outlined text-[18px] mr-1">restart_alt</span>
-                        <span>Reset</span>
+                        <span>Atur Ulang</span>
                     </a>
                 @endif
             </form>
@@ -80,8 +80,8 @@
                 <thead>
                     <tr class="bg-[#F0FDFA] text-[#1F2937] text-xs font-semibold border-b border-[#D9E4E2]">
                         <th class="py-3.5 px-4 text-center w-16">No</th>
-                        <th class="py-3.5 px-4 w-72">Username</th>
-                        <th class="py-3.5 px-4 text-center w-64">Password</th>
+                        <th class="py-3.5 px-4 w-72">Nama Pengguna</th>
+                        <th class="py-3.5 px-4 text-center w-64">Kata Sandi</th>
                         <th class="py-3.5 px-4 text-center w-28">Aksi</th>
                     </tr>
                 </thead>
@@ -109,7 +109,7 @@
                                     <button type="button"
                                             onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->username) }}')"
                                             class="w-8 h-8 rounded-lg hover:bg-[#CCFBF1] text-[#0F766E] flex items-center justify-center transition-colors focus:outline-none"
-                                            title="Ubah Username / Password">
+                                            title="Ubah Nama Pengguna / Kata Sandi">
                                         <span class="material-symbols-outlined text-[18px]">edit</span>
                                     </button>
 
@@ -133,7 +133,7 @@
                                     <h3 class="text-sm font-semibold text-[#1F2937]">Tidak ada akun peminjam ditemukan</h3>
                                     <p class="text-xs text-[#6B7280] mt-1 max-w-sm">
                                         @if(request('search'))
-                                            Kata kunci "{{ request('search') }}" tidak cocok dengan username manapun.
+                                            Kata kunci "{{ request('search') }}" tidak cocok dengan nama pengguna manapun.
                                         @else
                                             Belum ada data akun peminjam tersimpan di dalam sistem.
                                         @endif
@@ -196,20 +196,20 @@
             <!-- Role Indicator Info -->
             <div class="p-3 rounded-lg bg-[#F0FDFA] border border-[#CCFBF1] flex items-center gap-2 text-xs text-[#0F766E]">
                 <span class="material-symbols-outlined text-[18px]">verified_user</span>
-                <span>Role akun otomatis diset sebagai <strong>Peminjam</strong> saat disimpan.</span>
+                <span>Peran akun otomatis diatur sebagai <strong>Peminjam</strong> saat disimpan.</span>
             </div>
 
-            <!-- Username -->
+            <!-- Nama Pengguna -->
             <div class="flex flex-col gap-1.5">
                 <label for="add_username" class="text-xs font-semibold text-[#1F2937]">
-                    Username <span class="text-[#DC2626]">*</span>
+                    Nama Pengguna <span class="text-[#DC2626]">*</span>
                 </label>
                 <div class="relative flex items-center">
                     <input type="text"
                            id="add_username"
                            name="username"
                            value="{{ old('username') }}"
-                           placeholder="Masukkan username akun..."
+                           placeholder="Masukkan nama pengguna akun..."
                            required
                            class="w-full h-10 px-3 pr-10 bg-[#F3F7F6] rounded-lg font-mono text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
                     <div class="absolute right-3.5 inset-y-0 flex items-center pointer-events-none text-[#6B7280]">
@@ -218,10 +218,10 @@
                 </div>
             </div>
 
-            <!-- Password -->
+            <!-- Kata Sandi -->
             <div class="flex flex-col gap-1.5">
                 <label for="add_password" class="text-xs font-semibold text-[#1F2937]">
-                    Password <span class="text-[#DC2626]">*</span>
+                    Kata Sandi <span class="text-[#DC2626]">*</span>
                 </label>
                 <div class="relative flex items-center">
                     <input type="password"
@@ -253,7 +253,7 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- MODAL 2: UBAH AKUN PEMINJAM (2 FIELD: USERNAME & PASSWORD BARU)           -->
+<!-- MODAL 2: UBAH AKUN PEMINJAM (2 FIELD: NAMA PENGGUNA & KATA SANDI BARU)     -->
 <!-- ========================================================================= -->
 <div id="modalEditAkun" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#134E4A]/50 backdrop-blur-sm transition-opacity">
     <div class="bg-white rounded-xl max-w-md w-full shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150 border border-[#D9E4E2]">
@@ -261,7 +261,7 @@
         <div class="px-6 py-4 bg-[#F0FDFA] flex items-center justify-between border-b border-[#CCFBF1]">
             <div class="flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-[#0F766E] text-[22px]">manage_accounts</span>
-                <h2 class="text-base font-bold text-[#1F2937]">Ubah Username & Password</h2>
+                <h2 class="text-base font-bold text-[#1F2937]">Ubah Nama Pengguna & Kata Sandi</h2>
             </div>
             <button type="button"
                     onclick="closeEditAccountModal()"
@@ -275,10 +275,10 @@
             @csrf
             @method('PUT')
 
-            <!-- Username -->
+            <!-- Nama Pengguna -->
             <div class="flex flex-col gap-1.5">
                 <label for="edit_username" class="text-xs font-semibold text-[#1F2937]">
-                    Username <span class="text-[#DC2626]">*</span>
+                    Nama Pengguna <span class="text-[#DC2626]">*</span>
                 </label>
                 <div class="relative flex items-center">
                     <input type="text"
@@ -292,10 +292,10 @@
                 </div>
             </div>
 
-            <!-- Password Baru (Opsional) -->
+            <!-- Kata Sandi Baru (Opsional) -->
             <div class="flex flex-col gap-1.5">
                 <label for="edit_password" class="text-xs font-semibold text-[#1F2937]">
-                    Password Baru (Opsional)
+                    Kata Sandi Baru (Opsional)
                 </label>
                 <div class="relative flex items-center">
                     <input type="password"
@@ -354,8 +354,8 @@
 
         if (!username || !password) {
             Swal.fire({
-                title: 'Form Belum Lengkap',
-                text: 'Username dan password wajib diisi.',
+                title: 'Formulir Belum Lengkap',
+                text: 'Nama pengguna dan kata sandi wajib diisi.',
                 confirmButtonColor: '#0F766E',
                 width: '22rem',
                 customClass: {
@@ -370,8 +370,8 @@
 
         if (password.length < 6) {
             Swal.fire({
-                title: 'Password Terlalu Pendek',
-                text: 'Password minimal terdiri dari 6 karakter.',
+                title: 'Kata Sandi Terlalu Pendek',
+                text: 'Kata sandi minimal terdiri dari 6 karakter.',
                 confirmButtonColor: '#0F766E',
                 width: '22rem',
                 customClass: {
@@ -432,8 +432,8 @@
 
         if (!usernameInput) {
             Swal.fire({
-                title: 'Form Belum Lengkap',
-                text: 'Username wajib diisi.',
+                title: 'Formulir Belum Lengkap',
+                text: 'Nama pengguna wajib diisi.',
                 confirmButtonColor: '#0F766E',
                 width: '22rem',
                 customClass: {
@@ -448,7 +448,7 @@
 
         Swal.fire({
             title: 'Simpan perubahan akun?',
-            text: 'Apakah Anda yakin ingin memperbarui username/password untuk akun ini?',
+            text: 'Apakah Anda yakin ingin memperbarui nama pengguna/kata sandi untuk akun ini?',
             showCancelButton: true,
             confirmButtonColor: '#0F766E',
             cancelButtonColor: '#9CA3AF',
@@ -474,7 +474,7 @@
     function handleDeleteAccount(id, username) {
         Swal.fire({
             title: 'Hapus akun peminjam?',
-            text: `Akun '@${username}' akan dihapus. Pengguna tidak dapat login lagi ke sistem.`,
+            text: `Akun '@${username}' akan dihapus. Pengguna tidak dapat masuk lagi ke sistem.`,
             showCancelButton: true,
             confirmButtonColor: '#DC2626',
             cancelButtonColor: '#9CA3AF',
