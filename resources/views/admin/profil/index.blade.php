@@ -100,7 +100,7 @@
                                id="input_logo"
                                name="logo"
                                accept="image/jpeg,image/png,image/webp"
-                               @change="previewImage($event, 'previewLogo')"
+                               @change="previewImage($event, 'previewLogo', null, 2)"
                                class="hidden">
                     </div>
                 </div>
@@ -133,7 +133,7 @@
                                id="input_foto"
                                name="foto"
                                accept="image/jpeg,image/png,image/webp"
-                               @change="previewImage($event, 'previewFoto', 'placeholderFoto')"
+                               @change="previewImage($event, 'previewFoto', 'placeholderFoto', 2)"
                                class="hidden">
                     </div>
                 </div>
@@ -166,7 +166,7 @@
                                id="input_denah"
                                name="denah"
                                accept="image/jpeg,image/png,image/webp"
-                               @change="previewImage($event, 'previewDenah', 'placeholderDenah')"
+                               @change="previewImage($event, 'previewDenah', 'placeholderDenah', 5)"
                                class="hidden">
                     </div>
                 </div>
@@ -575,6 +575,34 @@
                     return;
                 }
 
+                // Check total upload size to prevent "The POST data is too large" error
+                const logoInput = document.getElementById('input_logo');
+                const fotoInput = document.getElementById('input_foto');
+                const denahInput = document.getElementById('input_denah');
+
+                let totalSize = 0;
+                if (logoInput && logoInput.files && logoInput.files[0]) totalSize += logoInput.files[0].size;
+                if (fotoInput && fotoInput.files && fotoInput.files[0]) totalSize += fotoInput.files[0].size;
+                if (denahInput && denahInput.files && denahInput.files[0]) totalSize += denahInput.files[0].size;
+
+                const maxTotalMB = 8;
+                if (totalSize > maxTotalMB * 1024 * 1024) {
+                    Swal.fire({
+                        title: 'Total Berkas Terlalu Besar',
+                        text: `Total ukuran berkas yang dipilih (${(totalSize / (1024 * 1024)).toFixed(2)} MB) melebihi batas pengiriman server (${maxTotalMB} MB). Silakan perkecil ukuran berkas atau unggah berkas satu per satu.`,
+                        icon: 'warning',
+                        confirmButtonColor: '#0F766E',
+                        width: '24rem',
+                        customClass: {
+                            popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                            title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                            htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                            confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                        }
+                    });
+                    return;
+                }
+
                 Swal.fire({
                     title: 'Simpan Profil Sekolah?',
                     text: 'Apakah Anda yakin ingin menyimpan seluruh perubahan profil dan identitas sekolah ini?',
@@ -605,7 +633,7 @@
                 });
             },
 
-            previewImage(event, imgId, placeholderId = null) {
+            previewImage(event, imgId, placeholderId = null, maxMB = 2) {
                 const file = event.target.files[0];
                 if (!file) return;
 
@@ -616,6 +644,24 @@
                         text: 'File yang diunggah harus berformat JPG, PNG, atau WebP.',
                         confirmButtonColor: '#0F766E',
                         width: '22rem',
+                        customClass: {
+                            popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                            title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                            htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                            confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                        }
+                    });
+                    event.target.value = '';
+                    return;
+                }
+
+                if (file.size > maxMB * 1024 * 1024) {
+                    Swal.fire({
+                        title: 'Ukuran Berkas Terlalu Besar',
+                        text: `Berkas "${file.name}" berukuran ${(file.size / (1024 * 1024)).toFixed(2)} MB. Batas maksimal yang diizinkan untuk berkas ini adalah ${maxMB} MB.`,
+                        icon: 'warning',
+                        confirmButtonColor: '#0F766E',
+                        width: '24rem',
                         customClass: {
                             popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                             title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',

@@ -60,6 +60,41 @@
             margin: 0;
             padding: 0;
         }
+
+        /* ── Responsive Table Utility ─────────────────────── */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .table-responsive table {
+            min-width: 600px;
+        }
+
+        /* ── Mobile-Friendly Touch Targets ───────────────── */
+        @media (max-width: 767px) {
+            .page-header-actions {
+                width: 100%;
+            }
+            .page-header-actions a,
+            .page-header-actions button {
+                width: 100%;
+                justify-content: center;
+            }
+            /* Ensure modal contents don't overflow viewport */
+            .swal2-popup {
+                max-width: calc(100vw - 2rem) !important;
+            }
+        }
+
+        /* ── Sidebar Transition ───────────────────────────── */
+        aside {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        /* ── Prevent body scroll when sidebar is open on mobile */
+        body.sidebar-open {
+            overflow: hidden;
+        }
     </style>
 
     @if(file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
@@ -68,7 +103,7 @@
 
     @stack('styles')
 </head>
-<body class="antialiased bg-[#F3F7F6] text-[#1F2937] min-h-screen" x-data="{ sidebarOpen: false }">
+<body class="antialiased bg-[#F3F7F6] text-[#1F2937] min-h-screen" x-data="{ sidebarOpen: false }" x-effect="document.body.classList.toggle('sidebar-open', sidebarOpen)">
 
     <!-- Admin Top Navbar -->
     @include('components.admin.navbar')

@@ -8,6 +8,7 @@ use App\Models\Loan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 
 class SchoolProfileController extends Controller
 {
@@ -96,7 +97,7 @@ class SchoolProfileController extends Controller
         }
 
         // 1. Handle Upload Logo (max 2MB)
-        if ($request->hasFile('logo')) {
+        if ($request->hasFile('logo') && $request->file('logo')->isValid()) {
             if ($schoolProfile->logo && File::exists(public_path($schoolProfile->logo))) {
                 File::delete(public_path($schoolProfile->logo));
             }
@@ -107,7 +108,7 @@ class SchoolProfileController extends Controller
         }
 
         // 2. Handle Upload Foto Sekolah (max 2MB)
-        if ($request->hasFile('foto')) {
+        if ($request->hasFile('foto') && $request->file('foto')->isValid()) {
             if ($schoolProfile->foto && File::exists(public_path($schoolProfile->foto))) {
                 File::delete(public_path($schoolProfile->foto));
             }
@@ -118,7 +119,7 @@ class SchoolProfileController extends Controller
         }
 
         // 3. Handle Upload Denah Sekolah (max 5MB)
-        if ($request->hasFile('denah')) {
+        if ($request->hasFile('denah') && $request->file('denah')->isValid()) {
             if ($schoolProfile->denah && File::exists(public_path($schoolProfile->denah))) {
                 File::delete(public_path($schoolProfile->denah));
             }
@@ -128,7 +129,12 @@ class SchoolProfileController extends Controller
             $validated['denah'] = 'uploads/profile/' . $denahName;
         }
 
-        $schoolProfile->fill($validated)->save();
+        // Filter only columns that exist in the database table to prevent SQLSTATE[42S22] errors
+        $fillableData = array_filter($validated, function ($key) {
+            return Schema::hasColumn('school_profiles', $key);
+        }, ARRAY_FILTER_USE_KEY);
+
+        $schoolProfile->fill($fillableData)->save();
 
         return redirect()->route('admin.profil.index')
             ->with('success', 'Data profil sekolah berhasil diperbarui.');
