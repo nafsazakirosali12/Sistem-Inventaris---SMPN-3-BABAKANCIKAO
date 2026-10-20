@@ -3,201 +3,355 @@
 @section('title', 'Beranda - ' . ($schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao'))
 
 @section('content')
-<div class="space-y-6">
-    <!-- Hero Banner -->
-    <div class="relative bg-gradient-to-r from-[#134E4A] to-[#0F766E] rounded-xl p-6 sm:p-8 text-white shadow-lg overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
-        <div class="relative z-10 max-w-2xl">
-            <span class="px-2.5 py-1 rounded-md bg-[#CCFBF1] text-[#0F766E] text-xs font-bold uppercase tracking-wider inline-block mb-2">
-                Selamat Datang
-            </span>
-            <h1 class="text-2xl sm:text-3xl font-bold mb-2">{{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKANCIKAO' }}</h1>
-            <p class="text-sm text-[#CCFBF1] leading-relaxed">
-                Selamat datang di {{ $schoolProfile->nama_sistem ?? 'Sistem Informasi Inventaris & Peminjaman' }}. Layanan peminjaman fasilitas dan sarana prasarana sekolah terpadu.
-            </p>
+<div class="w-full">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         1. HERO SECTION – Full-width dengan foto background sekolah
+    ════════════════════════════════════════════════════════════ -->
+    <section class="relative w-full overflow-hidden bg-[#F3F7F6] min-h-[480px] sm:min-h-[520px] md:min-h-[560px] flex items-center">
+
+        <!-- Background: foto sekolah dengan overlay gelap -->
+        <div class="absolute inset-x-0 top-0 bottom-0 z-0 bg-[#0A3D36]">
+            @if(!empty($schoolProfile->foto) && file_exists(public_path($schoolProfile->foto)))
+                <img src="{{ asset($schoolProfile->foto) }}"
+                     alt="Foto Gedung {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}"
+                     class="w-full h-full object-cover filter brightness-90 contrast-105"
+                     style="object-position: center 38%;">
+            @else
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3i-EqOWnfvzL0n1CmzuUAAZF-_r1vAecPzbtxoBzIVk1XKQ4XupWk3jIOZeM9iig9ABMTleFy3CVrkLsMA_vyGXJ78f4i9U9sucQR9wUYfbBZmDr016mZsQ3noRBZCKvCvkjp1oHuqALKdAOXTcreyMsSS-bwBlYUVJkRqX3_IFtESOsHikQCFF06qKreOPsdx0dHeObcrCTTovdzwybSKDIYvVfjmWtkaVE8gCEaNl6AuQPzE7hzpSgCTe7pfxu9Ruc"
+                     alt="Background {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}"
+                     class="w-full h-full object-cover filter brightness-90 contrast-105"
+                     style="object-position: center 38%;">
+            @endif
+            <div class="absolute inset-0 bg-[#003833]/65 mix-blend-multiply"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#00302b]/90 via-[#004840]/75 to-transparent"></div>
         </div>
 
-        @if(!empty($schoolProfile->logo) && file_exists(public_path($schoolProfile->logo)))
-            <div class="shrink-0 bg-white/10 backdrop-blur-xs p-3 rounded-2xl border border-white/20 shadow-md">
-                <img src="{{ asset($schoolProfile->logo) }}" alt="Logo Sekolah" class="h-20 sm:h-24 w-auto object-contain">
-            </div>
-        @endif
-    </div>
+        <!-- Konten Hero -->
+        <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-24">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-7 max-w-4xl">
 
-    <!-- Info Cards Grid (3 Cards: Profil Sekolah, Gedung Sekolah, Denah Sekolah) -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        <!-- 1. Card Profil Sekolah -->
-        <div class="bg-white rounded-xl border border-[#D9E4E2] p-6 shadow-sm flex flex-col justify-between">
-            <div>
-                <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-[#D9E4E2]">
-                    <div class="w-10 h-10 rounded-lg bg-[#F0FDFA] flex items-center justify-center text-[#0F766E]">
-                        <span class="material-symbols-outlined">school</span>
+                <!-- Logo Sekolah -->
+                <div class="shrink-0 w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-2xl flex items-center justify-center filter drop-shadow-lg">
+                    @if(!empty($schoolProfile->logo) && file_exists(public_path($schoolProfile->logo)))
+                        <img src="{{ asset($schoolProfile->logo) }}"
+                             alt="Logo {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}"
+                             class="w-full h-full object-contain filter drop-shadow-md">
+                    @elseif(file_exists(public_path('images/logo-sekolah.png')))
+                        <img src="{{ asset('images/logo-sekolah.png') }}"
+                             alt="Logo {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}"
+                             class="w-full h-full object-contain filter drop-shadow-md">
+                    @else
+                        <div class="w-full h-full rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/20">
+                            <span class="material-symbols-outlined text-5xl">school</span>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Teks & Tombol -->
+                <div class="flex flex-col items-center sm:items-start text-center sm:text-left text-white w-full">
+
+                    <!-- Tagline Pill -->
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 mb-3">
+                        <span class="material-symbols-outlined text-[14px] text-[#b5ede7]">account_balance</span>
+                        <span class="text-[11px] sm:text-xs tracking-wider uppercase font-semibold text-[#CCFBF1]">{{ $schoolProfile->tagline ?? 'PORTAL RESMI SARANA & PRASARANA' }}</span>
                     </div>
-                    <div>
-                        <h3 class="font-bold text-base text-[#1F2937]">Profil Sekolah</h3>
-                        <p class="text-[11px] text-[#6B7280]">Identitas & Informasi Resmi</p>
+
+                    <!-- Nama Sekolah -->
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight mb-2">
+                        {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKANCIKAO' }}
+                    </h1>
+
+                    <!-- Nama Sistem -->
+                    <h2 class="text-base sm:text-lg md:text-xl font-semibold text-white/90 tracking-tight mb-3">
+                        {{ $schoolProfile->nama_sistem ?? 'Sistem Inventaris & Peminjaman' }}
+                    </h2>
+
+                    <!-- Deskripsi -->
+                    <p class="text-sm text-white/80 leading-relaxed max-w-xl mb-6">
+                        Fasilitas peminjaman sarana pembelajaran untuk mendukung aktivitas belajar mengajar di sekolah.
+                    </p>
+
+                    <!-- Tombol Aksi -->
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-5">
+                        <a href="{{ route('admin.inventaris.index') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] active:scale-[0.98] text-white text-sm font-semibold shadow-md transition-all border border-[#CCFBF1]/30 focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <span class="material-symbols-outlined text-[18px]">category</span>
+                            <span>Lihat Katalog Barang</span>
+                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </a>
+                        <a href="{{ route('admin.peminjaman.index') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/30 text-white text-sm font-semibold hover:bg-white hover:text-[#0F766E] active:scale-[0.98] transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <span class="material-symbols-outlined text-[18px]">history</span>
+                            <span>Riwayat Peminjaman</span>
+                        </a>
+                    </div>
+
+                    <!-- Info Badge Baris -->
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/20 backdrop-blur-sm border border-white/10 text-white/85 text-[11px]">
+                            <span class="material-symbols-outlined text-[13px] text-[#FEF3C7]">schedule</span>
+                            07.00 – 15.30 WIB
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/20 backdrop-blur-sm border border-white/10 text-white/85 text-[11px]">
+                            <span class="material-symbols-outlined text-[13px] text-[#b5ede7]">check_circle</span>
+                            Pengembalian Tepat Waktu
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/20 backdrop-blur-sm border border-white/10 text-white/85 text-[11px]">
+                            <span class="material-symbols-outlined text-[13px] text-[#CCFBF1]">verified_user</span>
+                            Verifikasi Otomatis Admin
+                        </span>
                     </div>
                 </div>
-                <dl class="space-y-3 text-xs text-[#4B5563]">
-                    <div class="flex justify-between border-b border-[#D9E4E2] pb-2">
-                        <dt class="font-semibold text-[#1F2937]">NPSN:</dt>
-                        <dd class="font-mono font-bold text-[#0F766E]">{{ $schoolProfile->npsn ?? '-' }}</dd>
-                    </div>
-                    <div class="flex justify-between border-b border-[#D9E4E2] pb-2">
-                        <dt class="font-semibold text-[#1F2937]">Alamat:</dt>
-                        <dd class="text-right max-w-[180px] sm:max-w-xs text-[11px] leading-tight">{{ $schoolProfile->alamat ?? '-' }}</dd>
-                    </div>
-                    <div class="flex justify-between border-b border-[#D9E4E2] pb-2">
-                        <dt class="font-semibold text-[#1F2937]">Telepon:</dt>
-                        <dd>{{ $schoolProfile->telepon ?? '-' }}</dd>
-                    </div>
-                    <div class="flex justify-between">
-                        <dt class="font-semibold text-[#1F2937]">Email:</dt>
-                        <dd class="text-[11px]">{{ $schoolProfile->email ?? '-' }}</dd>
-                    </div>
-                </dl>
             </div>
         </div>
 
-        <!-- 2. Card Foto Gedung Sekolah -->
-        <div class="bg-white rounded-xl border border-[#D9E4E2] p-6 shadow-sm flex flex-col justify-between">
-            <div>
-                <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-[#D9E4E2]">
-                    <div class="w-10 h-10 rounded-lg bg-[#F0FDFA] flex items-center justify-center text-[#0F766E]">
-                        <span class="material-symbols-outlined">domain</span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base text-[#1F2937]">Gedung Sekolah</h3>
-                        <p class="text-[11px] text-[#6B7280]">Fasilitas & Lingkungan</p>
-                    </div>
-                </div>
+        <!-- Wave divider bawah – menyatu natural ke background halaman -->
+        <div class="absolute -bottom-[2px] left-0 right-0 w-full overflow-hidden leading-none z-10 pointer-events-none"
+             style="margin-bottom: -1px; border: none; outline: none;">
+            <svg class="relative block w-full h-10 sm:h-14 translate-y-[2px]"
+                 preserveAspectRatio="none" viewBox="0 0 1200 122"
+                 xmlns="http://www.w3.org/2000/svg"
+                 style="display: block; width: calc(100% + 2px); margin-left: -1px; border: none; outline: none;">
+                <path d="M0,35 C200,90 420,-15 650,55 C880,120 1050,20 1200,45 L1200,135 L0,135 Z"
+                      fill="#F3F7F6" stroke="none"></path>
+            </svg>
+        </div>
+    </section>
 
-                @if(!empty($schoolProfile->foto) && file_exists(public_path($schoolProfile->foto)))
-                    <div class="relative w-full h-40 rounded-xl overflow-hidden border border-[#D9E4E2] bg-[#F8FBFA] shadow-xs group cursor-pointer"
-                         onclick="previewGedung('{{ asset($schoolProfile->foto) }}', '{{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}')">
-                        <img src="{{ asset($schoolProfile->foto) }}"
-                             alt="Gedung {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}"
-                             class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5">
-                            <span class="material-symbols-outlined text-[20px]">zoom_in</span>
-                            <span>Lihat Foto Full</span>
+    <!-- ═══════════════════════════════════════════════════════════
+         KONTEN UTAMA – Sections bawah hero
+    ════════════════════════════════════════════════════════════ -->
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12">
+        <div class="flex flex-col gap-8 sm:gap-10">
+
+            <!-- ─── 2. LANGKAH PEMINJAMAN ─────────────────────── -->
+            <section class="w-full">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- Step 1 -->
+                    <div class="bg-white rounded-xl p-5 border border-[#D9E4E2] shadow-sm flex items-start gap-4 hover:-translate-y-0.5 transition-transform">
+                        <div class="w-10 h-10 rounded-lg bg-[#F0FDFA] text-[#0F766E] flex items-center justify-center shrink-0 border border-[#CCFBF1]">
+                            <span class="material-symbols-outlined text-[22px]">search_check</span>
+                        </div>
+                        <div class="space-y-1 min-w-0">
+                            <span class="text-[11px] font-semibold text-[#0F766E] uppercase tracking-wider block">Langkah 01</span>
+                            <h3 class="text-sm font-semibold text-[#1F2937]">Cari &amp; Pilih Barang</h3>
+                            <p class="text-xs text-[#6B7280] leading-relaxed">Jelajahi katalog dan periksa kepastian kuota stok unit siap pakai secara realtime.</p>
                         </div>
                     </div>
-                @else
-                    <div class="w-full h-40 rounded-xl border border-dashed border-[#D9E4E2] bg-[#F8FBFA] flex flex-col items-center justify-center text-[#9CA3AF] p-4 text-center">
-                        <span class="material-symbols-outlined text-[36px] text-[#CBD5E1]">domain</span>
-                        <span class="text-xs font-medium mt-1">Belum ada foto gedung</span>
-                    </div>
-                @endif
-            </div>
 
-            <div class="mt-4">
-                @if(!empty($schoolProfile->foto) && file_exists(public_path($schoolProfile->foto)))
-                    <button type="button"
-                            onclick="previewGedung('{{ asset($schoolProfile->foto) }}', '{{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}')"
-                            class="w-full py-2 px-3 rounded-lg border border-[#0F766E] text-[#0F766E] hover:bg-[#F0FDFA] font-semibold text-xs flex items-center justify-center space-x-1.5 transition-colors">
-                        <span class="material-symbols-outlined text-[18px]">visibility</span>
-                        <span>Lihat Gambar Gedung</span>
-                    </button>
-                @else
-                    <span class="block w-full text-center py-2 text-xs text-[#9CA3AF]">Gambar gedung belum diunggah</span>
-                @endif
-            </div>
-        </div>
-
-        <!-- 3. Card Denah Sekolah -->
-        <div class="bg-white rounded-xl border border-[#D9E4E2] p-6 shadow-sm flex flex-col justify-between">
-            <div>
-                <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-[#D9E4E2]">
-                    <div class="w-10 h-10 rounded-lg bg-[#F0FDFA] flex items-center justify-center text-[#0F766E]">
-                        <span class="material-symbols-outlined">map</span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base text-[#1F2937]">Denah Sekolah</h3>
-                        <p class="text-[11px] text-[#6B7280]">Peta Tata Letak Ruangan</p>
-                    </div>
-                </div>
-
-                @if(!empty($schoolProfile->denah) && file_exists(public_path($schoolProfile->denah)))
-                    <div class="relative w-full h-40 rounded-xl overflow-hidden border border-[#D9E4E2] bg-[#F8FBFA] shadow-xs group cursor-pointer"
-                         onclick="previewDenah('{{ asset($schoolProfile->denah) }}')">
-                        <img src="{{ asset($schoolProfile->denah) }}"
-                             alt="Denah {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}"
-                             class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5">
-                            <span class="material-symbols-outlined text-[20px]">zoom_in</span>
-                            <span>Lihat Denah Full</span>
+                    <!-- Step 2 -->
+                    <div class="bg-white rounded-xl p-5 border border-[#D9E4E2] shadow-sm flex items-start gap-4 hover:-translate-y-0.5 transition-transform">
+                        <div class="w-10 h-10 rounded-lg bg-[#F0FDFA] text-[#0F766E] flex items-center justify-center shrink-0 border border-[#CCFBF1]">
+                            <span class="material-symbols-outlined text-[22px]">edit_calendar</span>
+                        </div>
+                        <div class="space-y-1 min-w-0">
+                            <span class="text-[11px] font-semibold text-[#0F766E] uppercase tracking-wider block">Langkah 02</span>
+                            <h3 class="text-sm font-semibold text-[#1F2937]">Isi Formulir Pinjam</h3>
+                            <p class="text-xs text-[#6B7280] leading-relaxed">Tentukan jumlah unit, peruntukan kelas/kegiatan, serta jadwal tanggal pengembalian.</p>
                         </div>
                     </div>
-                @else
-                    <div class="w-full h-40 rounded-xl border border-dashed border-[#D9E4E2] bg-[#F8FBFA] flex flex-col items-center justify-center text-[#9CA3AF] p-4 text-center">
-                        <span class="material-symbols-outlined text-[36px] text-[#CBD5E1]">map</span>
-                        <span class="text-xs font-medium mt-1">Belum ada denah sekolah</span>
+
+                    <!-- Step 3 -->
+                    <div class="bg-white rounded-xl p-5 border border-[#D9E4E2] shadow-sm flex items-start gap-4 hover:-translate-y-0.5 transition-transform">
+                        <div class="w-10 h-10 rounded-lg bg-[#F0FDFA] text-[#0F766E] flex items-center justify-center shrink-0 border border-[#CCFBF1]">
+                            <span class="material-symbols-outlined text-[22px]">inventory</span>
+                        </div>
+                        <div class="space-y-1 min-w-0">
+                            <span class="text-[11px] font-semibold text-[#0F766E] uppercase tracking-wider block">Langkah 03</span>
+                            <h3 class="text-sm font-semibold text-[#1F2937]">Ambil di Gudang Sarpras</h3>
+                            <p class="text-xs text-[#6B7280] leading-relaxed">Tunjukkan bukti permohonan disetujui kepada petugas untuk serah terima fisik barang.</p>
+                        </div>
                     </div>
-                @endif
-            </div>
+                </div>
+            </section>
 
-            <div class="mt-4 flex gap-2">
-                @if(!empty($schoolProfile->denah) && file_exists(public_path($schoolProfile->denah)))
-                    <button type="button"
-                            onclick="previewDenah('{{ asset($schoolProfile->denah) }}')"
-                            class="flex-1 py-2.5 px-3 rounded-lg border border-[#0F766E] text-[#0F766E] hover:bg-[#F0FDFA] font-semibold text-xs flex items-center justify-center space-x-1 transition-colors">
-                        <span class="material-symbols-outlined text-[18px]">visibility</span>
-                        <span>Pratinjau</span>
-                    </button>
-                    <a href="{{ asset($schoolProfile->denah) }}"
-                       download="Denah-Sekolah-{{ Str::slug($schoolProfile->nama_sekolah ?? 'SMPN-3-Babakancikao') }}"
-                       target="_blank"
-                       class="flex-1 py-2.5 px-3 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white font-semibold text-xs flex items-center justify-center space-x-1 transition-colors shadow-xs">
-                        <span class="material-symbols-outlined text-[18px]">download</span>
-                        <span>Unduh</span>
-                    </a>
-                @else
-                    <button type="button"
-                            onclick="showDenahInfo()"
-                            class="w-full py-2.5 px-4 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white font-semibold text-xs flex items-center justify-center space-x-2 transition-colors">
-                        <span class="material-symbols-outlined text-[18px]">download</span>
-                        <span>Unduh Denah Sekolah</span>
-                    </button>
-                @endif
-            </div>
-        </div>
-    </div>
-</div>
+            <!-- ─── 3. INFORMASI & KONTAK RESMI SEKOLAH ─────────── -->
+            <section class="bg-white rounded-2xl border border-[#D9E4E2] shadow-sm overflow-hidden">
+                <!-- Header -->
+                <div class="px-6 sm:px-8 py-5 border-b border-[#D9E4E2] flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-[#F0FDFA] text-[#0F766E] flex items-center justify-center border border-[#CCFBF1] shrink-0">
+                            <span class="material-symbols-outlined text-[22px]">school</span>
+                        </div>
+                        <h2 class="text-sm sm:text-base font-bold tracking-wide text-[#1F2937] uppercase">
+                            Informasi Utama &amp; Kontak Resmi
+                        </h2>
+                    </div>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#DCFCE7] text-[#166534] text-xs font-semibold border border-[#16A34A]/30">
+                        <span class="w-2 h-2 rounded-full bg-[#16A34A]"></span>
+                        Akreditasi A (Unggul)
+                    </span>
+                </div>
 
+                <!-- Body: Grid 2 kolom di desktop, 1 kolom di mobile -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-0">
+                    <!-- Kiri -->
+                    <div class="px-6 sm:px-8 py-6 space-y-6">
+                        <!-- Nama Sekolah -->
+                        <div class="space-y-1">
+                            <span class="text-[11px] text-[#6B7280] uppercase tracking-wider block font-semibold">Nama Sekolah</span>
+                            <p class="text-xl sm:text-2xl font-bold text-[#1F2937] tracking-tight leading-snug">
+                                {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKANCIKAO' }}
+                            </p>
+                            <p class="text-xs text-[#6B7280] leading-relaxed">
+                                {{ $schoolProfile->tagline ?? 'Mewujudkan Insan Berakhlak Mulia, Cerdas, Terampil, dan Berbudaya Lingkungan.' }}
+                            </p>
+                        </div>
+
+                        <!-- Telepon -->
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-1.5 text-[#6B7280] text-[11px] uppercase tracking-wider font-semibold">
+                                <span class="material-symbols-outlined text-[15px] text-[#0F766E]">call</span>
+                                <span>Nomor Telepon / HP Resmi</span>
+                            </div>
+                            <p class="text-base font-semibold text-[#1F2937]">
+                                {{ $schoolProfile->telepon ?? '(0264) 8301234' }}
+                            </p>
+                        </div>
+
+                        <!-- Alamat -->
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-1.5 text-[#6B7280] text-[11px] uppercase tracking-wider font-semibold">
+                                <span class="material-symbols-outlined text-[15px] text-[#0F766E]">location_on</span>
+                                <span>Alamat Lengkap Sekolah</span>
+                            </div>
+                            <p class="text-sm text-[#1F2937] leading-relaxed">
+                                {{ $schoolProfile->alamat ?? 'Jl. Raya Babakancikao No. 45, Purwakarta, Jawa Barat 41151' }}
+                                @if(!empty($schoolProfile->kabupaten_kota) || !empty($schoolProfile->provinsi))
+                                    <br><span class="text-xs text-[#6B7280]">{{ $schoolProfile->kabupaten_kota ?? '' }}{{ (!empty($schoolProfile->kabupaten_kota) && !empty($schoolProfile->provinsi)) ? ', ' : '' }}{{ $schoolProfile->provinsi ?? '' }}</span>
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Kanan – dengan border kiri di md ke atas, border atas di mobile -->
+                    <div class="px-6 sm:px-8 py-6 space-y-6 border-t border-[#D9E4E2] md:border-t-0 md:border-l md:border-[#D9E4E2]">
+                        <!-- NPSN -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-1.5 text-[#6B7280] text-[11px] uppercase tracking-wider font-semibold">
+                                <span class="material-symbols-outlined text-[15px] text-[#0F766E]">verified</span>
+                                <span>NPSN</span>
+                            </div>
+                            <div>
+                                <span class="inline-block text-base font-bold text-[#0F766E] bg-[#F0FDFA] px-3 py-1 rounded-lg border border-[#CCFBF1]">
+                                    {{ $schoolProfile->npsn ?? '20205892' }}
+                                </span>
+                            </div>
+                            <p class="text-xs text-[#6B7280]">
+                                Terdaftar resmi di Kemendikbudristek &amp; Disdik {{ $schoolProfile->kabupaten_kota ?? 'Kab. Purwakarta' }}
+                            </p>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-1.5 text-[#6B7280] text-[11px] uppercase tracking-wider font-semibold">
+                                <span class="material-symbols-outlined text-[15px] text-[#0F766E]">mail</span>
+                                <span>Email Resmi Sekolah</span>
+                            </div>
+                            <p class="text-sm sm:text-base font-semibold text-[#0F766E] break-all">
+                                <a href="mailto:{{ $schoolProfile->email ?? 'info@smpn3babakancikao.sch.id' }}" class="hover:underline">
+                                    {{ $schoolProfile->email ?? 'info@smpn3babakancikao.sch.id' }}
+                                </a>
+                            </p>
+                        </div>
+
+                        <!-- Jam Layanan -->
+                        <div class="p-4 rounded-xl bg-[#F0F4F3] border border-[#D9E4E2] flex items-center gap-3">
+                            <span class="material-symbols-outlined text-[20px] text-[#0F766E] shrink-0">schedule</span>
+                            <div class="space-y-0.5 min-w-0">
+                                <p class="text-xs font-semibold text-[#1F2937]">Jam Layanan Kantor Sarpras</p>
+                                <p class="text-xs text-[#6B7280]">Senin s.d. Jumat, Pukul 07.00 – 15.30 WIB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ─── 4. DENAH SEKOLAH ────────────────────────────── -->
+            <section id="denah-sekolah" class="bg-white rounded-2xl border border-[#D9E4E2] shadow-sm overflow-hidden">
+                <!-- Header dengan tombol unduh -->
+                <div class="px-6 sm:px-8 py-5 border-b border-[#D9E4E2] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="space-y-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[#0F766E] text-[22px] sm:text-[24px]">map</span>
+                            <h2 class="text-lg sm:text-xl font-bold text-[#1F2937] tracking-tight">Denah Sekolah</h2>
+                        </div>
+                        <p class="text-xs sm:text-sm text-[#6B7280]">
+                            Informasi tata letak ruang dan fasilitas yang ada di lingkungan SMPN 3 Babakancikao.
+                        </p>
+                    </div>
+                    @if(!empty($schoolProfile->denah) && file_exists(public_path($schoolProfile->denah)))
+                        <a href="{{ asset($schoolProfile->denah) }}"
+                           download="Denah-{{ \Illuminate\Support\Str::slug($schoolProfile->nama_sekolah ?? 'SMPN-3-Babakancikao') }}"
+                           target="_blank"
+                           class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#0F766E] text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-[#115E59] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-[#CCFBF1] transition-colors shrink-0">
+                            <span class="material-symbols-outlined text-[16px]">download</span>
+                            <span>Unduh Denah</span>
+                        </a>
+                    @else
+                        <button type="button"
+                                onclick="showDenahNotice()"
+                                class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#E5E7EB] hover:bg-[#D1D5DB] text-[#6B7280] text-sm font-semibold rounded-lg transition-colors shrink-0"
+                                title="Denah belum tersedia">
+                            <span class="material-symbols-outlined text-[16px]">download</span>
+                            <span>Unduh Denah</span>
+                        </button>
+                    @endif
+                </div>
+
+                <!-- Gambar Denah -->
+                <div class="p-4 sm:p-6">
+                    @if(!empty($schoolProfile->denah) && file_exists(public_path($schoolProfile->denah)))
+                        <div class="relative w-full rounded-xl overflow-hidden border border-[#D9E4E2] bg-white group cursor-pointer shadow-sm"
+                             onclick="previewDenah('{{ asset($schoolProfile->denah) }}', '{{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}')">
+                            <img alt="Denah Arsitektur Kampus {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}"
+                                 class="w-full h-auto object-contain block mx-auto transition-transform duration-300 group-hover:scale-[1.005]"
+                                 src="{{ asset($schoolProfile->denah) }}">
+                            <div class="absolute bottom-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs text-[#4B5563] border border-[#D9E4E2] shadow-sm">
+                                Skala 1:200 • Update Sarpras {{ date('Y') }}
+                            </div>
+                            <div class="absolute inset-0 bg-black/15 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5 pointer-events-none">
+                                <span class="material-symbols-outlined text-[22px]">zoom_in</span>
+                                <span>Klik untuk Memperbesar</span>
+                            </div>
+                        </div>
+                    @else
+                        <div class="w-full rounded-xl border border-dashed border-[#D9E4E2] bg-[#F8FAFA] py-12 sm:py-16 text-center flex flex-col items-center justify-center gap-3">
+                            <div class="w-14 h-14 rounded-2xl bg-[#F0FDFA] border border-[#CCFBF1] flex items-center justify-center text-[#0F766E]">
+                                <span class="material-symbols-outlined text-[30px]">map</span>
+                            </div>
+                            <h3 class="text-sm sm:text-base font-bold text-[#1F2937]">Denah Sekolah Belum Tersedia</h3>
+                            <p class="text-xs text-[#6B7280] max-w-sm mx-auto leading-relaxed">
+                                Admin sekolah belum mengunggah file denah tata letak kampus {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}.
+                            </p>
+                        </div>
+                    @endif
+                </div>
+            </section>
+
+        </div><!-- end flex flex-col gap -->
+    </div><!-- end max-w-7xl -->
+</div><!-- end w-full -->
+
+@push('scripts')
 <script>
-    function previewGedung(url, nama) {
+    function previewDenah(url, title) {
         if (typeof Swal !== 'undefined') {
             Swal.fire({
-                title: 'Gedung Sekolah',
-                text: nama,
+                title: title ? 'Denah ' + title : 'Denah Kampus & Tata Letak Ruangan',
                 imageUrl: url,
-                imageAlt: 'Gedung Sekolah',
-                confirmButtonColor: '#0F766E',
-                confirmButtonText: 'Tutup',
-                customClass: {
-                    popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2]',
-                    confirmButton: 'px-5 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
-                }
-            });
-        }
-    }
-
-    function previewDenah(url) {
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                title: 'Denah Sekolah',
-                imageUrl: url,
-                imageAlt: 'Denah Sekolah',
+                imageAlt: 'Denah Kampus',
                 confirmButtonColor: '#0F766E',
                 confirmButtonText: 'Tutup',
                 showCancelButton: true,
                 cancelButtonText: 'Unduh Denah',
                 cancelButtonColor: '#115E59',
                 customClass: {
-                    popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2]',
-                    confirmButton: 'px-5 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white',
-                    cancelButton: 'px-5 py-2 rounded-lg text-xs font-semibold text-white'
+                    popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-4',
+                    title: 'text-sm font-bold text-[#1F2937] mb-2',
+                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white',
+                    cancelButton: 'px-4 py-2 rounded-lg text-xs font-semibold text-white'
                 }
             }).then((result) => {
                 if (result.dismiss === Swal.DismissReason.cancel) {
@@ -211,21 +365,25 @@
         }
     }
 
-    function showDenahInfo() {
+    function showDenahNotice() {
         if (typeof Swal !== 'undefined') {
             Swal.fire({
                 icon: 'info',
-                title: 'Denah Sekolah Belum Tersedia',
-                text: 'Admin sekolah belum mengunggah file denah tata letak gedung sekolah.',
+                title: 'Denah Belum Tersedia',
+                text: 'Admin sekolah belum mengunggah berkas denah tata letak kampus sekolah.',
                 confirmButtonColor: '#0F766E',
+                confirmButtonText: 'Tutup',
                 customClass: {
-                    popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2]',
-                    confirmButton: 'px-5 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                    popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                    title: 'text-sm font-bold text-[#1F2937] m-0 mb-2',
+                    htmlContainer: 'text-xs text-[#6B7280] m-0 mb-4 leading-relaxed',
+                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
                 }
             });
         } else {
-            alert('Belum ada denah yang diunggah oleh admin.');
+            alert('Admin sekolah belum mengunggah berkas denah tata letak kampus sekolah.');
         }
     }
 </script>
+@endpush
 @endsection

@@ -29,18 +29,16 @@ class DashboardController extends Controller
                 $q->where('status', 'dipinjam');
             })->count();
 
-        // ── Kondisi Inventaris (4 status) ─────────────────────────────────────
+        // ── Kondisi Inventaris (4 kondisi barang: Baik, Rusak, Perlu Perbaikan, Hilang) ─
         $baikCount           = Inventory::where('status', 'baik')->count();
-        $dipinjamCount       = Inventory::where('status', 'dipinjam')->count();
         $rusakCount          = Inventory::where('status', 'rusak')->count();
         $perluPerbaikanCount = Inventory::where('status', 'perlu_perbaikan')->count();
         $hilangCount         = Inventory::where('status', 'hilang')->count();
 
-        // ── Donut Chart (4 segments: Baik+Dipinjam, Rusak, Perlu Perbaikan, Hilang) ─
+        // ── Donut Chart (4 segments: Baik, Rusak, Perlu Perbaikan, Hilang) ─────
         $totalForChart = max($totalAset, 1);
 
         $baikPct           = round(($baikCount / $totalForChart) * 100);
-        $dipinjamChartPct  = round(($dipinjamCount / $totalForChart) * 100);
         $rusakPct          = round(($rusakCount / $totalForChart) * 100);
         $perluPerbaikanPct = round(($perluPerbaikanCount / $totalForChart) * 100);
         $hilangPct         = round(($hilangCount / $totalForChart) * 100);
@@ -48,15 +46,13 @@ class DashboardController extends Controller
         // SVG stroke-dasharray (circumference = 238.7 for r=38)
         $circumference      = 238.7;
         $baikDash           = round(($baikPct / 100) * $circumference, 1);
-        $dipinjamChartDash  = round(($dipinjamChartPct / 100) * $circumference, 1);
         $rusakDash          = round(($rusakPct / 100) * $circumference, 1);
         $perluPerbaikanDash = round(($perluPerbaikanPct / 100) * $circumference, 1);
         $hilangDash         = round(($hilangPct / 100) * $circumference, 1);
 
         $offset1 = -$baikDash;
-        $offset2 = $offset1 - $dipinjamChartDash;
-        $offset3 = $offset2 - $rusakDash;
-        $offset4 = $offset3 - $perluPerbaikanDash;
+        $offset2 = $offset1 - $rusakDash;
+        $offset3 = $offset2 - $perluPerbaikanDash;
 
         // ── Tabel Inventaris Terbaru (5 data saja) ────────────────────────────
         $latestInventories = Inventory::with(['category', 'room'])
@@ -76,24 +72,20 @@ class DashboardController extends Controller
             'sedangDipinjam',
             'tersedia',
             'baikCount',
-            'dipinjamCount',
             'rusakCount',
             'perluPerbaikanCount',
             'hilangCount',
             'baikPct',
-            'dipinjamChartPct',
             'rusakPct',
             'perluPerbaikanPct',
             'hilangPct',
             'baikDash',
-            'dipinjamChartDash',
             'rusakDash',
             'perluPerbaikanDash',
             'hilangDash',
             'offset1',
             'offset2',
             'offset3',
-            'offset4',
             'circumference',
             'latestInventories',
             'pendingLoansCount'

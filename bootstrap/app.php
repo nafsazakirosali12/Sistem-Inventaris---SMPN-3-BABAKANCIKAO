@@ -14,5 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, $request) {
+            return redirect()->back()
+                ->with('error', 'Ukuran total berkas yang diunggah terlalu besar (melebihi batas server: ' . ini_get('post_max_size') . '). Silakan perkecil ukuran berkas Anda.');
+        });
     })->create();

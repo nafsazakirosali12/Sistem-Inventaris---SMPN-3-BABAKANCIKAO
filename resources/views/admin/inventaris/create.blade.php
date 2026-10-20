@@ -48,7 +48,7 @@
             <!-- Upload Foto Barang dengan Live Preview -->
             <div class="flex flex-col gap-2">
                 <label class="text-xs font-semibold text-[#1F2937]">
-                    Foto Barang (Opsional)
+                    Foto Barang <span class="text-[#DC2626]">*</span>
                 </label>
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
                     <!-- Dropzone Area -->
@@ -62,6 +62,7 @@
                                    id="foto_input"
                                    name="foto"
                                    accept="image/jpeg,image/png,image/webp"
+                                   required
                                    class="hidden"
                                    onchange="previewImage(this)">
                         </label>
@@ -514,6 +515,7 @@
         const kategori = document.getElementById('category_id').value;
         const ruangan = document.getElementById('room_id').value;
         const status = document.getElementById('status').value;
+        const fotoInput = document.getElementById('foto_input');
 
         if (!kode || !nama || !kategori || !ruangan || !status) {
             Swal.fire({
@@ -522,6 +524,21 @@
                 text: 'Pastikan seluruh field wajib pada Informasi Utama (Kode Barang, Nama, Kategori, Ruangan, Status Unit) telah terisi.',
                 confirmButtonColor: '#0F766E',
                 confirmButtonText: 'Lengkapi Data',
+                customClass: {
+                    popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                }
+            });
+            return false;
+        }
+
+        if (!fotoInput || !fotoInput.files || fotoInput.files.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Foto Belum Diunggah',
+                text: 'Foto barang inventaris wajib diunggah sebelum data dapat disimpan.',
+                confirmButtonColor: '#0F766E',
+                confirmButtonText: 'Unggah Foto',
                 customClass: {
                     popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                     confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'

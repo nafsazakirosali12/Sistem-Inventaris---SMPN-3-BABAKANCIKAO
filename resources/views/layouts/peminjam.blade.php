@@ -60,6 +60,29 @@
             margin: 0;
             padding: 0;
         }
+
+        /* ── Responsive Utilities ─────────────────────────── */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Prevent horizontal overflow */
+        .w-full {
+            max-width: 100%;
+        }
+
+        @media (max-width: 639px) {
+            /* Ensure SweetAlert modals don't overflow small screens */
+            .swal2-popup {
+                max-width: calc(100vw - 2rem) !important;
+            }
+            /* Buttons stack vertically on very small screens */
+            .hero-btn-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
     </style>
 
     @if(file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
@@ -74,7 +97,7 @@
     @include('components.peminjam.navbar')
 
     <!-- Main Workspace Content -->
-    <main class="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6">
+    <main class="flex-1 w-full">
         @yield('content')
     </main>
 

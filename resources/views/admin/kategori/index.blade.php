@@ -287,11 +287,16 @@
                 <label for="edit_kode_kategori" class="text-xs font-semibold text-[#1F2937]">
                     Kode Kategori <span class="text-[#DC2626]">*</span>
                 </label>
-                <input type="text"
-                       id="edit_kode_kategori"
-                       name="kode_kategori"
-                       required
-                       class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg font-mono text-xs uppercase font-bold text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
+                <div class="relative">
+                    <input type="text"
+                           id="edit_kode_kategori"
+                           name="kode_kategori"
+                           required
+                           class="w-full h-10 px-3 pr-10 bg-[#F3F7F6] rounded-lg font-mono text-xs uppercase font-bold text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
+                    <div class="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-[#6B7280]">
+                        <span class="material-symbols-outlined text-[18px]">tag</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Nama Kategori -->

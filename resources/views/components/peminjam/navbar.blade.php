@@ -1,43 +1,53 @@
 <!-- Peminjam Top Navbar (Dark Green Main Identity) -->
-<nav class="bg-[#134E4A] min-h-[64px] px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between text-white shadow-md border-b border-[#115E59] sticky top-0 z-50">
+<nav class="bg-[#134E4A] h-16 px-3 sm:px-6 flex items-center justify-between text-white shadow-md border-b border-[#115E59] sticky top-0 z-50">
     <!-- Brand & Logo -->
-    <div class="flex items-center space-x-3">
-        <a href="{{ route('home') }}" class="flex items-center space-x-3 hover:opacity-95 transition-opacity">
-            <img src="{{ (!empty($schoolProfile->logo) && file_exists(public_path($schoolProfile->logo))) ? asset($schoolProfile->logo) : asset('images/logo-sekolah.png') }}" alt="Logo {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKAN CIKAO' }}" class="h-10 w-10 object-contain">
-            <div>
-                <h2 class="font-bold text-sm sm:text-base leading-tight text-white uppercase tracking-wider">{{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKAN CIKAO' }}</h2>
-                <p class="text-[11px] text-[#CCFBF1] opacity-95">{{ $schoolProfile->nama_sistem ?? 'Sistem Informasi Inventaris & Peminjaman' }}</p>
+    <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+        <a href="{{ route('home') }}" class="flex items-center gap-2 sm:gap-3 hover:opacity-95 transition-opacity min-w-0">
+            <img src="{{ (!empty($schoolProfile->logo) && file_exists(public_path($schoolProfile->logo))) ? asset($schoolProfile->logo) : asset('images/logo-sekolah.png') }}"
+                 alt="Logo {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKAN CIKAO' }}"
+                 class="h-9 w-9 sm:h-10 sm:w-10 object-contain shrink-0">
+            <div class="min-w-0 hidden xs:block sm:block">
+                <h2 class="font-bold text-xs sm:text-sm leading-tight text-white uppercase tracking-wider truncate max-w-[150px] sm:max-w-none">
+                    {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 BABAKAN CIKAO' }}
+                </h2>
+                <p class="text-[10px] sm:text-[11px] text-[#CCFBF1] opacity-90 truncate max-w-[150px] sm:max-w-xs hidden sm:block">
+                    {{ $schoolProfile->nama_sistem ?? 'Sistem Inventaris & Peminjaman' }}
+                </p>
             </div>
         </a>
     </div>
 
     <!-- Navigation Links & User Controls -->
-    <div class="flex items-center space-x-2 sm:space-x-6 mt-2 sm:mt-0">
-        <!-- Links Peminjam -->
-        <div class="flex items-center space-x-1 sm:space-x-3 text-xs font-semibold">
+    <div class="flex items-center gap-1 sm:gap-4 shrink-0">
+        <!-- Links Peminjam – dipersingkat pada mobile -->
+        <div class="flex items-center gap-0.5 sm:gap-1 text-xs font-semibold">
             <a href="{{ route('home') }}"
-               class="px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('home') ? 'bg-[#0F766E] text-white shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white' }}">
-                Beranda
+               class="px-2 sm:px-3 py-2 rounded-lg transition-colors whitespace-nowrap {{ request()->routeIs('home') ? 'bg-[#0F766E] text-white shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white' }}">
+                <span class="hidden sm:inline">Beranda</span>
+                <span class="sm:hidden material-symbols-outlined text-[20px] leading-none">home</span>
             </a>
             <a href="#"
-               class="px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('peminjaman.*') ? 'bg-[#0F766E] text-white shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white' }}">
-                Peminjaman
+               class="px-2 sm:px-3 py-2 rounded-lg transition-colors whitespace-nowrap {{ request()->routeIs('peminjaman.*') ? 'bg-[#0F766E] text-white shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white' }}">
+                <span class="hidden sm:inline">Peminjaman</span>
+                <span class="sm:hidden material-symbols-outlined text-[20px] leading-none">assignment_return</span>
             </a>
             <a href="#"
-               class="px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('riwayat.*') ? 'bg-[#0F766E] text-white shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white' }}">
-                Riwayat Peminjaman
+               class="px-2 sm:px-3 py-2 rounded-lg transition-colors whitespace-nowrap {{ request()->routeIs('riwayat.*') ? 'bg-[#0F766E] text-white shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white' }}">
+                <span class="hidden sm:inline">Riwayat</span>
+                <span class="sm:hidden material-symbols-outlined text-[20px] leading-none">history</span>
             </a>
         </div>
 
         <!-- Logout Action -->
         @auth
-            <div class="flex items-center space-x-3 pl-3 border-l border-[#115E59]">
-                <span class="text-xs text-[#CCFBF1] hidden md:inline-block">Halo, <strong>{{ auth()->user()->name }}</strong></span>
+            <div class="flex items-center gap-2 pl-2 sm:pl-3 border-l border-[#115E59]">
+                <span class="text-xs text-[#CCFBF1] hidden lg:inline-block">Halo, <strong>{{ auth()->user()->name }}</strong></span>
                 <button type="button"
                         onclick="confirmPeminjamLogout()"
-                        class="px-3 py-1.5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-xs font-semibold text-white flex items-center space-x-1.5 transition-colors shadow-sm">
-                    <span>Keluar</span>
-                    <span class="material-symbols-outlined text-[16px]">logout</span>
+                        class="px-2 sm:px-3 py-1.5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-xs font-semibold text-white flex items-center gap-1 sm:gap-1.5 transition-colors shadow-sm"
+                        title="Keluar dari sistem">
+                    <span class="hidden sm:inline">Keluar</span>
+                    <span class="material-symbols-outlined text-[18px]">logout</span>
                 </button>
             </div>
             <form id="peminjamLogoutForm" action="{{ route('logout') }}" method="POST" class="hidden">
