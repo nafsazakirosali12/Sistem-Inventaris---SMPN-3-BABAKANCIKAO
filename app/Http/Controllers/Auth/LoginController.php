@@ -23,7 +23,7 @@ class LoginController extends Controller
         $schoolProfile = SchoolProfile::first() ?? new SchoolProfile([
             'nama_sekolah' => 'SMPN 3 BABAKANCIKAO',
             'nama_sistem' => 'Sistem Informasi Inventaris & Peminjaman',
-            'tagline' => 'Portal Terpadu Sarana & Prasarana',
+            'tagline' => 'Portal Sarana & Prasarana',
         ]);
 
         return view('auth.login', compact('schoolProfile'));

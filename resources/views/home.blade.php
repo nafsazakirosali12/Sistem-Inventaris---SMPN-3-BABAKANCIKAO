@@ -87,21 +87,6 @@
                         </a>
                     </div>
 
-                    <!-- Info Badge Baris -->
-                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/20 backdrop-blur-sm border border-white/10 text-white/85 text-[11px]">
-                            <span class="material-symbols-outlined text-[13px] text-[#FEF3C7]">schedule</span>
-                            07.00 – 15.30 WIB
-                        </span>
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/20 backdrop-blur-sm border border-white/10 text-white/85 text-[11px]">
-                            <span class="material-symbols-outlined text-[13px] text-[#b5ede7]">check_circle</span>
-                            Pengembalian Tepat Waktu
-                        </span>
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/20 backdrop-blur-sm border border-white/10 text-white/85 text-[11px]">
-                            <span class="material-symbols-outlined text-[13px] text-[#CCFBF1]">verified_user</span>
-                            Verifikasi Otomatis Admin
-                        </span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -178,10 +163,6 @@
                             Informasi Utama &amp; Kontak Resmi
                         </h2>
                     </div>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#DCFCE7] text-[#166534] text-xs font-semibold border border-[#16A34A]/30">
-                        <span class="w-2 h-2 rounded-full bg-[#16A34A]"></span>
-                        Akreditasi A (Unggul)
-                    </span>
                 </div>
 
                 <!-- Body: Grid 2 kolom di desktop, 1 kolom di mobile -->
@@ -261,7 +242,7 @@
                             <span class="material-symbols-outlined text-[20px] text-[#0F766E] shrink-0">schedule</span>
                             <div class="space-y-0.5 min-w-0">
                                 <p class="text-xs font-semibold text-[#1F2937]">Jam Layanan Kantor Sarpras</p>
-                                <p class="text-xs text-[#6B7280]">Senin s.d. Jumat, Pukul 07.00 – 15.30 WIB</p>
+                                <p class="text-xs text-[#6B7280]">Senin s.d. Jumat, Pukul 07.00 – 13.00 WIB</p>
                             </div>
                         </div>
                     </div>
