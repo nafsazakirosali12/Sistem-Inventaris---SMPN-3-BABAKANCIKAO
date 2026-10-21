@@ -38,18 +38,51 @@
             </a>
         </div>
 
-        <!-- Logout Action -->
+        <!-- User Menu Dropdown (Burger Icon) -->
         @auth
-            <div class="flex items-center gap-2 pl-2 sm:pl-3 border-l border-[#115E59]">
-                <span class="text-xs text-[#CCFBF1] hidden lg:inline-block">Halo, <strong>{{ auth()->user()->name }}</strong></span>
-                <button type="button"
-                        onclick="confirmPeminjamLogout()"
-                        class="px-2 sm:px-3 py-1.5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-xs font-semibold text-white flex items-center gap-1 sm:gap-1.5 transition-colors shadow-sm"
-                        title="Keluar dari sistem">
-                    <span class="hidden sm:inline">Keluar</span>
-                    <span class="material-symbols-outlined text-[18px]">logout</span>
+            <div class="relative inline-block text-left pl-2 sm:pl-3 border-l border-[#115E59]" x-data="{ open: false }">
+                <button @click="open = !open"
+                        type="button"
+                        class="p-2 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white flex items-center justify-center transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-[#CCFBF1]/40"
+                        :class="{ 'bg-[#115E59] ring-2 ring-[#CCFBF1]/40': open }"
+                        title="Menu Pengguna"
+                        aria-label="Menu Pengguna">
+                    <span class="material-symbols-outlined text-[20px] transition-transform duration-200">menu</span>
                 </button>
+
+                <!-- Dropdown Menu (1: Nama yang sedang login, 2: Keluar) -->
+                <div x-show="open"
+                     @click.away="open = false"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="transform opacity-0 scale-95"
+                     x-transition:enter-end="transform opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="transform opacity-100 scale-100"
+                     x-transition:leave-end="transform opacity-0 scale-95"
+                     class="origin-top-right absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white ring-1 ring-black/5 focus:outline-none z-50 overflow-hidden border border-[#D9E4E2]"
+                     style="display: none;">
+
+                    <!-- 1. Nama yang Sedang Login -->
+                    <div class="px-4 py-3 bg-[#F0FDFA] border-b border-[#D9E4E2] flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full bg-[#0F766E] text-white flex items-center justify-center shrink-0 shadow-xs">
+                            <span class="material-symbols-outlined text-[18px]">person</span>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs font-bold text-[#1F2937] truncate" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</p>
+                            <p class="text-[11px] text-[#0F766E] font-medium capitalize">{{ auth()->user()->role ?? 'Peminjam' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- 2. Keluar -->
+                    <button type="button"
+                            @click="open = false; confirmPeminjamLogout()"
+                            class="w-full group flex items-center px-4 py-2.5 text-xs text-[#DC2626] hover:bg-[#FEE2E2]/60 transition-colors font-medium text-left">
+                        <span class="material-symbols-outlined text-[18px] mr-2.5 text-[#DC2626] transition-transform group-hover:translate-x-0.5">logout</span>
+                        <span>Keluar</span>
+                    </button>
+                </div>
             </div>
+
             <form id="peminjamLogoutForm" action="{{ route('logout') }}" method="POST" class="hidden">
                 @csrf
             </form>

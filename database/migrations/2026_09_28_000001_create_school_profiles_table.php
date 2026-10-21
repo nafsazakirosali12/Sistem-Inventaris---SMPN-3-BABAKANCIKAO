@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nama_sekolah')->default('SMPN 3 BABAKANCIKAO');
             $table->string('npsn')->default('20203040');
             $table->string('nama_sistem')->default('Sistem Informasi Inventaris & Peminjaman');
-            $table->string('tagline')->default('Portal Terpadu Sarana & Prasarana');
+            $table->string('tagline')->default('Portal Sarana & Prasarana');
             $table->text('alamat')->nullable();
             $table->string('telepon')->nullable();
             $table->string('email')->nullable();

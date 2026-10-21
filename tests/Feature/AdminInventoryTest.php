@@ -9,6 +9,8 @@ use App\Models\Room;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminInventoryTest extends TestCase
@@ -98,6 +100,7 @@ class AdminInventoryTest extends TestCase
             'category_id' => $this->category->id,
             'room_id' => $this->room->id,
             'status' => 'baik', // Status Unit
+            'foto' => UploadedFile::fake()->create('laptop.jpg', 100, 'image/jpeg'),
             'nomor_register' => '0001',
             'merk_type' => 'ASUS A416',
             'ukuran_cc' => '14 Inci',
@@ -128,6 +131,11 @@ class AdminInventoryTest extends TestCase
             'nomor_register' => '0001',
             'tahun_pembelian' => '2024',
         ]);
+
+        $inv = Inventory::where('kode_barang', 'INV-2024-LAP-001')->first();
+        if ($inv && $inv->foto && file_exists(public_path($inv->foto))) {
+            unlink(public_path($inv->foto));
+        }
     }
 
     public function test_kode_barang_must_be_unique(): void

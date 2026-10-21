@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
                 'nama_sekolah' => 'SMPN 3 BABAKANCIKAO',
                 'npsn' => '20203040',
                 'nama_sistem' => 'Sistem Informasi Inventaris & Peminjaman',
-                'tagline' => 'Portal Terpadu Sarana & Prasarana',
+                'tagline' => 'Portal Sarana & Prasarana',
                 'alamat' => 'Jl. Raya Babakancikao No. 45, Purwakarta, Jawa Barat',
                 'telepon' => '(0264) 8301234',
                 'email' => 'info@smpn3babakancikao.sch.id',
