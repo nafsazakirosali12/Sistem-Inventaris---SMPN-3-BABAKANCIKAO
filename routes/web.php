@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\SchoolProfileController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\LoanController;
+use App\Http\Controllers\Admin\ReportController;
 
 // Redirect root to login
 Route::get('/', function () {
@@ -72,6 +73,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/akun', [AccountController::class, 'store'])->name('akun.store');
         Route::put('/akun/{user}', [AccountController::class, 'update'])->name('akun.update');
         Route::delete('/akun/{user}', [AccountController::class, 'destroy'])->name('akun.destroy');
+
+        // Laporan Inventaris
+        Route::get('/laporan', [ReportController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/preview', [ReportController::class, 'preview'])->name('laporan.preview');
+        Route::get('/laporan/download', [ReportController::class, 'download'])->name('laporan.download');
     });
 });
 

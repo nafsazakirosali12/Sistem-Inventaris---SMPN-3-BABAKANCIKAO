@@ -23,6 +23,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (class_exists(\Illuminate\Foundation\Console\ServeCommand::class)) {
+            \Illuminate\Foundation\Console\ServeCommand::$passthroughVariables[] = 'SystemRoot';
+            \Illuminate\Foundation\Console\ServeCommand::$passthroughVariables[] = 'windir';
+            \Illuminate\Foundation\Console\ServeCommand::$passthroughVariables[] = 'SystemDrive';
+            \Illuminate\Foundation\Console\ServeCommand::$passthroughVariables[] = 'TEMP';
+            \Illuminate\Foundation\Console\ServeCommand::$passthroughVariables[] = 'TMP';
+        }
+
         View::composer('*', function ($view) {
             if (!array_key_exists('schoolProfile', $view->getData())) {
                 $schoolProfile = null;

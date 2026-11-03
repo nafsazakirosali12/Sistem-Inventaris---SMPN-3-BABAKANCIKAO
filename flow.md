@@ -98,11 +98,11 @@ Sama dengan peminjam: username, password, tombol Masuk, alert jika salah, tampil
 3. Edit membuka **pop-up**: ubah gambar, username, password, tombol **Simpan**.
 4. Alert keputusan → alert berhasil.
 
-### 3.4 Profil Sekolah (sumber data Home dan Footer)
+### 3.4 Profil Sekolah (terhubung database school_profiles)
 **Bidang**
 - Nama sekolah, NPSN (8 digit angka), alamat lengkap, no. telepon, email
 - Logo sekolah, foto/gambar sekolah, **denah sekolah (gambar saja)**
-- **Media sosial** (Instagram, YouTube, Facebook, TikTok; boleh kosong) 💡
+- **Media sosial** (Instagram, YouTube; boleh kosong) 💡
 - **Identitas laporan KIB** 💡: Provinsi, Kab./Kota (default Jawa Barat / Purwakarta, dapat diedit), Bidang, Unit Organisasi, Sub Unit Organisasi, UPB, No. Kode Lokasi
 
 **Alur**

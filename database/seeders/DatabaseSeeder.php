@@ -34,6 +34,10 @@ class DatabaseSeeder extends Seeder
                 'sub_unit_organisasi' => 'SMPN 3 Babakancikao',
                 'upb' => 'SMPN 3 Babakancikao',
                 'no_kode_lokasi' => '12.34.56.78.90',
+                'nama_kepala_sekolah' => 'Drs. H. Ahmad Dahlan, M.Pd',
+                'nip_kepala_sekolah' => '19720315 199802 1 002',
+                'nama_pembuat' => 'Admin Sarpras',
+                'nip_pembuat' => '19800101 200501 1 001',
             ]
         );
 

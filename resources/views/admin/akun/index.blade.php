@@ -41,12 +41,10 @@
                     @endif
                 </div>
 
-                <!-- Sort Filter -->
-                <div class="flex items-center gap-2 bg-[#F3F7F6] rounded-lg px-3 h-10 border border-[#D9E4E2]">
-                    <span class="material-symbols-outlined text-[#6B7280] text-[18px]">sort</span>
+                <!-- Sort Filter (Select2 with Search) -->
+                <div class="w-full sm:w-60 shrink-0">
                     <select name="sort"
-                            onchange="this.form.submit()"
-                            class="bg-transparent text-xs text-[#1F2937] focus:outline-none cursor-pointer pr-2">
+                            class="select2-filter w-full">
                         <option value="username_asc" {{ request('sort') == 'username_asc' ? 'selected' : '' }}>Nama Pengguna (A-Z)</option>
                         <option value="username_desc" {{ request('sort') == 'username_desc' ? 'selected' : '' }}>Nama Pengguna (Z-A)</option>
                         <option value="recent" {{ request('sort') == 'recent' ? 'selected' : '' }}>Terkini Didaftarkan</option>

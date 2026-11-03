@@ -60,8 +60,82 @@ class InventoryController extends Controller
             $query->where('status', $status);
         }
 
-        // Filter: Rentang Tanggal / Tahun Pembelian (Date Range Picker)
-        if ($request->filled('date_range')) {
+        // Filter: Tahun Pembelian (Mendukung Rentang Tahun "2020 - 2024" maupun Single Year "2024")
+        if ($request->filled('tahun')) {
+            $tahunInput = trim($request->input('tahun'));
+            // Cek jika format rentang tahun: "2020 - 2024", "2020-2024", "2020 — 2024", "2020 to 2024"
+            if (preg_match('/^(\d{4})\s*[-—–to]+\s*(\d{4})$/u', $tahunInput, $matches)) {
+                $startYear = (int)$matches[1];
+                $endYear = (int)$matches[2];
+                if ($startYear > $endYear) {
+                    [$startYear, $endYear] = [$endYear, $startYear];
+                }
+
+                $query->where(function ($q) use ($startYear, $endYear) {
+                    $q->where(function ($s) use ($startYear, $endYear) {
+                        $s->whereRaw('LENGTH(TRIM(tahun_pembelian)) = 4')
+                          ->whereRaw('CAST(tahun_pembelian AS UNSIGNED) >= ?', [$startYear])
+                          ->whereRaw('CAST(tahun_pembelian AS UNSIGNED) <= ?', [$endYear]);
+                    })->orWhere(function ($s) use ($startYear, $endYear) {
+                        $s->whereRaw('LENGTH(TRIM(tahun_pembelian)) > 4')
+                          ->whereRaw('CAST(SUBSTR(TRIM(tahun_pembelian), 1, 4) AS UNSIGNED) >= ?', [$startYear])
+                          ->whereRaw('CAST(SUBSTR(TRIM(tahun_pembelian), 1, 4) AS UNSIGNED) <= ?', [$endYear]);
+                    });
+                });
+            } else {
+                $tahun = $tahunInput;
+                $query->where(function ($q) use ($tahun) {
+                    $q->where('tahun_pembelian', $tahun)
+                      ->orWhere('tahun_pembelian', 'like', "$tahun-%")
+                      ->orWhere('tahun_pembelian', 'like', "%/$tahun")
+                      ->orWhere('tahun_pembelian', 'like', "%-$tahun");
+                });
+            }
+        } elseif ($request->filled('tahun_awal') || $request->filled('tahun_akhir')) {
+            $startYear = $request->filled('tahun_awal') ? (int)$request->input('tahun_awal') : null;
+            $endYear = $request->filled('tahun_akhir') ? (int)$request->input('tahun_akhir') : null;
+
+            if ($startYear && $endYear && $startYear > $endYear) {
+                [$startYear, $endYear] = [$endYear, $startYear];
+            }
+
+            $query->where(function ($q) use ($startYear, $endYear) {
+                if ($startYear && $endYear) {
+                    $q->where(function ($sub) use ($startYear, $endYear) {
+                        $sub->where(function ($s) use ($startYear, $endYear) {
+                            $s->whereRaw('LENGTH(TRIM(tahun_pembelian)) = 4')
+                              ->whereRaw('CAST(tahun_pembelian AS UNSIGNED) >= ?', [$startYear])
+                              ->whereRaw('CAST(tahun_pembelian AS UNSIGNED) <= ?', [$endYear]);
+                        })->orWhere(function ($s) use ($startYear, $endYear) {
+                            $s->whereRaw('LENGTH(TRIM(tahun_pembelian)) > 4')
+                              ->whereRaw('CAST(SUBSTR(TRIM(tahun_pembelian), 1, 4) AS UNSIGNED) >= ?', [$startYear])
+                              ->whereRaw('CAST(SUBSTR(TRIM(tahun_pembelian), 1, 4) AS UNSIGNED) <= ?', [$endYear]);
+                        });
+                    });
+                } elseif ($startYear) {
+                    $q->where(function ($sub) use ($startYear) {
+                        $sub->where(function ($s) use ($startYear) {
+                            $s->whereRaw('LENGTH(TRIM(tahun_pembelian)) = 4')
+                              ->whereRaw('CAST(tahun_pembelian AS UNSIGNED) >= ?', [$startYear]);
+                        })->orWhere(function ($s) use ($startYear) {
+                            $s->whereRaw('LENGTH(TRIM(tahun_pembelian)) > 4')
+                              ->whereRaw('CAST(SUBSTR(TRIM(tahun_pembelian), 1, 4) AS UNSIGNED) >= ?', [$startYear]);
+                        });
+                    });
+                } elseif ($endYear) {
+                    $q->where(function ($sub) use ($endYear) {
+                        $sub->where(function ($s) use ($endYear) {
+                            $s->whereRaw('LENGTH(TRIM(tahun_pembelian)) = 4')
+                              ->whereRaw('CAST(tahun_pembelian AS UNSIGNED) <= ?', [$endYear]);
+                        })->orWhere(function ($s) use ($endYear) {
+                            $s->whereRaw('LENGTH(TRIM(tahun_pembelian)) > 4')
+                              ->whereRaw('CAST(SUBSTR(TRIM(tahun_pembelian), 1, 4) AS UNSIGNED) <= ?', [$endYear]);
+                        });
+                    });
+                }
+            });
+        } elseif ($request->filled('date_range')) {
+            // Fallback untuk backward-compatibility jika ada request date_range
             $dateRange = trim($request->input('date_range'));
             // Support delimiters: " — " (em-dash), " - " (hyphen), " to "
             $parts = preg_split('/\s*(?:—|-|to)\s*/u', $dateRange);
@@ -164,13 +238,39 @@ class InventoryController extends Controller
         $categories = Category::orderBy('nama_kategori', 'asc')->get();
         $rooms = Room::orderBy('nama_ruangan', 'asc')->get();
 
+        // Ambil daftar tahun inventaris yang tersedia untuk filter tahun
+        $years = Inventory::whereNotNull('tahun_pembelian')
+            ->where('tahun_pembelian', '!=', '')
+            ->pluck('tahun_pembelian')
+            ->map(function ($val) {
+                $val = trim($val);
+                if (preg_match('/^\d{4}$/', $val)) {
+                    return (int)$val;
+                }
+                if (preg_match('/^(\d{4})/', $val, $matches)) {
+                    return (int)$matches[1];
+                }
+                return null;
+            })
+            ->filter()
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        $currentYear = (int)date('Y');
+        if (!$years->contains($currentYear)) {
+            $years->prepend($currentYear);
+            $years = $years->sortDesc()->values();
+        }
+
         return view('admin.inventaris.index', compact(
             'schoolProfile',
             'user',
             'perluTindakanCount',
             'inventories',
             'categories',
-            'rooms'
+            'rooms',
+            'years'
         ));
     }
 

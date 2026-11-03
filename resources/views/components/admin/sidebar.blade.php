@@ -65,7 +65,7 @@
             </a>
 
             <!-- 8. Laporan Inventaris -->
-            <a href="#"
+            <a href="{{ route('admin.laporan.index') }}"
                class="flex items-center h-11 px-4 transition-all text-xs rounded-lg {{ request()->routeIs('admin.laporan*') ? 'bg-[#0F766E] text-white font-bold border-l-4 border-[#2DD4BF] shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white font-medium' }}">
                 <span class="material-symbols-outlined mr-3 text-[20px] {{ request()->routeIs('admin.laporan*') ? 'text-[#2DD4BF]' : '' }}">summarize</span>
                 <span>Laporan Inventaris</span>

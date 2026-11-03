@@ -2,62 +2,6 @@
 
 @section('title', 'Data Inventaris - ' . ($schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao'))
 
-@push('styles')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<style>
-    .flatpickr-calendar {
-        border-radius: 12px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-        border: 1px solid #D9E4E2;
-        font-family: 'Inter', system-ui, sans-serif;
-        font-size: 12px;
-    }
-    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange,
-    .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange,
-    .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus,
-    .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover,
-    .flatpickr-day.selected.prevMonthDay, .flatpickr-day.selected.nextMonthDay {
-        background: #0F766E !important;
-        border-color: #0F766E !important;
-        color: #ffffff !important;
-    }
-    .flatpickr-day.inRange {
-        background: #CCFBF1 !important;
-        border-color: #CCFBF1 !important;
-        color: #0F766E !important;
-    }
-    .flatpickr-months .flatpickr-month {
-        background: #0F766E;
-        color: #fff;
-        fill: #fff;
-        border-top-left-radius: 12px;
-        border-top-right-radius: 12px;
-    }
-    span.flatpickr-weekday {
-        background: #0F766E;
-        color: #CCFBF1;
-    }
-    .flatpickr-current-month .flatpickr-monthDropdown-months,
-    .flatpickr-current-month input.cur-year {
-        color: #ffffff;
-        font-weight: 600;
-    }
-    .flatpickr-prev-month svg, .flatpickr-next-month svg {
-        fill: #ffffff;
-    }
-    .flatpickr-day.flatpickr-disabled,
-    .flatpickr-day.flatpickr-disabled:hover,
-    .flatpickr-day.notAllowed,
-    .flatpickr-day.notAllowed:hover {
-        color: #9CA3AF !important;
-        background: #F3F7F6 !important;
-        cursor: not-allowed !important;
-        opacity: 0.35 !important;
-        pointer-events: none !important;
-    }
-</style>
-@endpush
-
 @section('content')
 <div class="flex flex-col w-full gap-6">
 
@@ -79,7 +23,7 @@
     </div>
 
     <!-- Unified Card: Search, Filter, Actions & Data Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-[#D9E4E2] overflow-hidden flex flex-col">
+    <div class="bg-white rounded-xl shadow-sm border border-[#D9E4E2] flex flex-col relative">
         <!-- Card Header: Search & Filter Toolbar -->
         <div class="p-4 sm:p-5 border-b border-[#D9E4E2] bg-white">
             <form action="{{ route('admin.inventaris.index') }}" method="GET" class="flex flex-col gap-3">
@@ -104,11 +48,10 @@
                         @endif
                     </div>
 
-                    <!-- Filter Kategori: [ Icon Kategori ] Semua Kategori [ Chevron ] -->
-                    <div class="relative lg:col-span-2">
+                    <!-- Filter Kategori -->
+                    <div class="lg:col-span-2">
                         <select name="category_id"
-                                onchange="this.form.submit()"
-                                class="w-full h-10 pl-3 pr-8 bg-[#F3F7F6] text-xs text-[#1F2937] rounded-lg appearance-none cursor-pointer focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 border border-[#D9E4E2] truncate">
+                                class="select2-filter w-full">
                             <option value="">Semua Kategori</option>
                             @foreach ($categories as $cat)
                                 <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>
@@ -116,16 +59,12 @@
                                 </option>
                             @endforeach
                         </select>
-                        <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">
-                            <span class="material-symbols-outlined text-[18px]">expand_more</span>
-                        </div>
                     </div>
 
-                    <!-- Filter Ruangan: [ Icon Ruangan ] Semua Ruangan [ Chevron ] -->
-                    <div class="relative lg:col-span-2">
+                    <!-- Filter Ruangan -->
+                    <div class="lg:col-span-2">
                         <select name="room_id"
-                                onchange="this.form.submit()"
-                                class="w-full h-10 pl-3 pr-8 bg-[#F3F7F6] text-xs text-[#1F2937] rounded-lg appearance-none cursor-pointer focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 border border-[#D9E4E2] truncate">
+                                class="select2-filter w-full">
                             <option value="">Semua Ruangan</option>
                             @foreach ($rooms as $room)
                                 <option value="{{ $room->id }}" {{ request('room_id') == $room->id ? 'selected' : '' }}>
@@ -133,60 +72,268 @@
                                 </option>
                             @endforeach
                         </select>
-                        <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">
-                            <span class="material-symbols-outlined text-[18px]">expand_more</span>
-                        </div>
                     </div>
 
-                    <!-- Filter Status: [ Icon Status ] Semua Status Unit [ Chevron ] -->
-                    <div class="relative lg:col-span-2">
+                    <!-- Filter Status -->
+                    <div class="lg:col-span-2">
                         <select name="status"
-                                onchange="this.form.submit()"
-                                class="w-full h-10 pl-3 pr-8 bg-[#F3F7F6] text-xs text-[#1F2937] rounded-lg appearance-none cursor-pointer focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 border border-[#D9E4E2] truncate">
+                                class="select2-filter w-full">
                             <option value="">Semua Status Unit</option>
                             <option value="baik" {{ request('status') == 'baik' ? 'selected' : '' }}>Baik</option>
                             <option value="rusak" {{ request('status') == 'rusak' ? 'selected' : '' }}>Rusak</option>
                             <option value="perlu_perbaikan" {{ request('status') == 'perlu_perbaikan' ? 'selected' : '' }}>Perlu Perbaikan</option>
                             <option value="hilang" {{ request('status') == 'hilang' ? 'selected' : '' }}>Hilang</option>
                         </select>
-                        <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">
-                            <span class="material-symbols-outlined text-[18px]">expand_more</span>
-                        </div>
                     </div>
 
-                    <!-- Filter Rentang Tanggal: [ Icon Calendar ] Pilih rentang tanggal... [ Chevron / Reset ] -->
-                    <div class="relative lg:col-span-3 flex items-center gap-2">
-                        <div class="relative flex-1">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#6B7280]">
+                    <!-- Filter Tahun (Modern Year Range Picker Component) -->
+                    <div class="relative lg:col-span-3 flex items-center gap-2"
+                         x-data="{
+                             open: false,
+                             inputValue: '{{ request('tahun') ?? '' }}',
+                             todayYear: {{ date('Y') }},
+                             startYear: null,
+                             endYear: null,
+                             hoverYear: null,
+                             pickingStep: 1,
+                             decadeStart: {{ date('Y') - (date('Y') % 10) }},
+
+                             init() {
+                                 if (this.inputValue) {
+                                     const parts = this.inputValue.split(/\s*[-—–to]+\s*/);
+                                     if (parts.length >= 2 && parts[0] && parts[1]) {
+                                         this.startYear = parseInt(parts[0]);
+                                         this.endYear = parseInt(parts[1]);
+                                         this.decadeStart = Math.floor(this.startYear / 10) * 10;
+                                     } else if (parts.length === 1 && parts[0]) {
+                                         this.startYear = parseInt(parts[0]);
+                                         this.endYear = parseInt(parts[0]);
+                                         this.decadeStart = Math.floor(this.startYear / 10) * 10;
+                                     }
+                                 }
+                             },
+
+                             get decadeEnd() {
+                                 return this.decadeStart + 9;
+                             },
+
+                             get activeStart() {
+                                 if (this.pickingStep === 2 && this.startYear !== null && this.hoverYear !== null) {
+                                     return Math.min(this.startYear, this.hoverYear);
+                                 }
+                                 if (this.startYear !== null && this.endYear !== null) {
+                                     return Math.min(this.startYear, this.endYear);
+                                 }
+                                 return this.startYear;
+                             },
+
+                             get activeEnd() {
+                                 if (this.pickingStep === 2 && this.startYear !== null && this.hoverYear !== null) {
+                                     return Math.max(this.startYear, this.hoverYear);
+                                 }
+                                 if (this.startYear !== null && this.endYear !== null) {
+                                     return Math.max(this.startYear, this.endYear);
+                                 }
+                                 return this.endYear;
+                             },
+
+                             get stepGuide() {
+                                 if (this.pickingStep === 2) {
+                                     return 'Pilih tahun akhir untuk menyelesaikan rentang...';
+                                 }
+                                 if (this.startYear && this.endYear) {
+                                     return this.startYear === this.endYear
+                                         ? 'Tahun terpilih: ' + this.startYear
+                                         : 'Rentang: ' + this.startYear + ' — ' + this.endYear;
+                                 }
+                                 return 'Pilih tahun awal rentang';
+                             },
+
+                             get years() {
+                                 const list = [];
+                                 for (let i = -1; i <= 10; i++) {
+                                     const y = this.decadeStart + i;
+                                     const aStart = this.activeStart;
+                                     const aEnd = this.activeEnd;
+
+                                     const isStart = aStart !== null && y === aStart;
+                                     const isEnd = aEnd !== null && y === aEnd;
+                                     const isInRange = aStart !== null && aEnd !== null && y > aStart && y < aEnd;
+                                     const isSingle = aStart !== null && aStart === aEnd && y === aStart;
+
+                                     list.push({
+                                         year: y,
+                                         isCurrentDecade: i >= 0 && i <= 9,
+                                         isToday: y === this.todayYear,
+                                         isStart: isStart,
+                                         isEnd: isEnd,
+                                         isInRange: isInRange,
+                                         isSingle: isSingle,
+                                         isSelected: isStart || isEnd || isInRange
+                                     });
+                                 }
+                                 return list;
+                             },
+
+                             prevDecade() {
+                                 this.decadeStart -= 10;
+                             },
+
+                             nextDecade() {
+                                 this.decadeStart += 10;
+                             },
+
+                             onYearClick(y) {
+                                 if (this.pickingStep === 1 || !this.startYear || (this.startYear && this.endYear && this.pickingStep !== 2)) {
+                                     // Langkah 1: Pilih tahun awal
+                                     this.startYear = y;
+                                     this.endYear = null;
+                                     this.hoverYear = y;
+                                     this.pickingStep = 2;
+                                 } else if (this.pickingStep === 2) {
+                                     // Langkah 2: Pilih tahun akhir & selesaikan rentang
+                                     const finalStart = Math.min(this.startYear, y);
+                                     const finalEnd = Math.max(this.startYear, y);
+                                     this.startYear = finalStart;
+                                     this.endYear = finalEnd;
+                                     this.pickingStep = 1;
+                                     this.hoverYear = null;
+
+                                     const val = (finalStart === finalEnd) ? String(finalStart) : `${finalStart} - ${finalEnd}`;
+                                     this.inputValue = val;
+                                     this.open = false;
+                                     this.$refs.yearInput.value = val;
+                                     this.$refs.yearInput.closest('form').submit();
+                                 }
+                             },
+
+                             onYearHover(y) {
+                                 if (this.pickingStep === 2) {
+                                     this.hoverYear = y;
+                                 }
+                             },
+
+                             selectToday() {
+                                 this.startYear = this.todayYear;
+                                 this.endYear = this.todayYear;
+                                 this.pickingStep = 1;
+                                 this.hoverYear = null;
+                                 this.inputValue = String(this.todayYear);
+                                 this.open = false;
+                                 this.$refs.yearInput.value = this.todayYear;
+                                 this.$refs.yearInput.closest('form').submit();
+                             }
+                         }"
+                         @click.outside="open = false; hoverYear = null"
+                         @keydown.escape.window="open = false; hoverYear = null">
+
+                        <!-- Input Container -->
+                        <div class="relative flex-1 min-w-0">
+                            <input type="text"
+                                   x-ref="yearInput"
+                                   name="tahun"
+                                   id="filter_tahun"
+                                   :value="inputValue"
+                                   placeholder="Select Year"
+                                   readonly
+                                   @click="open = !open"
+                                   class="w-full h-10 pl-3 pr-10 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] placeholder-[#6B7280] border border-[#D9E4E2] focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all cursor-pointer font-medium select-none truncate">
+
+                            <!-- Calendar Icon (Right Side) -->
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-[#6B7280]">
                                 <span class="material-symbols-outlined text-[18px]">calendar_today</span>
                             </div>
-                            <input type="text"
-                                   id="filter_date_range"
-                                   name="date_range"
-                                   value="{{ request('date_range') }}"
-                                   placeholder="Pilih rentang tanggal..."
-                                   readonly
-                                   class="w-full h-10 pl-9 pr-8 bg-[#F3F7F6] text-xs text-[#1F2937] rounded-lg border border-[#D9E4E2] focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 cursor-pointer placeholder-[#6B7280] truncate">
-                            @if(request('date_range'))
-                                <a href="{{ route('admin.inventaris.index', request()->except('date_range')) }}"
-                                   class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-[#6B7280] hover:text-[#DC2626] transition-colors"
-                                   title="Hapus filter rentang tanggal">
+
+                            <!-- Clear Button (when year is selected) -->
+                            @if(request('tahun'))
+                                <a href="{{ route('admin.inventaris.index', request()->except('tahun')) }}"
+                                   class="absolute inset-y-0 right-8 pr-1 flex items-center text-[#9CA3AF] hover:text-[#DC2626] transition-colors"
+                                   title="Hapus filter tahun"
+                                   @click.stop>
                                     <span class="material-symbols-outlined text-[16px]">cancel</span>
                                 </a>
-                            @else
-                                <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">
-                                    <span class="material-symbols-outlined text-[18px]">expand_more</span>
-                                </div>
                             @endif
                         </div>
 
-                        @if(request()->hasAny(['search', 'category_id', 'room_id', 'status', 'date_range', 'tahun', 'sort']))
+                        <!-- Reset All Filters Button -->
+                        @if(request()->hasAny(['search', 'category_id', 'room_id', 'status', 'tahun', 'sort']))
                             <a href="{{ route('admin.inventaris.index') }}"
                                class="h-10 px-3 rounded-lg bg-white border border-[#D9E4E2] text-xs text-[#4B5563] hover:text-[#DC2626] hover:bg-[#FEE2E2]/30 flex items-center justify-center transition-colors shrink-0"
                                title="Reset semua filter">
                                 <span class="material-symbols-outlined text-[18px]">restart_alt</span>
                             </a>
                         @endif
+
+                        <!-- Year Range Picker Dropdown Panel -->
+                        <div x-show="open"
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+                             class="absolute right-0 top-full mt-1.5 w-64 sm:w-72 bg-white rounded-xl shadow-xl border border-[#D9E4E2] p-3.5 z-50 font-sans"
+                             style="display: none;"
+                             @click.stop
+                             @mouseleave="hoverYear = null">
+
+                            <!-- Header: 10-Year Range & Navigation Arrows -->
+                            <div class="flex items-center justify-between pb-2 mb-1.5 border-b border-[#D9E4E2]">
+                                <button type="button"
+                                        @click.stop="prevDecade()"
+                                        class="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B7280] hover:text-[#0F766E] hover:bg-[#F0FDFA] transition-colors cursor-pointer"
+                                        title="10 Tahun Sebelumnya">
+                                    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                                </button>
+
+                                <span x-text="decadeStart + ' - ' + decadeEnd"
+                                      class="text-xs font-bold text-[#1F2937] tracking-wide select-none">
+                                </span>
+
+                                <button type="button"
+                                        @click.stop="nextDecade()"
+                                        class="w-7 h-7 flex items-center justify-center rounded-lg text-[#6B7280] hover:text-[#0F766E] hover:bg-[#F0FDFA] transition-colors cursor-pointer"
+                                        title="10 Tahun Berikutnya">
+                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                </button>
+                            </div>
+
+                            <!-- Guidance Subtitle (Step Indicator) -->
+                            <div class="text-[11px] text-[#0F766E] font-medium text-center py-1 select-none flex items-center justify-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">info</span>
+                                <span x-text="stepGuide"></span>
+                            </div>
+
+                            <!-- Years Grid (4 Columns) -->
+                            <div class="grid grid-cols-4 gap-1.5 my-2">
+                                <template x-for="item in years" :key="item.year">
+                                    <button type="button"
+                                            @click.stop="onYearClick(item.year)"
+                                            @mouseenter="onYearHover(item.year)"
+                                            class="h-9 text-xs font-medium transition-all flex items-center justify-center cursor-pointer select-none"
+                                            :class="{
+                                                'bg-[#0F766E] text-white font-bold rounded-lg shadow-xs ring-2 ring-[#0F766E]/20': item.isStart || item.isEnd || item.isSingle,
+                                                'bg-[#CCFBF1] text-[#0F766E] font-semibold rounded-none': item.isInRange,
+                                                'text-[#0F766E] font-bold border border-[#0F766E]/40 bg-[#F0FDFA] rounded-lg': item.isToday && !item.isSelected,
+                                                'text-[#1F2937] hover:bg-[#F3F7F6] hover:text-[#0F766E] rounded-lg': !item.isSelected && !item.isToday && item.isCurrentDecade,
+                                                'text-[#9CA3AF] hover:bg-[#F3F7F6] rounded-lg': !item.isSelected && !item.isToday && !item.isCurrentDecade
+                                            }">
+                                        <span x-text="item.year"></span>
+                                    </button>
+                                </template>
+                            </div>
+
+                            <!-- Footer: Today Button -->
+                            <div class="pt-2 border-t border-[#D9E4E2] flex items-center justify-center">
+                                <button type="button"
+                                        @click.stop="selectToday()"
+                                        class="w-full py-1.5 px-3 rounded-lg text-xs font-semibold text-[#0F766E] bg-[#F0FDFA] hover:bg-[#CCFBF1]/50 border border-[#CCFBF1] transition-colors text-center cursor-pointer"
+                                        title="Pilih tahun saat ini">
+                                    Today ({{ date('Y') }})
+                                </button>
+                            </div>
+
+                        </div>
                     </div>
 
                 </div>
@@ -385,33 +532,7 @@
 </form>
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize Flatpickr Date Range Picker per revision requirement
-        flatpickr("#filter_date_range", {
-            mode: "range",
-            dateFormat: "d/m/Y",
-            conjunction: " — ",
-            locale: "id",
-            allowInput: false,
-            maxDate: "{{ \Carbon\Carbon::now('Asia/Jakarta')->format('d/m/Y') }}",
-            defaultDate: @json(request('date_range') ? preg_split('/\s*(?:—|-|to)\s*/u', request('date_range')) : []),
-            onClose: function(selectedDates, dateStr, instance) {
-                if (selectedDates.length === 2) {
-                    instance.element.closest('form').submit();
-                } else if (selectedDates.length === 1 && !dateStr.includes('—')) {
-                    setTimeout(() => {
-                        if (instance.selectedDates.length === 1) {
-                            instance.element.closest('form').submit();
-                        }
-                    }, 600);
-                }
-            }
-        });
-    });
-
     /**
      * Konfirmasi Hapus Inventaris (Mengikuti pola DESIGN.md 2.4, 6.10, flow.md 3.8)
      * - Penolakan tegas bila unit sedang dipinjam

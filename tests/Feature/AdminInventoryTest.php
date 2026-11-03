@@ -65,8 +65,105 @@ class AdminInventoryTest extends TestCase
         $response->assertSee('Tambah Inventaris');
         // Breadcrumb inside page is removed
         $response->assertDontSee('Beranda / Data Inventaris');
-        // Date range picker is present
-        $response->assertSee('filter_date_range');
+        // Year Picker component is present
+        $response->assertSee('filter_tahun');
+        $response->assertSee('Select Year');
+        $response->assertSee('Today');
+    }
+
+    public function test_year_range_filter_filters_database_accurately(): void
+    {
+        $inv2020 = Inventory::create([
+            'kode_barang' => 'INV-2020-Z',
+            'nama_barang' => 'Barang Tahun 2020',
+            'category_id' => $this->category->id,
+            'room_id' => $this->room->id,
+            'status' => 'baik',
+            'tahun_pembelian' => '2020',
+        ]);
+
+        $inv2022 = Inventory::create([
+            'kode_barang' => 'INV-2022-Z',
+            'nama_barang' => 'Barang Tahun 2022',
+            'category_id' => $this->category->id,
+            'room_id' => $this->room->id,
+            'status' => 'baik',
+            'tahun_pembelian' => '2022',
+        ]);
+
+        $inv2025 = Inventory::create([
+            'kode_barang' => 'INV-2025-Z',
+            'nama_barang' => 'Barang Tahun 2025',
+            'category_id' => $this->category->id,
+            'room_id' => $this->room->id,
+            'status' => 'baik',
+            'tahun_pembelian' => '2025',
+        ]);
+
+        // Filter rentang tahun 2020 s/d 2022
+        $response = $this->actingAs($this->admin)->get(route('admin.inventaris.index', [
+            'tahun_awal' => '2020',
+            'tahun_akhir' => '2022',
+        ]));
+
+        $response->assertSee('Barang Tahun 2020');
+        $response->assertSee('Barang Tahun 2022');
+        $response->assertDontSee('Barang Tahun 2025');
+
+        // Filter dari tahun 2023 saja (tahun_awal = 2023)
+        $response2 = $this->actingAs($this->admin)->get(route('admin.inventaris.index', [
+            'tahun_awal' => '2023',
+        ]));
+
+        $response2->assertSee('Barang Tahun 2025');
+        $response2->assertDontSee('Barang Tahun 2020');
+        $response2->assertDontSee('Barang Tahun 2022');
+
+        // Filter rentang tahun via string format '2020 - 2022'
+        $response3 = $this->actingAs($this->admin)->get(route('admin.inventaris.index', [
+            'tahun' => '2020 - 2022',
+        ]));
+
+        $response3->assertSee('Barang Tahun 2020');
+        $response3->assertSee('Barang Tahun 2022');
+        $response3->assertDontSee('Barang Tahun 2025');
+    }
+
+    public function test_year_filter_filters_database_accurately(): void
+    {
+        $inv2022 = Inventory::create([
+            'kode_barang' => 'INV-2022-X',
+            'nama_barang' => 'Barang Khusus Tahun 2022',
+            'category_id' => $this->category->id,
+            'room_id' => $this->room->id,
+            'status' => 'baik',
+            'tahun_pembelian' => '2022',
+        ]);
+
+        $inv2024 = Inventory::create([
+            'kode_barang' => 'INV-2024-Y',
+            'nama_barang' => 'Barang Khusus Tahun 2024',
+            'category_id' => $this->category->id,
+            'room_id' => $this->room->id,
+            'status' => 'baik',
+            'tahun_pembelian' => '2024',
+        ]);
+
+        // Filter by year 2024
+        $response = $this->actingAs($this->admin)->get(route('admin.inventaris.index', [
+            'tahun' => '2024'
+        ]));
+
+        $response->assertSee('Barang Khusus Tahun 2024');
+        $response->assertDontSee('Barang Khusus Tahun 2022');
+
+        // Filter by year 2022
+        $response2 = $this->actingAs($this->admin)->get(route('admin.inventaris.index', [
+            'tahun' => '2022'
+        ]));
+
+        $response2->assertSee('Barang Khusus Tahun 2022');
+        $response2->assertDontSee('Barang Khusus Tahun 2024');
     }
 
     public function test_admin_can_view_create_page_without_card1_card2_labels_and_without_barcode_icon(): void

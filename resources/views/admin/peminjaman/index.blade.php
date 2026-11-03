@@ -94,25 +94,20 @@
                         @endif
                     </div>
 
-                    <!-- Filter Status: Hanya Dipinjam & Selesai (Tanpa icon kiri) (lg: 2 cols) -->
-                    <div class="relative lg:col-span-2">
+                    <!-- Filter Status: Hanya Dipinjam & Selesai (Select2) (lg: 2 cols) -->
+                    <div class="lg:col-span-2">
                         <select name="status"
-                                onchange="this.form.submit()"
-                                class="w-full h-10 pl-3 pr-8 bg-[#F3F7F6] text-xs text-[#1F2937] rounded-lg appearance-none cursor-pointer focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 border border-[#D9E4E2] truncate">
+                                class="select2-filter w-full">
                             <option value="">Semua Status</option>
                             <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
                             <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
                         </select>
-                        <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">
-                            <span class="material-symbols-outlined text-[18px]">expand_more</span>
-                        </div>
                     </div>
 
-                    <!-- Filter Kategori (Tanpa icon kiri) (lg: 3 cols) -->
-                    <div class="relative lg:col-span-3">
+                    <!-- Filter Kategori (Select2) (lg: 3 cols) -->
+                    <div class="lg:col-span-3">
                         <select name="category_id"
-                                onchange="this.form.submit()"
-                                class="w-full h-10 pl-3 pr-8 bg-[#F3F7F6] text-xs text-[#1F2937] rounded-lg appearance-none cursor-pointer focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 border border-[#D9E4E2] truncate">
+                                class="select2-filter w-full">
                             <option value="">Semua Kategori</option>
                             @foreach ($categories as $cat)
                                 <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>
@@ -120,9 +115,6 @@
                                 </option>
                             @endforeach
                         </select>
-                        <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">
-                            <span class="material-symbols-outlined text-[18px]">expand_more</span>
-                        </div>
                     </div>
 
                     <!-- Filter Tanggal (Tanpa icon kiri) (lg: 3 cols) -->
