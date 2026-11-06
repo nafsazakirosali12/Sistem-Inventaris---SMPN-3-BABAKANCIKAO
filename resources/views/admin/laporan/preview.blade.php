@@ -125,6 +125,37 @@
         <!-- Controls: Format Switcher, Print & Download Buttons -->
         <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
 
+            <!-- Switch Format Dropdown -->
+            <div class="relative" x-data="{ open: false }">
+                <button type="button"
+                        @click="open = !open"
+                        class="h-10 px-3 border border-[#D9E4E2] rounded-lg text-xs font-medium text-[#374151] hover:bg-[#F3F7F6] transition-colors flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[18px] text-[#6B7280]">swap_horiz</span>
+                    <span>Ganti Format: <strong class="uppercase text-[#0F766E]">.{{ $activeFormat }}</strong></span>
+                    <span class="material-symbols-outlined text-[16px]">expand_more</span>
+                </button>
+
+                <div x-show="open"
+                     @click.outside="open = false"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     class="absolute right-0 mt-1 w-56 bg-white rounded-xl shadow-xl border border-[#D9E4E2] p-1.5 z-30 select-none"
+                     style="display: none;">
+                    <div class="px-2.5 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pilih Format</div>
+                    @foreach($supportedFormats as $fmtKey => $fmtItem)
+                        <a href="{{ route('admin.laporan.preview', array_merge($filters, ['format' => $fmtKey])) }}"
+                           class="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors {{ $activeFormat === $fmtKey ? 'bg-[#0F766E]/10 text-[#0F766E] font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[16px]">{{ $fmtItem['icon'] }}</span>
+                                <span>{{ $fmtItem['label'] }}</span>
+                            </div>
+                            <span class="text-[10px] font-mono font-bold uppercase">.{{ $fmtKey }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
             <!-- Print Button -->
             <button type="button"
                     onclick="window.print()"
@@ -133,26 +164,23 @@
                 <span class="hidden sm:inline">Cetak</span>
             </button>
 
-            <!-- Download PDF -->
-            <a href="{{ route('admin.laporan.download', array_merge($filters, ['format' => 'pdf'])) }}"
-               class="h-10 px-4 {{ $activeFormat === 'pdf' ? 'bg-red-600 hover:bg-red-700' : 'bg-red-100 hover:bg-red-200 text-red-700' }} {{ $activeFormat === 'pdf' ? 'text-white shadow-md hover:shadow-lg' : '' }} rounded-lg text-xs font-bold transition-all flex items-center gap-2">
-                <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
-                <span>Download .PDF</span>
-            </a>
-
-            <!-- Download Excel -->
-            <a href="{{ route('admin.laporan.download', array_merge($filters, ['format' => 'xlsx'])) }}"
-               class="h-10 px-4 {{ $activeFormat === 'xlsx' ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md hover:shadow-lg' : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-700' }} rounded-lg text-xs font-bold transition-all flex items-center gap-2">
-                <span class="material-symbols-outlined text-[18px]">table_view</span>
-                <span>Download .XLSX</span>
-            </a>
-
-            <!-- Download Word -->
-            <a href="{{ route('admin.laporan.download', array_merge($filters, ['format' => 'docx'])) }}"
-               class="h-10 px-4 {{ $activeFormat === 'docx' ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg' : 'bg-blue-100 hover:bg-blue-200 text-blue-700' }} rounded-lg text-xs font-bold transition-all flex items-center gap-2">
-                <span class="material-symbols-outlined text-[18px]">description</span>
-                <span>Download .DOCX</span>
-            </a>
+            <!-- Download Button -->
+            @if(in_array($activeFormat, ['png', 'jpg', 'jpeg', 'webp']))
+                <button type="button"
+                        id="btnDownloadImage"
+                        onclick="triggerImageDownload('{{ $activeFormat }}')"
+                        class="h-10 px-5 bg-[#0F766E] hover:bg-[#115E59] text-white rounded-lg text-xs font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">download</span>
+                    <span>Download .{{ strtoupper($activeFormat) }}</span>
+                </button>
+            @else
+                <a href="{{ route('admin.laporan.download', array_merge($filters, ['format' => $activeFormat])) }}"
+                   id="btnDownloadBackend"
+                   class="h-10 px-5 bg-[#0F766E] hover:bg-[#115E59] text-white rounded-lg text-xs font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">download</span>
+                    <span>Download .{{ strtoupper($activeFormat) }}</span>
+                </a>
+            @endif
 
         </div>
     </div>
@@ -399,5 +427,88 @@
 
 </div>
 
+<!-- html2canvas for client-side rendering of PNG, JPG, JPEG, and WebP -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+    function triggerImageDownload(format) {
+        const docElem = document.getElementById('reportDocument');
+        if (!docElem) return;
+
+        Swal.fire({
+            title: 'Menyiapkan Gambar...',
+            text: 'Sedang me-render tampilan dokumen resolusi tinggi ke format .' + format.toUpperCase(),
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Set higher scale for sharp rendering (2x retina quality)
+        html2canvas(docElem, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            windowWidth: 1400
+        }).then(canvas => {
+            let mimeType = 'image/png';
+            let quality = 0.95;
+
+            if (format === 'jpg' || format === 'jpeg') {
+                mimeType = 'image/jpeg';
+            } else if (format === 'webp') {
+                mimeType = 'image/webp';
+            }
+
+            const dataUrl = canvas.toDataURL(mimeType, quality);
+            const now = new Date();
+            const dateStr = now.getFullYear() +
+                String(now.getMonth() + 1).padStart(2, '0') +
+                String(now.getDate()).padStart(2, '0') + '_' +
+                String(now.getHours()).padStart(2, '0') +
+                String(now.getMinutes()).padStart(2, '0');
+
+            const fileName = `Laporan_Inventaris_KIB_B_${dateStr}.${format}`;
+
+            // Create download anchor
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil Diunduh!',
+                text: `Dokumen laporan berhasil diunduh dalam format .${format.toUpperCase()}`,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }).catch(err => {
+            console.error('Render error:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Membuat Gambar',
+                text: 'Terjadi kendala saat memproses gambar pratinjau: ' + err.message
+            });
+        });
+    }
+
+    // Auto-download if triggered from redirect (e.g. download endpoint for image formats)
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('auto_download') === '1') {
+            const format = urlParams.get('format') || 'png';
+            if (['png', 'jpg', 'jpeg', 'webp'].includes(format)) {
+                setTimeout(() => {
+                    triggerImageDownload(format);
+                }, 600);
+            }
+        }
+    });
+</script>
 @endsection
 
