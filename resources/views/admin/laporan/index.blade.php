@@ -185,15 +185,32 @@
 @endpush
 
 @section('content')
-<div class="space-y-5">
+<div class="space-y-5" x-data="{ showDownloadModal: false, selectedFormat: 'pdf' }">
 
-    <!-- PAGE HEADER: Sederhana & Bersih -->
+    <!-- PAGE HEADER: Modern & Terarah dengan Tombol Ekspor Utama -->
     <div class="no-print flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-bold text-[#1F2937] tracking-tight">Laporan Inventaris Barang</h1>
             <p class="text-xs text-[#6B7280] mt-0.5">
-                Sesuaikan filter pada bilah satu baris di bawah, lalu cetak atau unduh dokumen KIB B resmi.
+                Kelola filter data inventaris dan unduh laporan resmi KIB B (Peralatan dan Mesin).
             </p>
+        </div>
+
+        <div class="flex items-center gap-2.5 flex-wrap">
+            {{-- Tombol Pratinjau KIB B --}}
+            <a href="{{ route('admin.laporan.preview', request()->only(['search','category_id','room_id','status','tahun'])) }}"
+               class="h-9 px-3.5 bg-white border border-[#D9E4E2] hover:bg-[#F3F7F6] text-[#374151] rounded-lg text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[18px] text-[#0F766E]">visibility</span>
+                <span>Pratinjau KIB B</span>
+            </a>
+
+            {{-- Tombol Utama: Unduh Laporan (Buka Modal Unduh) --}}
+            <button type="button"
+                    @click="showDownloadModal = true"
+                    class="h-9 px-4 bg-[#0F766E] hover:bg-[#115E59] text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">download</span>
+                <span>Unduh Laporan</span>
+            </button>
         </div>
     </div>
 
@@ -205,22 +222,8 @@
                 <span class="text-xs font-bold text-[#1F2937] uppercase tracking-wide">Cakupan Data Laporan</span>
             </div>
 
-            <!-- Single Row Grid (6 Kolom pada Desktop) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
-
-                <!-- 1. Format Dokumen Laporan -->
-                <div>
-                    <label for="filter_format" class="block text-xs font-semibold text-[#374151] mb-1 truncate" title="Format Dokumen Laporan">
-                        Format Dokumen Laporan
-                    </label>
-                    <select name="format" id="filter_format" class="select2-single w-full" onchange="updateDownloadButtonState()">
-                        @foreach($formats as $fKey => $fVal)
-                            <option value="{{ $fKey }}" {{ request('format', 'pdf') === $fKey ? 'selected' : '' }}>
-                                {{ $fVal['label'] }} (.{{ $fVal['ext'] }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+            <!-- Single Row Grid (5 Kolom pada Desktop) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 items-end">
 
                 <!-- 2. Kategori Barang -->
                 <div>
@@ -465,19 +468,48 @@
                     </span>
                 </div>
                 <p class="text-xs text-[#6B7280] mt-0.5">
-                    Dokumen resmi KIB B dalam tata letak A4 Landscape. Silakan pilih format lalu unduh atau cetak dokumen.
+                    Dokumen resmi KIB B dalam tata letak A4 Landscape. Sesuaikan filter lalu unduh atau cetak.
                 </p>
             </div>
 
-            <!-- Tombol Cetak / Unduh di Atas Tabel -->
-            <div class="flex items-center gap-2 shrink-0">
+        <!-- 2. Tombol Unduh 3 Format: PDF, Excel, Word -->
+            <div class="flex items-center gap-2 shrink-0 flex-wrap">
+
+                {{-- Cetak (Print Browser) --}}
                 <button type="button"
-                        id="btnCetakUnduh"
-                        onclick="executePrintOrDownload()"
-                        class="h-9 px-4 bg-[#0F766E] hover:bg-[#115E59] text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer">
-                    <span class="material-symbols-outlined text-[18px]" id="btnIcon">print</span>
-                    <span id="btnText">Cetak / Unduh Dokumen</span>
+                        onclick="window.print()"
+                        class="h-9 px-3.5 border border-[#D9E4E2] rounded-lg text-xs font-semibold text-[#374151] hover:bg-[#F3F7F6] transition-colors flex items-center gap-1.5 cursor-pointer no-print">
+                    <span class="material-symbols-outlined text-[18px] text-[#6B7280]">print</span>
+                    <span class="hidden sm:inline">Cetak</span>
                 </button>
+
+                {{-- Unduh PDF --}}
+                <a id="btnDownloadPdf"
+                   href="{{ route('admin.laporan.download', array_merge(request()->only(['search','category_id','room_id','status','tahun']), ['format' => 'pdf'])) }}"
+                   onclick="downloadReport('pdf'); return false;"
+                   class="h-9 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 no-print">
+                    <span class="material-symbols-outlined text-[17px]">picture_as_pdf</span>
+                    <span>PDF</span>
+                </a>
+
+                {{-- Unduh Excel --}}
+                <a id="btnDownloadXlsx"
+                   href="{{ route('admin.laporan.download', array_merge(request()->only(['search','category_id','room_id','status','tahun']), ['format' => 'xlsx'])) }}"
+                   onclick="downloadReport('xlsx'); return false;"
+                   class="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 no-print">
+                    <span class="material-symbols-outlined text-[17px]">table_view</span>
+                    <span>Excel</span>
+                </a>
+
+                {{-- Unduh Word --}}
+                <a id="btnDownloadDocx"
+                   href="{{ route('admin.laporan.download', array_merge(request()->only(['search','category_id','room_id','status','tahun']), ['format' => 'docx'])) }}"
+                   onclick="downloadReport('docx'); return false;"
+                   class="h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 no-print">
+                    <span class="material-symbols-outlined text-[17px]">description</span>
+                    <span>Word</span>
+                </a>
+
             </div>
         </div>
 
@@ -688,12 +720,147 @@
 
     </div>
 
+    <!-- 3. MODAL UNDUH LAPORAN (Modern Export Dialog) -->
+    <div x-show="showDownloadModal"
+         class="fixed inset-0 z-50 overflow-y-auto no-print"
+         style="display: none;"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity" @click="showDownloadModal = false"></div>
+
+        <!-- Dialog Box Container -->
+        <div class="min-h-full flex items-center justify-center p-4">
+            <div class="relative bg-white rounded-2xl shadow-2xl border border-[#D9E4E2] max-w-lg w-full p-6 text-left transform transition-all"
+                 @click.stop
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 scale-95 translate-y-2">
+
+                <!-- Header Modal -->
+                <div class="flex items-center justify-between pb-3 border-b border-[#D9E4E2]">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-[#E6FFFA] text-[#0F766E] flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[24px]">download</span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-[#1F2937]">Unduh Dokumen Laporan KIB B</h3>
+                            <p class="text-xs text-[#6B7280]">Pilih format file dokumen laporan yang ingin diunduh.</p>
+                        </div>
+                    </div>
+                    <button type="button"
+                            @click="showDownloadModal = false"
+                            class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100">
+                        <span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                </div>
+
+                <!-- Ringkasan Data yang Akan Diekspor -->
+                <div class="mt-4 p-3.5 bg-[#F8FBFA] rounded-xl border border-[#D9E4E2] text-xs">
+                    <div class="flex items-center justify-between font-semibold text-[#1F2937] mb-1">
+                        <span class="flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px] text-[#0F766E]">analytics</span>
+                            <span>Cakupan Data Terpilih</span>
+                        </span>
+                        <span class="px-2 py-0.5 rounded-full bg-[#CCFBF1] text-[#0F766E] font-bold text-[11px]">
+                            {{ number_format($filteredTotalCount) }} Barang
+                        </span>
+                    </div>
+                    <div class="text-[11px] text-[#6B7280] space-y-0.5 mt-2">
+                        <div class="flex justify-between">
+                            <span>Akumulasi Nilai Harga:</span>
+                            <span class="font-bold text-[#1F2937]">Rp {{ number_format($filteredTotalHarga, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Format Layout:</span>
+                            <span class="font-medium text-[#1F2937]">Kartu Inventaris Barang (KIB) B - A4 Landscape</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pilihan Format (Radio Cards) -->
+                <div class="mt-4 space-y-2.5">
+                    <label class="block text-xs font-bold text-[#374151] mb-2 uppercase tracking-wide">Pilih Format File</label>
+
+                    {{-- Format PDF --}}
+                    <label class="flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all"
+                           :class="selectedFormat === 'pdf' ? 'border-[#0F766E] bg-[#F0FDFA] ring-2 ring-[#0F766E]/20' : 'border-[#D9E4E2] hover:bg-gray-50'">
+                        <div class="flex items-center gap-3">
+                            <input type="radio" name="format_choice" value="pdf" x-model="selectedFormat" class="text-[#0F766E] focus:ring-[#0F766E]">
+                            <div class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-[#1F2937]">PDF Document (.pdf)</div>
+                                <div class="text-[11px] text-[#6B7280]">Dokumen resmi KIB B A4 Landscape, siap cetak / tanda tangan</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">Resmi</span>
+                    </label>
+
+                    {{-- Format Excel --}}
+                    <label class="flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all"
+                           :class="selectedFormat === 'xlsx' ? 'border-[#0F766E] bg-[#F0FDFA] ring-2 ring-[#0F766E]/20' : 'border-[#D9E4E2] hover:bg-gray-50'">
+                        <div class="flex items-center gap-3">
+                            <input type="radio" name="format_choice" value="xlsx" x-model="selectedFormat" class="text-[#0F766E] focus:ring-[#0F766E]">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[20px]">table_view</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-[#1F2937]">Microsoft Excel (.xlsx)</div>
+                                <div class="text-[11px] text-[#6B7280]">Spreadsheet terstruktur dengan rumus SUM total harga otomatis</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Data</span>
+                    </label>
+
+                    {{-- Format Word --}}
+                    <label class="flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all"
+                           :class="selectedFormat === 'docx' ? 'border-[#0F766E] bg-[#F0FDFA] ring-2 ring-[#0F766E]/20' : 'border-[#D9E4E2] hover:bg-gray-50'">
+                        <div class="flex items-center gap-3">
+                            <input type="radio" name="format_choice" value="docx" x-model="selectedFormat" class="text-[#0F766E] focus:ring-[#0F766E]">
+                            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[20px]">description</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-[#1F2937]">Microsoft Word (.docx)</div>
+                                <div class="text-[11px] text-[#6B7280]">Format dokumen Microsoft Word yang dapat diedit langsung</div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Editable</span>
+                    </label>
+                </div>
+
+                <!-- Footer Modal -->
+                <div class="mt-6 pt-3 border-t border-[#D9E4E2] flex items-center justify-end gap-2.5">
+                    <button type="button"
+                            @click="showDownloadModal = false"
+                            class="h-9 px-4 rounded-lg border border-[#D9E4E2] text-xs font-semibold text-[#4B5563] hover:bg-gray-100 transition-colors">
+                        Batal
+                    </button>
+                    <button type="button"
+                            @click="downloadReport(selectedFormat); showDownloadModal = false;"
+                            class="h-9 px-5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+                        <span class="material-symbols-outlined text-[18px]">download</span>
+                        <span>Unduh Dokumen Sekarang</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @push('scripts')
-<!-- html2canvas untuk unduh gambar langsung di sisi browser -->
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
 <script>
     $(document).ready(function() {
         // Inisialisasi Select2 Single
@@ -708,106 +875,41 @@
             dropdownParent: $('body'),
             closeOnSelect: false
         });
-
-        // Perbarui label tombol saat halaman dimuat
-        updateDownloadButtonState();
     });
 
-    // Memperbarui teks dan ikon tombol aksi sesuai format dokumen yang dipilih
-    function updateDownloadButtonState() {
-        const formatSelect = document.getElementById('filter_format');
-        const format = formatSelect ? formatSelect.value : 'pdf';
-        const btnText = document.getElementById('btnText');
-        const btnIcon = document.getElementById('btnIcon');
+    /**
+     * Download Report Helper Function:
+     * Mengambil seluruh parameter filter yang aktif dari form #reportFilterForm,
+     * menambahkan parameter format, dan langsung memicu unduhan file dari backend.
+     */
+    function downloadReport(format) {
+        const form = document.getElementById('reportFilterForm');
+        const formData = form ? new FormData(form) : new FormData();
+        const params = new URLSearchParams();
 
-        if (!btnText || !btnIcon) return;
-
-        if (format === 'pdf') {
-            btnText.textContent = 'Cetak / Unduh PDF';
-            btnIcon.textContent = 'print';
-        } else if (format === 'xlsx') {
-            btnText.textContent = 'Unduh Excel (.xlsx)';
-            btnIcon.textContent = 'table_view';
-        } else if (format === 'docx') {
-            btnText.textContent = 'Unduh Word (.docx)';
-            btnIcon.textContent = 'description';
-        } else if (['png', 'jpg', 'jpeg', 'webp'].includes(format)) {
-            btnText.textContent = `Unduh Gambar (.${format.toUpperCase()})`;
-            btnIcon.textContent = 'image';
-        }
-    }
-
-    // Mengunduh langsung dokumen pratinjau sebagai gambar (PNG, JPG, JPEG, WebP) via html2canvas
-    function downloadDocumentAsImage(format) {
-        const docElem = document.getElementById('printableDocument');
-        if (!docElem) return;
-
-        const btn = document.getElementById('btnCetakUnduh');
-        const origHtml = btn ? btn.innerHTML : '';
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Mengunduh .${format.toUpperCase()}...</span>`;
-        }
-
-        const mimeType = (format === 'png') ? 'image/png' :
-                         (format === 'webp') ? 'image/webp' : 'image/jpeg';
-        const ext = (format === 'jpeg') ? 'jpg' : format;
-
-        html2canvas(docElem, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            windowWidth: docElem.scrollWidth
-        }).then(function(canvas) {
-            const dataUrl = canvas.toDataURL(mimeType, 0.95);
-            const link = document.createElement('a');
-            const now = new Date();
-            const timestamp = now.getFullYear() +
-                String(now.getMonth() + 1).padStart(2, '0') +
-                String(now.getDate()).padStart(2, '0') + '_' +
-                String(now.getHours()).padStart(2, '0') +
-                String(now.getMinutes()).padStart(2, '0') +
-                String(now.getSeconds()).padStart(2, '0');
-            link.download = `Laporan_Inventaris_KIB_B_${timestamp}.${ext}`;
-            link.href = dataUrl;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }).catch(function(err) {
-            console.error('Error generating image:', err);
-            alert('Gagal memproses gambar. Silakan coba kembali.');
-        }).finally(function() {
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = origHtml;
+        for (const [key, value] of formData.entries()) {
+            if (value && value.trim() !== '') {
+                params.append(key, value.trim());
             }
-        });
-    }
-
-    // Menjalankan Cetak / Unduh Dokumen sesuai format yang dipilih
-    function executePrintOrDownload() {
-        const formatSelect = document.getElementById('filter_format');
-        const format = formatSelect ? formatSelect.value : 'pdf';
-
-        if (format === 'xlsx' || format === 'docx') {
-            // Langsung unduh file Excel atau Word dari backend
-            const form = document.getElementById('reportFilterForm');
-            const url = "{{ route('admin.laporan.download') }}?" + new URLSearchParams(new FormData(form)).toString();
-            window.location.href = url;
-        } else if (['png', 'jpg', 'jpeg', 'webp'].includes(format)) {
-            // Langsung unduh gambar di browser tanpa perlu berpindah halaman
-            downloadDocumentAsImage(format);
-        } else {
-            // Default PDF / Cetak: Langsung buka window.print()
-            // Kosongkan title sementara agar header default browser tidak mencetak judul halaman atau URL 127
-            const oldTitle = document.title;
-            document.title = ' ';
-            window.print();
-            setTimeout(function() {
-                document.title = oldTitle;
-            }, 1000);
         }
+        params.set('format', format || 'pdf');
+
+        if (typeof Swal !== 'undefined') {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+            Toast.fire({
+                icon: 'info',
+                title: `Menyiapkan unduhan .${(format || 'pdf').toUpperCase()}...`
+            });
+        }
+
+        const downloadUrl = "{{ route('admin.laporan.download') }}?" + params.toString();
+        window.location.href = downloadUrl;
     }
 </script>
 @endpush

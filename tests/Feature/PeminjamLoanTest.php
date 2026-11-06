@@ -155,11 +155,12 @@ class PeminjamLoanTest extends TestCase
             'alasan_tujuan' => 'Keperluan Rapat Guru',
         ]);
 
-        $response->assertRedirect(route('peminjam.inventaris.index'));
+        $loan = Loan::where('nama_peminjam', 'Budi Santoso')->first();
+        $this->assertNotNull($loan);
+        $response->assertRedirect(route('peminjam.riwayat.index', ['highlight' => $loan->id]));
         $response->assertSessionHas('success');
 
         // Check loan was created
-        $loan = Loan::where('nama_peminjam', 'Budi Santoso')->first();
         $this->assertNotNull($loan);
         $this->assertEquals(2, $loan->jumlah);
         $this->assertEquals('dipinjam', $loan->status);
@@ -215,11 +216,12 @@ class PeminjamLoanTest extends TestCase
             'tanggal_kembali' => Carbon::now()->addDay()->format('Y-m-d H:i:s'),
         ]);
 
-        $response->assertRedirect(route('peminjam.inventaris.index'));
+        $loan = Loan::where('nama_peminjam', 'Siti Aminah')->first();
+        $this->assertNotNull($loan);
+        $response->assertRedirect(route('peminjam.riwayat.index', ['highlight' => $loan->id]));
         $response->assertSessionHas('success');
 
         // System should have allocated inv2 (INV-LAP-002) because inv1 is unavailable
-        $loan = Loan::where('nama_peminjam', 'Siti Aminah')->first();
         $this->assertNotNull($loan);
         $this->assertEquals(['INV-LAP-002'], $loan->daftar_kode_barang);
     }
@@ -230,6 +232,164 @@ class PeminjamLoanTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Riwayat Peminjaman');
+    }
+
+    public function test_riwayat_displays_cards_with_required_fields(): void
+    {
+        $loan = Loan::create([
+            'kode_peminjaman' => 'PINJAM-2026-TEST01',
+            'nama_peminjam' => 'Dra. Hj. Fatimah',
+            'user_id' => $this->peminjam->id,
+            'category_id' => $this->category->id,
+            'inventory_id' => $this->inv1->id,
+            'jumlah' => 2,
+            'tanggal_pinjam' => Carbon::now(),
+            'tanggal_kembali' => Carbon::now()->addDays(2),
+            'status' => 'dipinjam',
+            'alasan_tujuan' => 'Praktikum IPA Multimedia',
+        ]);
+
+        LoanDetail::create([
+            'loan_id' => $loan->id,
+            'inventory_id' => $this->inv1->id,
+            'kode_barang' => $this->inv1->kode_barang,
+        ]);
+        LoanDetail::create([
+            'loan_id' => $loan->id,
+            'inventory_id' => $this->inv2->id,
+            'kode_barang' => $this->inv2->kode_barang,
+        ]);
+
+        $response = $this->actingAs($this->peminjam)->get(route('peminjam.riwayat.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('PINJAM-2026-TEST01');
+        $response->assertSee('Dra. Hj. Fatimah');
+        $response->assertSee('Laptop Multimedia');
+        $response->assertSee('2 Unit');
+        $response->assertSee('Dipinjam');
+        $response->assertSee('INV-LAP-001');
+        $response->assertSee('INV-LAP-002');
+    }
+
+    public function test_riwayat_search_filters_borrower_name_and_code(): void
+    {
+        $loan1 = Loan::create([
+            'kode_peminjaman' => 'PINJAM-SEARCH-01',
+            'nama_peminjam' => 'Asep Saepuloh',
+            'user_id' => $this->peminjam->id,
+            'category_id' => $this->category->id,
+            'jumlah' => 1,
+            'tanggal_pinjam' => Carbon::now(),
+            'tanggal_kembali' => Carbon::now()->addDay(),
+            'status' => 'dipinjam',
+        ]);
+
+        $loan2 = Loan::create([
+            'kode_peminjaman' => 'PINJAM-SEARCH-02',
+            'nama_peminjam' => 'Dewi Sartika',
+            'user_id' => $this->peminjam->id,
+            'category_id' => $this->category->id,
+            'jumlah' => 1,
+            'tanggal_pinjam' => Carbon::now(),
+            'tanggal_kembali' => Carbon::now()->addDay(),
+            'status' => 'dipinjam',
+        ]);
+
+        // Search for Asep
+        $response = $this->actingAs($this->peminjam)->get(route('peminjam.riwayat.index', ['search' => 'Asep']));
+        $response->assertStatus(200);
+        $response->assertSee('Asep Saepuloh');
+        $response->assertDontSee('Dewi Sartika');
+
+        // Search for code 02
+        $response = $this->actingAs($this->peminjam)->get(route('peminjam.riwayat.index', ['search' => 'PINJAM-SEARCH-02']));
+        $response->assertStatus(200);
+        $response->assertSee('Dewi Sartika');
+        $response->assertDontSee('Asep Saepuloh');
+    }
+
+    public function test_riwayat_status_filter_and_overdue_badge(): void
+    {
+        // 1 active
+        $activeLoan = Loan::create([
+            'kode_peminjaman' => 'PINJAM-STATUS-ACT',
+            'nama_peminjam' => 'Guru Aktif',
+            'user_id' => $this->peminjam->id,
+            'category_id' => $this->category->id,
+            'jumlah' => 1,
+            'tanggal_pinjam' => Carbon::now(),
+            'tanggal_kembali' => Carbon::now()->addDays(3),
+            'status' => 'dipinjam',
+        ]);
+
+        // 1 completed
+        $completedLoan = Loan::create([
+            'kode_peminjaman' => 'PINJAM-STATUS-DON',
+            'nama_peminjam' => 'Guru Selesai',
+            'user_id' => $this->peminjam->id,
+            'category_id' => $this->category->id,
+            'jumlah' => 1,
+            'tanggal_pinjam' => Carbon::now()->subDays(5),
+            'tanggal_kembali' => Carbon::now()->subDays(3),
+            'tanggal_kembali_aktual' => Carbon::now()->subDays(3),
+            'status' => 'selesai',
+        ]);
+
+        // 1 overdue (borrowed, past return date)
+        $overdueLoan = Loan::create([
+            'kode_peminjaman' => 'PINJAM-STATUS-OVD',
+            'nama_peminjam' => 'Guru Terlambat',
+            'user_id' => $this->peminjam->id,
+            'category_id' => $this->category->id,
+            'jumlah' => 1,
+            'tanggal_pinjam' => Carbon::now()->subDays(4),
+            'tanggal_kembali' => Carbon::now()->subDays(1),
+            'status' => 'dipinjam',
+        ]);
+
+        // Filter status = dipinjam
+        $response = $this->actingAs($this->peminjam)->get(route('peminjam.riwayat.index', ['status' => 'dipinjam']));
+        $response->assertStatus(200);
+        $response->assertSee('Guru Aktif');
+        $response->assertSee('Guru Terlambat');
+        $response->assertDontSee('Guru Selesai');
+
+        // Filter status = selesai
+        $response = $this->actingAs($this->peminjam)->get(route('peminjam.riwayat.index', ['status' => 'selesai']));
+        $response->assertStatus(200);
+        $response->assertSee('Guru Selesai');
+        $response->assertDontSee('Guru Aktif');
+
+        // Filter status = terlambat
+        $response = $this->actingAs($this->peminjam)->get(route('peminjam.riwayat.index', ['status' => 'terlambat']));
+        $response->assertStatus(200);
+        $response->assertSee('Guru Terlambat');
+        $response->assertDontSee('Guru Aktif');
+        $response->assertDontSee('Guru Selesai');
+    }
+
+    public function test_riwayat_pagination_six_per_page(): void
+    {
+        for ($i = 1; $i <= 8; $i++) {
+            Loan::create([
+                'kode_peminjaman' => "PINJAM-PAG-{$i}",
+                'nama_peminjam' => "Peminjam {$i}",
+                'user_id' => $this->peminjam->id,
+                'category_id' => $this->category->id,
+                'jumlah' => 1,
+                'tanggal_pinjam' => Carbon::now(),
+                'tanggal_kembali' => Carbon::now()->addDay(),
+                'status' => 'dipinjam',
+            ]);
+        }
+
+        $response = $this->actingAs($this->peminjam)->get(route('peminjam.riwayat.index'));
+        $response->assertStatus(200);
+
+        // Page 1 should contain 6 items
+        $this->assertEquals(6, $response->viewData('loans')->count());
+        $this->assertEquals(8, $response->viewData('loans')->total());
     }
 
     public function test_admin_completing_loan_releases_all_loan_details_back_to_available(): void
@@ -335,11 +495,12 @@ class PeminjamLoanTest extends TestCase
             ]
         ]);
 
-        $response->assertRedirect(route('peminjam.inventaris.index'));
+        $loan = Loan::where('nama_peminjam', 'Drs. H. Ahmad Dahlan')->first();
+        $this->assertNotNull($loan);
+        $response->assertRedirect(route('peminjam.riwayat.index', ['highlight' => $loan->id]));
         $response->assertSessionHas('success');
 
         // Check single loan was created with total 6 items
-        $loan = Loan::where('nama_peminjam', 'Drs. H. Ahmad Dahlan')->first();
         $this->assertNotNull($loan);
         $this->assertEquals(6, $loan->jumlah);
         $this->assertEquals('dipinjam', $loan->status);

@@ -293,7 +293,7 @@ class PeminjamInventoryController extends Controller
 
             $allocatedCodes = collect($allAllocatedInventories)->pluck('kode_barang')->implode(', ');
 
-            return redirect()->route('peminjam.inventaris.index')
+            return redirect()->route('peminjam.riwayat.index', ['highlight' => $loan->id])
                 ->with('success', "Pengajuan peminjaman '{$loan->kode_peminjaman}' untuk {$totalUnitsCount} unit barang berhasil diajukan! Kode barang yang dialokasikan: {$allocatedCodes}.");
         });
     }
@@ -310,9 +310,15 @@ class PeminjamInventoryController extends Controller
         $user = Auth::user();
         $categories = Category::orderBy('nama_kategori')->get();
 
-        $query = Loan::with(['category', 'inventory.room', 'details.inventory.category', 'details.inventory.room', 'user'])->latest();
+        $query = Loan::with([
+            'category',
+            'inventory.room',
+            'details.inventory.category',
+            'details.inventory.room',
+            'user'
+        ])->latest('id');
 
-        // 1. Search Filter (kode peminjaman, nama peminjam, nama barang, kode barang, kategori)
+        // 1. Search Filter (kode peminjaman, nama peminjam, nama barang, kode barang, kategori, alasan)
         if ($request->filled('search')) {
             $search = trim($request->input('search'));
             $query->where(function ($q) use ($search) {
@@ -331,14 +337,29 @@ class PeminjamInventoryController extends Controller
                   })
                   ->orWhereHas('details.inventory.category', function ($dcq) use ($search) {
                       $dcq->where('nama_kategori', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('details.inventory', function ($diq) use ($search) {
+                      $diq->where('nama_barang', 'like', "%{$search}%");
                   });
             });
         }
 
-        // 2. Status Filter
+        // 2. Status Filter (dipinjam, selesai, terlambat)
         if ($request->filled('status')) {
             $status = strtolower(trim($request->input('status')));
-            if (in_array($status, ['dipinjam', 'selesai'])) {
+            if ($status === 'terlambat') {
+                $now = Carbon::now('Asia/Jakarta');
+                $query->where(function ($q) use ($now) {
+                    $q->where(function ($dq) use ($now) {
+                        $dq->where('status', 'dipinjam')
+                          ->where('tanggal_kembali', '<', $now);
+                    })->orWhere(function ($sq) {
+                        $sq->where('status', 'selesai')
+                          ->whereNotNull('tanggal_kembali_aktual')
+                          ->whereColumn('tanggal_kembali_aktual', '>', 'tanggal_kembali');
+                    });
+                });
+            } elseif (in_array($status, ['dipinjam', 'selesai'])) {
                 $query->where('status', $status);
             }
         }
@@ -354,10 +375,62 @@ class PeminjamInventoryController extends Controller
             });
         }
 
-        // Highlight newly submitted transaction
+        // 4. Date Range Filter (Berdasarkan tanggal_pinjam)
+        if ($request->filled('date_range')) {
+            $dateRange = $request->input('date_range');
+            $dates = preg_split('/\s*(?:—|-|to)\s*/u', $dateRange);
+            $today = Carbon::now('Asia/Jakarta')->endOfDay();
+
+            if (count($dates) === 2) {
+                try {
+                    $startDate = Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
+                    $endDate = Carbon::createFromFormat('d/m/Y', trim($dates[1]))->endOfDay();
+
+                    if ($startDate->isAfter($today)) {
+                        $query->whereRaw('1 = 0');
+                    } else {
+                        if ($endDate->isAfter($today)) {
+                            $endDate = $today;
+                        }
+                        $query->whereBetween('tanggal_pinjam', [$startDate, $endDate]);
+                    }
+                } catch (\Exception $e) {
+                    // Ignore date parsing errors gracefully
+                }
+            } elseif (count($dates) === 1 && !empty(trim($dates[0]))) {
+                try {
+                    $singleDate = Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
+                    if ($singleDate->isAfter($today)) {
+                        $query->whereRaw('1 = 0');
+                    } else {
+                        $query->whereDate('tanggal_pinjam', $singleDate);
+                    }
+                } catch (\Exception $e) {
+                    // Ignore
+                }
+            }
+        }
+
+        // 5. Highlight newly submitted transaction
         $highlightId = $request->input('highlight');
 
-        // Pagination 6 items per page (flow.md 2.5)
+        // 6. Quick Stats
+        $now = Carbon::now('Asia/Jakarta');
+        $totalLoansCount = Loan::count();
+        $activeLoansCount = Loan::where('status', 'dipinjam')->count();
+        $completedLoansCount = Loan::where('status', 'selesai')->count();
+        $overdueLoansCount = Loan::where(function ($q) use ($now) {
+            $q->where(function ($dq) use ($now) {
+                $dq->where('status', 'dipinjam')
+                  ->where('tanggal_kembali', '<', $now);
+            })->orWhere(function ($sq) {
+                $sq->where('status', 'selesai')
+                  ->whereNotNull('tanggal_kembali_aktual')
+                  ->whereColumn('tanggal_kembali_aktual', '>', 'tanggal_kembali');
+            });
+        })->count();
+
+        // 7. Pagination 6 items per page (flow.md 2.5 & 5)
         $loans = $query->paginate(6)->withQueryString();
 
         return view('peminjam.riwayat.index', compact(
@@ -365,7 +438,11 @@ class PeminjamInventoryController extends Controller
             'schoolProfile',
             'user',
             'categories',
-            'highlightId'
+            'highlightId',
+            'totalLoansCount',
+            'activeLoansCount',
+            'completedLoansCount',
+            'overdueLoansCount'
         ));
     }
 }

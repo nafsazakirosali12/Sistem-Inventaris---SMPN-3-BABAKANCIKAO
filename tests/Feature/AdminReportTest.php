@@ -105,23 +105,22 @@ class AdminReportTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Laporan Inventaris Barang');
         $response->assertSee('Cakupan Data Laporan');
-        $response->assertSee('Format Dokumen Laporan');
-        $response->assertSee('PDF Document (.pdf)');
-        $response->assertSee('Microsoft Excel (.xlsx)');
-        $response->assertSee('Microsoft Word (.docx)');
-        $response->assertSee('Gambar PNG (.png)');
         $response->assertSee('REKAPITULASI INVENTARIS BARANG (KIB) B');
         $response->assertSee('PERALATAN DAN MESIN');
         $response->assertSee('Laptop ASUS ExpertBook');
         $response->assertSee('Pratinjau', false);
         $response->assertSee('Drs. H. Mamat Slamet, M.Pd.'); // Nama kepala sekolah from school profile
         $response->assertSee('Ahmad Fulan, S.Kom.'); // Nama pembuat from school profile
-        // Ensure 3 cards and Total Nilai Aset are NOT present in filter
+        // Three direct download buttons are present
+        $response->assertSee('btnDownloadPdf', false);
+        $response->assertSee('btnDownloadXlsx', false);
+        $response->assertSee('btnDownloadDocx', false);
+        $response->assertSee('A4 Landscape');
+        // Ensure stat cards are NOT present
         $response->assertDontSee('Total Data Inventaris');
         $response->assertDontSee('Total Nilai Perolehan Aset');
         $response->assertDontSee('Total Nilai Aset');
         $response->assertDontSee('Format Output Didukung');
-        $response->assertSee('A4 Landscape');
     }
 
     public function test_admin_can_filter_index_with_multiple_conditions(): void
@@ -239,14 +238,31 @@ class AdminReportTest extends TestCase
         $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     }
 
-    public function test_admin_downloading_image_format_redirects_to_preview_with_auto_download(): void
+    public function test_admin_downloading_unsupported_format_falls_back_to_pdf(): void
     {
-        $response = $this->actingAs($this->admin)->get(route('admin.laporan.download', ['format' => 'png']));
+        // Unsupported/unknown format is normalized to PDF (fallback behavior in download())
+        $response = $this->actingAs($this->admin)->get(route('admin.laporan.download', ['format' => 'xyz']));
 
-        $response->assertRedirect();
-        $response->assertRedirectContains(route('admin.laporan.preview'));
-        $response->assertRedirectContains('auto_download=1');
-        $response->assertRedirectContains('format=png');
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/pdf');
+    }
+
+    public function test_admin_can_download_all_three_formats(): void
+    {
+        // PDF
+        $pdfResponse = $this->actingAs($this->admin)->get(route('admin.laporan.download', ['format' => 'pdf']));
+        $pdfResponse->assertStatus(200);
+        $pdfResponse->assertHeader('Content-Type', 'application/pdf');
+
+        // Excel
+        $xlsxResponse = $this->actingAs($this->admin)->get(route('admin.laporan.download', ['format' => 'xlsx']));
+        $xlsxResponse->assertStatus(200);
+        $xlsxResponse->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+        // Word
+        $docxResponse = $this->actingAs($this->admin)->get(route('admin.laporan.download', ['format' => 'docx']));
+        $docxResponse->assertStatus(200);
+        $docxResponse->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     }
 }
 

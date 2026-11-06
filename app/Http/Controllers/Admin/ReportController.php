@@ -23,16 +23,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ReportController extends Controller
 {
     /**
-     * Supported export formats.
+     * Supported export formats (PDF, Excel, Word only — reliable server-side generation).
      */
     protected array $supportedFormats = [
         'pdf'  => ['label' => 'PDF Document', 'ext' => 'pdf', 'icon' => 'picture_as_pdf', 'badge' => 'Dokumen Resmi', 'desc' => 'Dokumen resmi KIB B siap cetak atau arsip (A4 Landscape)'],
         'xlsx' => ['label' => 'Microsoft Excel', 'ext' => 'xlsx', 'icon' => 'table_view', 'badge' => 'Spreadsheet', 'desc' => 'File Excel lengkap dengan rumus total, border tabel, dan data terstruktur'],
         'docx' => ['label' => 'Microsoft Word', 'ext' => 'docx', 'icon' => 'description', 'badge' => 'Editable', 'desc' => 'File dokumen Microsoft Word siap edit dengan format tabel KIB B'],
-        'png'  => ['label' => 'Gambar PNG', 'ext' => 'png', 'icon' => 'image', 'badge' => 'High-Res', 'desc' => 'Gambar kualitas tinggi (lossless) hasil render dokumen pratinjau'],
-        'jpg'  => ['label' => 'Gambar JPG', 'ext' => 'jpg', 'icon' => 'image', 'badge' => 'Gambar Standar', 'desc' => 'Format gambar standar untuk lampiran atau dibagikan dengan cepat'],
-        'jpeg' => ['label' => 'Gambar JPEG', 'ext' => 'jpeg', 'icon' => 'image', 'badge' => 'Kompresi Tinggi', 'desc' => 'Gambar kompresi optimal dengan ukuran file efisien dan visual tajam'],
-        'webp' => ['label' => 'Gambar WebP', 'ext' => 'webp', 'icon' => 'image', 'badge' => 'Web Modern', 'desc' => 'Format gambar modern terkompresi efisien untuk tampilan web'],
     ];
 
     /**
@@ -131,14 +127,6 @@ class ReportController extends Controller
         $timestamp = date('Ymd_His');
         $baseName = 'Laporan_Inventaris_KIB_B_' . $timestamp;
 
-        // Image formats (PNG, JPG, JPEG, WebP) are rendered client-side via preview page html2canvas
-        if (in_array($format, ['png', 'jpg', 'jpeg', 'webp'])) {
-            return redirect()->route('admin.laporan.preview', array_merge(
-                $request->all(),
-                ['format' => $format, 'auto_download' => 1]
-            ));
-        }
-
         // PDF Generation via DomPDF
         if ($format === 'pdf') {
             return $this->exportPdf($schoolProfile, $inventories, $totalItems, $totalHarga, $generatedDate, $baseName);
@@ -162,6 +150,9 @@ class ReportController extends Controller
      */
     protected function exportPdf($schoolProfile, $inventories, $totalItems, $totalHarga, $generatedDate, $baseName)
     {
+        @ini_set('memory_limit', '512M');
+        @set_time_limit(120);
+
         // Convert logo to base64 for reliable DomPDF rendering (requires GD)
         $logoBase64 = null;
         if (extension_loaded('gd')) {
@@ -406,6 +397,9 @@ class ReportController extends Controller
 
         $writer = new Xlsx($spreadsheet);
         $response = new StreamedResponse(function () use ($writer) {
+            if (ob_get_length()) {
+                ob_end_clean();
+            }
             $writer->save('php://output');
         });
 
@@ -606,6 +600,9 @@ class ReportController extends Controller
 
         $writer = IOFactory::createWriter($phpWord, 'Word2007');
         $response = new StreamedResponse(function () use ($writer) {
+            if (ob_get_length()) {
+                ob_end_clean();
+            }
             $writer->save('php://output');
         });
 
