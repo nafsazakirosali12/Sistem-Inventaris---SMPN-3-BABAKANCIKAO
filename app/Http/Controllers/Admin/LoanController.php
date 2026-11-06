@@ -153,10 +153,18 @@ class LoanController extends Controller
                 'user_id' => Auth::id(),
                 'category_id' => $validated['category_id'],
                 'inventory_id' => $availableInventory->id,
+                'jumlah' => 1,
                 'tanggal_pinjam' => Carbon::parse($validated['tanggal_pinjam']),
                 'tanggal_kembali' => Carbon::parse($validated['tanggal_kembali']),
                 'status' => 'dipinjam', // Direct status 'dipinjam' without approval
                 'alasan_tujuan' => $validated['alasan_tujuan'] ?? null,
+            ]);
+
+            // Save detail
+            \App\Models\LoanDetail::create([
+                'loan_id' => $loan->id,
+                'inventory_id' => $availableInventory->id,
+                'kode_barang' => $availableInventory->kode_barang,
             ]);
 
             // Mark the allocated unit as 'dipinjam' (unavailable for other loans)
@@ -188,8 +196,14 @@ class LoanController extends Controller
                     'tanggal_kembali_aktual' => $now,
                 ]);
 
-                // Release the allocated inventory unit back to available
-                if ($loan->inventory) {
+                // Release all allocated inventory units back to available
+                if ($loan->details()->exists()) {
+                    foreach ($loan->details as $detail) {
+                        if ($detail->inventory) {
+                            $detail->inventory->update(['status' => 'baik']);
+                        }
+                    }
+                } elseif ($loan->inventory) {
                     $loan->inventory->update(['status' => 'baik']);
                 }
 
@@ -202,8 +216,14 @@ class LoanController extends Controller
                     'tanggal_kembali_aktual' => null,
                 ]);
 
-                // Mark the inventory unit back to 'dipinjam'
-                if ($loan->inventory) {
+                // Mark the inventory units back to 'dipinjam'
+                if ($loan->details()->exists()) {
+                    foreach ($loan->details as $detail) {
+                        if ($detail->inventory) {
+                            $detail->inventory->update(['status' => 'dipinjam']);
+                        }
+                    }
+                } elseif ($loan->inventory) {
                     $loan->inventory->update(['status' => 'dipinjam']);
                 }
 

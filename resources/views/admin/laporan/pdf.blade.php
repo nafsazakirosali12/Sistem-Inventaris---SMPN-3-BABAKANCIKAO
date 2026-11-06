@@ -229,7 +229,12 @@
                 <tr>
                     <td class="text-center">{{ $loop->iteration }}</td>
                     <td class="text-center">{{ $inv->kode_barang ?: '-' }}</td>
-                    <td>{{ $inv->nama_barang ?: '-' }}</td>
+                    <td>
+                        <div style="font-weight: bold;">{{ $inv->nama_barang ?: '-' }}</div>
+                        @if($inv->category)
+                            <div style="font-size: 5pt; color: #444;">Kelompok: {{ $inv->category->nama_kategori }}</div>
+                        @endif
+                    </td>
                     <td class="text-center">{{ $inv->nomor_register ?: '-' }}</td>
                     <td>{{ $inv->merk_type ?: '-' }}</td>
                     <td class="text-center">{{ $inv->ukuran_cc ?: '-' }}</td>

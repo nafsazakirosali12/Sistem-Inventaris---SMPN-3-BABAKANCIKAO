@@ -74,13 +74,13 @@
 
                     <!-- Tombol Aksi -->
                     <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-5">
-                        <a href="{{ route('admin.inventaris.index') }}"
+                        <a href="{{ route('peminjam.inventaris.index') }}"
                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] active:scale-[0.98] text-white text-sm font-semibold shadow-md transition-all border border-[#CCFBF1]/30 focus:outline-none focus:ring-2 focus:ring-white/30">
                             <span class="material-symbols-outlined text-[18px]">category</span>
                             <span>Lihat Katalog Barang</span>
                             <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                         </a>
-                        <a href="{{ route('admin.peminjaman.index') }}"
+                        <a href="{{ route('peminjam.riwayat.index') }}"
                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/30 text-white text-sm font-semibold hover:bg-white hover:text-[#0F766E] active:scale-[0.98] transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-white/30">
                             <span class="material-symbols-outlined text-[18px]">history</span>
                             <span>Riwayat Peminjaman</span>

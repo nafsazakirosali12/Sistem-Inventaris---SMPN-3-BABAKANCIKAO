@@ -335,7 +335,12 @@
                             <tr class="hover:bg-gray-50/70 transition-colors">
                                 <td class="text-center font-medium">{{ $loop->iteration }}</td>
                                 <td class="font-mono text-[10px] text-center">{{ $inv->kode_barang ?: '-' }}</td>
-                                <td class="font-semibold text-black">{{ $inv->nama_barang ?: '-' }}</td>
+                                <td>
+                                    <div class="font-semibold text-black">{{ $inv->nama_barang ?: '-' }}</div>
+                                    @if($inv->category)
+                                        <div class="text-[8px] text-[#0F766E] font-medium">Kelompok: {{ $inv->category->nama_kategori }}</div>
+                                    @endif
+                                </td>
                                 <td class="text-center font-mono text-[10px]">{{ $inv->nomor_register ?: '-' }}</td>
                                 <td>{{ $inv->merk_type ?: '-' }}</td>
                                 <td class="text-center">{{ $inv->ukuran_cc ?: '-' }}</td>

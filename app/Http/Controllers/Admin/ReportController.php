@@ -306,7 +306,8 @@ class ReportController extends Controller
         foreach ($inventories as $inv) {
             $sheet->setCellValue('A' . $currentRow, $no);
             $sheet->setCellValueExplicit('B' . $currentRow, (string) ($inv->kode_barang ?: '-'), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValue('C' . $currentRow, $inv->nama_barang ?: '-');
+            $namaBarangWithCat = $inv->category ? ($inv->nama_barang . ' (' . $inv->category->nama_kategori . ')') : ($inv->nama_barang ?: '-');
+            $sheet->setCellValue('C' . $currentRow, $namaBarangWithCat);
             $sheet->setCellValueExplicit('D' . $currentRow, (string) ($inv->nomor_register ?: '-'), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet->setCellValue('E' . $currentRow, $inv->merk_type ?: '-');
             $sheet->setCellValue('F' . $currentRow, $inv->ukuran_cc ?: '-');
@@ -538,7 +539,11 @@ class ReportController extends Controller
             $table->addRow();
             $table->addCell(400)->addText((string)$no, $numStyle, ['alignment' => Jc::CENTER]);
             $table->addCell(1100)->addText($inv->kode_barang ?: '-', $bodyStyle);
-            $table->addCell(1600)->addText($inv->nama_barang ?: '-', $bodyStyle);
+            $namaCell = $table->addCell(1600);
+            $namaCell->addText($inv->nama_barang ?: '-', $bodyStyle);
+            if ($inv->category) {
+                $namaCell->addText('(' . $inv->category->nama_kategori . ')', ['size' => 6.5, 'color' => '666666', 'name' => 'Arial']);
+            }
             $table->addCell(900)->addText($inv->nomor_register ?: '-', $bodyStyle, ['alignment' => Jc::CENTER]);
             $table->addCell(1100)->addText($inv->merk_type ?: '-', $bodyStyle);
             $table->addCell(800)->addText($inv->ukuran_cc ?: '-', $bodyStyle);

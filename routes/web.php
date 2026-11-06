@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\SchoolProfileController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\LoanController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Peminjam\PeminjamInventoryController;
 
 // Redirect root to login
 Route::get('/', function () {
@@ -29,6 +30,20 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 // Protected Routes
 Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+    // Peminjam Routes (Protected strictly by role.peminjam)
+    Route::middleware('role.peminjam')->prefix('peminjam')->name('peminjam.')->group(function () {
+        Route::get('/inventaris', [PeminjamInventoryController::class, 'index'])->name('inventaris.index');
+        Route::post('/peminjaman', [PeminjamInventoryController::class, 'store'])->name('peminjaman.store');
+        Route::get('/riwayat', [PeminjamInventoryController::class, 'riwayat'])->name('riwayat.index');
+    });
+
+    // Friendly Aliases for Peminjam
+    Route::middleware('role.peminjam')->group(function () {
+        Route::get('/peminjaman', [PeminjamInventoryController::class, 'index'])->name('peminjaman.index');
+        Route::post('/peminjaman', [PeminjamInventoryController::class, 'store'])->name('peminjaman.store');
+        Route::get('/riwayat-peminjaman', [PeminjamInventoryController::class, 'riwayat'])->name('riwayat.index');
+    });
 
     // Admin Routes
     Route::prefix('admin')->name('admin.')->group(function () {

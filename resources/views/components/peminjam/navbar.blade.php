@@ -26,13 +26,13 @@
                 <span class="hidden sm:inline">Beranda</span>
                 <span class="sm:hidden material-symbols-outlined text-[20px] leading-none">home</span>
             </a>
-            <a href="#"
-               class="px-2 sm:px-3 py-2 rounded-lg transition-colors whitespace-nowrap {{ request()->routeIs('peminjaman.*') ? 'bg-[#0F766E] text-white shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white' }}">
+            <a href="{{ route('peminjam.inventaris.index') }}"
+               class="px-2 sm:px-3 py-2 rounded-lg transition-colors whitespace-nowrap {{ request()->routeIs('peminjam.inventaris.*', 'peminjaman.*') ? 'bg-[#0F766E] text-white shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white' }}">
                 <span class="hidden sm:inline">Peminjaman</span>
                 <span class="sm:hidden material-symbols-outlined text-[20px] leading-none">assignment_return</span>
             </a>
-            <a href="#"
-               class="px-2 sm:px-3 py-2 rounded-lg transition-colors whitespace-nowrap {{ request()->routeIs('riwayat.*') ? 'bg-[#0F766E] text-white shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white' }}">
+            <a href="{{ route('peminjam.riwayat.index') }}"
+               class="px-2 sm:px-3 py-2 rounded-lg transition-colors whitespace-nowrap {{ request()->routeIs('peminjam.riwayat.*', 'riwayat.*') ? 'bg-[#0F766E] text-white shadow-sm' : 'text-[#CCFBF1] hover:bg-white/10 hover:text-white' }}">
                 <span class="hidden sm:inline">Riwayat</span>
                 <span class="sm:hidden material-symbols-outlined text-[20px] leading-none">history</span>
             </a>

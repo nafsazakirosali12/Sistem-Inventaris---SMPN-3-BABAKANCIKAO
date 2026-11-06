@@ -17,6 +17,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Select2 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <!-- SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Alpine.js CDN -->
@@ -83,6 +89,128 @@
                 align-items: stretch;
             }
         }
+
+        /* ── Custom Select2 (Admin & Peminjam Modern Theme) ──────────── */
+        .select2-container {
+            width: 100% !important;
+        }
+        .select2-container--default .select2-selection--single {
+            background-color: #F3F7F6;
+            border: 1px solid #D9E4E2;
+            border-radius: 0.5rem; /* rounded-lg (8px) */
+            height: 40px; /* h-10 (40px) */
+            display: flex;
+            align-items: center;
+            transition: all 0.15s ease-in-out;
+            position: relative;
+        }
+        .select2-container--default .select2-selection--single:hover {
+            border-color: #0F766E;
+        }
+        .select2-container--default.select2-container--open .select2-selection--single,
+        .select2-container--default .select2-selection--single:focus {
+            background-color: #ffffff;
+            border-color: #0F766E;
+            box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.2);
+            outline: none;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #1F2937;
+            font-size: 0.75rem; /* 12px (text-xs) */
+            font-family: inherit;
+            font-weight: 500;
+            line-height: 38px;
+            padding-left: 0.75rem;
+            padding-right: 2rem;
+            display: block;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #6B7280;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 38px;
+            right: 8px;
+            width: 20px;
+            position: absolute;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: #6B7280 transparent transparent transparent;
+            border-style: solid;
+            border-width: 5px 4px 0 4px;
+            height: 0;
+            left: 50%;
+            margin-left: -4px;
+            margin-top: -2px;
+            position: absolute;
+            top: 50%;
+            width: 0;
+            transition: transform 0.2s ease;
+        }
+        .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+            border-color: transparent transparent #0F766E transparent;
+            border-width: 0 4px 5px 4px;
+        }
+        .select2-dropdown {
+            border: 1px solid #D9E4E2;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            overflow: hidden;
+            z-index: 99999;
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+        .select2-container--default .select2-results > .select2-results__options {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .select2-container--default .select2-search--dropdown {
+            padding: 8px;
+            background-color: #F8FBFA;
+            border-bottom: 1px solid #D9E4E2;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid #D9E4E2;
+            border-radius: 0.375rem;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            outline: none;
+            background-color: #ffffff;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+            border-color: #0F766E;
+            box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.15);
+        }
+        .select2-container--default .select2-results__option {
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            color: #1F2937;
+            user-select: none;
+            transition: background-color 0.1s;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #0F766E;
+            color: #ffffff;
+        }
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: #F0FDFA;
+            color: #0F766E;
+            font-weight: 600;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected=true] {
+            background-color: #0F766E;
+            color: #ffffff;
+        }
     </style>
 
     @if(file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
@@ -104,19 +232,56 @@
     <!-- Dynamic Shared School Footer -->
     @include('components.shared.footer')
 
-    <!-- SweetAlert Toast Notifications for Flash Session Messages -->
+    <!-- Global Select2 Filter Initializer (Identik dengan Admin) -->
+    <script>
+        $(document).ready(function() {
+            if (typeof $.fn.select2 !== 'undefined') {
+                $('.select2-filter').each(function() {
+                    const $select = $(this);
+                    $select.select2({
+                        width: '100%',
+                        dropdownAutoWidth: false, // Menjaga lebar dropdown tidak melebihi container input
+                        minimumResultsForSearch: 0
+                    }).on('select2:select', function(e) {
+                        if ($select.data('auto-submit') !== false) {
+                            $select.closest('form').submit();
+                        }
+                    });
+                });
+
+                // Auto-focus input pencarian saat dropdown Select2 dibuka
+                $(document).on('select2:open', function() {
+                    setTimeout(function() {
+                        const searchField = document.querySelector('.select2-container--open .select2-search__field');
+                        if (searchField) {
+                            searchField.focus();
+                            if (!searchField.getAttribute('placeholder')) {
+                                searchField.setAttribute('placeholder', 'Ketik untuk mencari...');
+                            }
+                        }
+                    }, 50);
+                });
+            }
+        });
+    </script>
+
+    <!-- SweetAlert Notifications for Flash Session Messages (Konsisten dengan Seluruh Aplikasi) -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             @if (session('success'))
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'success',
-                        title: "{{ session('success') }}",
-                        showConfirmButton: false,
-                        timer: 4000,
-                        timerProgressBar: true
+                        title: 'Berhasil',
+                        text: "{{ session('success') }}",
+                        confirmButtonColor: '#0F766E',
+                        confirmButtonText: 'Tutup',
+                        width: '24rem',
+                        customClass: {
+                            popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                            title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                            htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                            confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
+                        }
                     });
                 }
             @endif
@@ -124,13 +289,16 @@
             @if (session('error'))
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
-                        icon: 'error',
                         title: 'Perhatian',
                         text: "{{ session('error') }}",
                         confirmButtonColor: '#0F766E',
+                        confirmButtonText: 'Tutup',
+                        width: '24rem',
                         customClass: {
-                            popup: 'rounded-xl',
-                            confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold'
+                            popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                            title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                            htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                            confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                         }
                     });
                 }

@@ -51,6 +51,11 @@ class Inventory extends Model
         return $this->hasMany(Loan::class);
     }
 
+    public function loanDetails(): HasMany
+    {
+        return $this->hasMany(LoanDetail::class);
+    }
+
     /**
      * Status Unit Label (Tersedia, Dipinjam, Rusak, Perlu Perbaikan, Hilang)
      */
@@ -147,6 +152,9 @@ class Inventory extends Model
      */
     public function getIsCurrentlyBorrowedAttribute(): bool
     {
-        return $this->loans()->where('status', 'dipinjam')->exists();
+        return $this->loans()->where('status', 'dipinjam')->exists()
+            || $this->loanDetails()->whereHas('loan', function ($q) {
+                $q->where('status', 'dipinjam');
+            })->exists();
     }
 }
