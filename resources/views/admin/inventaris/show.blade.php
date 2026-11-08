@@ -55,7 +55,7 @@
                     @endif
                 </div>
 
-                <!-- Status Unit Badge Banner (Kondisi Fisik) -->
+                <!-- Status Unit Badge Banner (Kondisi Fisik: Baik, Rusak, Perlu Perbaikan, Hilang) -->
                 @php
                     $statusUnit = strtolower($inventory->status ?? 'baik');
                 @endphp
@@ -75,11 +75,6 @@
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#F3F4F6] text-[#374151]">
                             <span class="w-2 h-2 rounded-full bg-[#6B7280] mr-2"></span>
                             Hilang
-                        </span>
-                    @elseif($statusUnit === 'dipinjam')
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#DBEAFE] text-[#1E40AF]">
-                            <span class="w-2 h-2 rounded-full bg-[#2563EB] mr-2"></span>
-                            Dipinjam
                         </span>
                     @else
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#DCFCE7] text-[#166534]">

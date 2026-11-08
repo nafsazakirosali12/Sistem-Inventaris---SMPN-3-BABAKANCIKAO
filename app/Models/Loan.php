@@ -120,4 +120,36 @@ class Loan extends Model
         }
         return false;
     }
+
+    /**
+     * Count of active (currently borrowed) units in this loan
+     */
+    public function getActiveDetailsCountAttribute(): int
+    {
+        if ($this->relationLoaded('details')) {
+            return $this->details->where('status', 'dipinjam')->count();
+        }
+        return $this->details()->where('status', 'dipinjam')->count();
+    }
+
+    /**
+     * Count of returned units in this loan
+     */
+    public function getFinishedDetailsCountAttribute(): int
+    {
+        if ($this->relationLoaded('details')) {
+            return $this->details->where('status', 'selesai')->count();
+        }
+        return $this->details()->where('status', 'selesai')->count();
+    }
+
+    /**
+     * Check if loan is partially returned (some finished, some still active)
+     */
+    public function getIsPartiallyReturnedAttribute(): bool
+    {
+        $active = $this->active_details_count;
+        $finished = $this->finished_details_count;
+        return $active > 0 && $finished > 0;
+    }
 }

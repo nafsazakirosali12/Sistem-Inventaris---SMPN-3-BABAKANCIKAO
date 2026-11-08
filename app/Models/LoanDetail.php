@@ -11,6 +11,12 @@ class LoanDetail extends Model
         'loan_id',
         'inventory_id',
         'kode_barang',
+        'status',
+        'tanggal_kembali_aktual',
+    ];
+
+    protected $casts = [
+        'tanggal_kembali_aktual' => 'datetime',
     ];
 
     public function loan(): BelongsTo
@@ -23,4 +29,3 @@ class LoanDetail extends Model
         return $this->belongsTo(Inventory::class);
     }
 }
-

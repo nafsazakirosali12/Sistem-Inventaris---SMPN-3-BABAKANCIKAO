@@ -119,16 +119,26 @@ class PeminjamLoanTest extends TestCase
         $response->assertSee('Laptop Multimedia');
         $response->assertSee('Laptop ASUS ExpertBook');
         $response->assertSee('Lab Komputer 1');
-        // Check format: "Stok Tersedia: 3 Unit"
-        $response->assertSee('Stok Tersedia: 3 Unit');
+        // Check format: "Stok: 3"
+        $response->assertSee('Stok: 3');
         $response->assertSee('Detail');
         $response->assertSee('Pinjam');
     }
 
     public function test_stock_calculation_excludes_borrowed_and_damaged_items(): void
     {
-        // Mark inv1 as borrowed
-        $this->inv1->update(['status' => 'dipinjam']);
+        // Create an active loan borrowing inv1
+        Loan::create([
+            'kode_peminjaman' => 'PINJAM-ACT-001',
+            'nama_peminjam' => 'Guru Peminjam',
+            'user_id' => $this->peminjam->id,
+            'category_id' => $this->category->id,
+            'inventory_id' => $this->inv1->id,
+            'jumlah' => 1,
+            'tanggal_pinjam' => Carbon::now(),
+            'tanggal_kembali' => Carbon::now()->addDay(),
+            'status' => 'dipinjam',
+        ]);
 
         // Mark inv2 as damaged
         $this->inv2->update(['status' => 'rusak']);
@@ -137,7 +147,7 @@ class PeminjamLoanTest extends TestCase
         $response = $this->actingAs($this->peminjam)->get(route('peminjam.inventaris.index'));
 
         $response->assertStatus(200);
-        $response->assertSee('Stok Tersedia: 1 Unit');
+        $response->assertSee('Stok: 1');
     }
 
     public function test_peminjam_can_submit_loan_with_auto_allocated_units(): void
@@ -158,7 +168,7 @@ class PeminjamLoanTest extends TestCase
         $loan = Loan::where('nama_peminjam', 'Budi Santoso')->first();
         $this->assertNotNull($loan);
         $response->assertRedirect(route('peminjam.riwayat.index', ['highlight' => $loan->id]));
-        $response->assertSessionHas('success');
+        $response->assertSessionHas('success', 'Peminjaman berhasil! 2 unit barang telah berhasil dipinjam.');
 
         // Check loan was created
         $this->assertNotNull($loan);
@@ -172,14 +182,17 @@ class PeminjamLoanTest extends TestCase
         $allocatedCodes = $loan->details->pluck('kode_barang')->all();
         $this->assertEquals(['INV-LAP-001', 'INV-LAP-002'], $allocatedCodes);
 
-        // Check that inv1 and inv2 are marked 'dipinjam'
+        // Check that inv1 and inv2 are currently borrowed, while their physical status remains 'baik'
         $this->inv1->refresh();
         $this->inv2->refresh();
         $this->inv3->refresh();
 
-        $this->assertEquals('dipinjam', $this->inv1->status);
-        $this->assertEquals('dipinjam', $this->inv2->status);
-        $this->assertEquals('baik', $this->inv3->status); // inv3 is still available!
+        $this->assertTrue($this->inv1->is_currently_borrowed);
+        $this->assertTrue($this->inv2->is_currently_borrowed);
+        $this->assertFalse($this->inv3->is_currently_borrowed);
+        $this->assertEquals('baik', $this->inv1->status);
+        $this->assertEquals('baik', $this->inv2->status);
+        $this->assertEquals('baik', $this->inv3->status); // inv3 is still available and baik!
     }
 
     public function test_cannot_borrow_more_than_available_stock(): void
@@ -205,7 +218,17 @@ class PeminjamLoanTest extends TestCase
     public function test_skips_unavailable_unit_and_allocates_next_available(): void
     {
         // Suppose inv1 is already borrowed by another loan
-        $this->inv1->update(['status' => 'dipinjam']);
+        Loan::create([
+            'kode_peminjaman' => 'PINJAM-ACT-002',
+            'nama_peminjam' => 'Guru Lain',
+            'user_id' => $this->peminjam->id,
+            'category_id' => $this->category->id,
+            'inventory_id' => $this->inv1->id,
+            'jumlah' => 1,
+            'tanggal_pinjam' => Carbon::now(),
+            'tanggal_kembali' => Carbon::now()->addDay(),
+            'status' => 'dipinjam',
+        ]);
 
         // Peminjam wants to borrow 1 unit
         $response = $this->actingAs($this->peminjam)->post(route('peminjam.peminjaman.store'), [
@@ -219,7 +242,7 @@ class PeminjamLoanTest extends TestCase
         $loan = Loan::where('nama_peminjam', 'Siti Aminah')->first();
         $this->assertNotNull($loan);
         $response->assertRedirect(route('peminjam.riwayat.index', ['highlight' => $loan->id]));
-        $response->assertSessionHas('success');
+        $response->assertSessionHas('success', 'Peminjaman berhasil! 1 unit barang telah berhasil dipinjam.');
 
         // System should have allocated inv2 (INV-LAP-002) because inv1 is unavailable
         $this->assertNotNull($loan);
@@ -411,14 +434,16 @@ class PeminjamLoanTest extends TestCase
             'inventory_id' => $this->inv1->id,
             'kode_barang' => 'INV-LAP-001',
         ]);
-        $this->inv1->update(['status' => 'dipinjam']);
 
         LoanDetail::create([
             'loan_id' => $loan->id,
             'inventory_id' => $this->inv2->id,
             'kode_barang' => 'INV-LAP-002',
         ]);
-        $this->inv2->update(['status' => 'dipinjam']);
+
+        // Prior to completion, units are borrowed
+        $this->assertTrue($this->inv1->fresh()->is_currently_borrowed);
+        $this->assertTrue($this->inv2->fresh()->is_currently_borrowed);
 
         // Admin marks as selesai
         $response = $this->actingAs($this->admin)->put(route('admin.peminjaman.update', $loan->id), [
@@ -430,11 +455,11 @@ class PeminjamLoanTest extends TestCase
         $loan->refresh();
         $this->assertEquals('selesai', $loan->status);
 
-        // Both inv1 and inv2 should now be released to 'baik'
-        $this->inv1->refresh();
-        $this->inv2->refresh();
-        $this->assertEquals('baik', $this->inv1->status);
-        $this->assertEquals('baik', $this->inv2->status);
+        // Both inv1 and inv2 are released (no longer borrowed), and physical condition is 'baik'
+        $this->assertFalse($this->inv1->fresh()->is_currently_borrowed);
+        $this->assertFalse($this->inv2->fresh()->is_currently_borrowed);
+        $this->assertEquals('baik', $this->inv1->fresh()->status);
+        $this->assertEquals('baik', $this->inv2->fresh()->status);
     }
 
     public function test_peminjam_can_submit_multi_category_loan_in_single_transaction(): void
@@ -498,7 +523,7 @@ class PeminjamLoanTest extends TestCase
         $loan = Loan::where('nama_peminjam', 'Drs. H. Ahmad Dahlan')->first();
         $this->assertNotNull($loan);
         $response->assertRedirect(route('peminjam.riwayat.index', ['highlight' => $loan->id]));
-        $response->assertSessionHas('success');
+        $response->assertSessionHas('success', 'Peminjaman berhasil! 6 unit barang telah berhasil dipinjam.');
 
         // Check single loan was created with total 6 items
         $this->assertNotNull($loan);
@@ -519,14 +544,20 @@ class PeminjamLoanTest extends TestCase
             'INV-MAT-003',
         ], $allocatedCodes);
 
-        // Verify all 6 units are marked 'dipinjam'
-        $this->assertEquals('dipinjam', $this->inv1->fresh()->status);
-        $this->assertEquals('dipinjam', $this->inv2->fresh()->status);
-        $this->assertEquals('baik', $this->inv3->fresh()->status); // inv3 was not borrowed!
-        $this->assertEquals('dipinjam', $proy1->fresh()->status);
-        $this->assertEquals('dipinjam', $matras1->fresh()->status);
-        $this->assertEquals('dipinjam', $matras2->fresh()->status);
-        $this->assertEquals('dipinjam', $matras3->fresh()->status);
+        // Verify all 6 units are marked borrowed via active loan, while physical status remains 'baik'
+        $this->assertTrue($this->inv1->fresh()->is_currently_borrowed);
+        $this->assertTrue($this->inv2->fresh()->is_currently_borrowed);
+        $this->assertFalse($this->inv3->fresh()->is_currently_borrowed); // inv3 was not borrowed!
+        $this->assertTrue($proy1->fresh()->is_currently_borrowed);
+        $this->assertTrue($matras1->fresh()->is_currently_borrowed);
+        $this->assertTrue($matras2->fresh()->is_currently_borrowed);
+        $this->assertTrue($matras3->fresh()->is_currently_borrowed);
+
+        $this->assertEquals('baik', $this->inv1->fresh()->status);
+        $this->assertEquals('baik', $this->inv2->fresh()->status);
+        $this->assertEquals('baik', $this->inv3->fresh()->status);
+        $this->assertEquals('baik', $proy1->fresh()->status);
+        $this->assertEquals('baik', $matras1->fresh()->status);
 
         // Verify category summary
         $loan->load('details.inventory.category');
@@ -626,6 +657,60 @@ class PeminjamLoanTest extends TestCase
             'nama_peminjam' => 'Ibu Guru Matematika',
             'status' => 'dipinjam',
         ]);
+    }
+
+    public function test_catalog_paginates_at_eight_categories_per_page(): void
+    {
+        // $this->category already has 1 category with 3 'baik' items in setUp
+        // Create 8 more categories with at least 1 'baik' item each
+        for ($i = 1; $i <= 8; $i++) {
+            $cat = Category::create([
+                'kode_kategori' => "KAT-TEST-{$i}",
+                'nama_kategori' => "Kategori Uji {$i}",
+            ]);
+            Inventory::create([
+                'kode_barang' => "INV-TEST-{$i}-001",
+                'nama_barang' => "Barang Uji {$i}",
+                'category_id' => $cat->id,
+                'room_id' => $this->room->id,
+                'status' => 'baik',
+            ]);
+        }
+
+        // Total 9 categories. With paginate(8), page 1 should contain exactly 8 items.
+        $response = $this->actingAs($this->peminjam)->get(route('peminjam.inventaris.index'));
+        $response->assertStatus(200);
+
+        $categories = $response->viewData('categories');
+        $this->assertEquals(8, $categories->count());
+        $this->assertEquals(9, $categories->total());
+    }
+
+    public function test_only_items_with_status_baik_are_counted_in_stock_and_displayed(): void
+    {
+        // Create a category with only broken/repair items
+        $brokenCat = Category::create([
+            'kode_kategori' => 'KAT-RUSAK',
+            'nama_kategori' => 'Kategori Rusak Total',
+        ]);
+        Inventory::create([
+            'kode_barang' => 'INV-BAD-001',
+            'nama_barang' => 'Barang Rusak Total',
+            'category_id' => $brokenCat->id,
+            'room_id' => $this->room->id,
+            'status' => 'rusak',
+        ]);
+
+        $response = $this->actingAs($this->peminjam)->get(route('peminjam.inventaris.index'));
+        $response->assertStatus(200);
+
+        // Kategori Rusak Total has stock 0 and Habis badge
+        $stockMap = $response->viewData('stockPerCategory');
+        $this->assertEquals(0, $stockMap[$brokenCat->id]);
+
+        // Broken item must not be included in all_units
+        $dataMap = $response->viewData('categoriesDataMap');
+        $this->assertEmpty($dataMap[$brokenCat->id]['all_units']);
     }
 }
 

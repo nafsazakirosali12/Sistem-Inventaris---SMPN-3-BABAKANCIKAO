@@ -291,7 +291,7 @@
         });
     </script>
 
-    <!-- Global Select2 Filter Initializer with Search Feature -->
+    <!-- Global Select2 Filter & Form Initializer with Search Feature -->
     <script>
         $(document).ready(function() {
             if (typeof $.fn.select2 !== 'undefined') {
@@ -305,6 +305,15 @@
                         if ($select.data('auto-submit') !== false) {
                             $select.closest('form').submit();
                         }
+                    });
+                });
+
+                $('.select2-form').each(function() {
+                    const $select = $(this);
+                    $select.select2({
+                        width: '100%',
+                        dropdownAutoWidth: false,
+                        minimumResultsForSearch: 0 // Pastikan fitur pencarian selalu aktif agar bisa ngetik
                     });
                 });
 

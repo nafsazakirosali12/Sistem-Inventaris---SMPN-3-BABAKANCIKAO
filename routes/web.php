@@ -81,6 +81,7 @@ Route::middleware('auth')->group(function () {
         // Data Peminjaman (flow.md 3.9 & DESIGN.md 6.11)
         Route::get('/peminjaman', [LoanController::class, 'index'])->name('peminjaman.index');
         Route::post('/peminjaman', [LoanController::class, 'store'])->name('peminjaman.store');
+        Route::put('/peminjaman/detail/{loanDetail}', [LoanController::class, 'updateDetail'])->name('peminjaman.detail.update');
         Route::put('/peminjaman/{loan}', [LoanController::class, 'update'])->name('peminjaman.update');
 
         // Daftar Akun Peminjam (flow.md 3.11)

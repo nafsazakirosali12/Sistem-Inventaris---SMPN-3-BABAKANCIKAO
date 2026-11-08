@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Loan;
+use App\Models\LoanDetail;
 use App\Models\SchoolProfile;
 use App\Models\Category;
 use App\Models\Inventory;
@@ -26,7 +27,13 @@ class LoanController extends Controller
         $user = Auth::user();
         $categories = Category::orderBy('nama_kategori')->get();
 
-        $query = Loan::with(['category', 'inventory.room', 'user'])->latest();
+        $query = Loan::with([
+            'category',
+            'inventory.room',
+            'user',
+            'details.inventory.category',
+            'details.inventory.room',
+        ])->latest();
 
         // 1. Search Filter (kode peminjaman, nama peminjam, alasan, kategori, kode unit/nama barang)
         if ($request->filled('search')) {
@@ -41,6 +48,13 @@ class LoanController extends Controller
                   ->orWhereHas('inventory', function ($iq) use ($search) {
                       $iq->where('kode_barang', 'like', "%{$search}%")
                          ->orWhere('nama_barang', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('details', function ($dq) use ($search) {
+                      $dq->where('kode_barang', 'like', "%{$search}%")
+                         ->orWhereHas('inventory', function ($diq) use ($search) {
+                             $diq->where('nama_barang', 'like', "%{$search}%")
+                                 ->orWhereHas('category', fn($dcq) => $dcq->where('nama_kategori', 'like', "%{$search}%"));
+                         });
                   });
             });
         }
@@ -55,7 +69,13 @@ class LoanController extends Controller
 
         // 3. Category Filter
         if ($request->filled('category_id')) {
-            $query->where('category_id', $request->input('category_id'));
+            $catId = $request->input('category_id');
+            $query->where(function ($q) use ($catId) {
+                $q->where('category_id', $catId)
+                  ->orWhereHas('details.inventory', function ($iq) use ($catId) {
+                      $iq->where('category_id', $catId);
+                  });
+            });
         }
 
         // 4. Date Range Filter (Max Date: Today WIB)
@@ -101,8 +121,11 @@ class LoanController extends Controller
         // 6. Highlighted Transaction from notification
         $highlightId = $request->input('highlight');
 
-        // 7. Active loans count
-        $activeLoansCount = Loan::where('status', 'dipinjam')->count();
+        // 7. Active units count (sum of all units currently on active loan)
+        $activeUnitsCount = LoanDetail::where('status', 'dipinjam')->count();
+        if ($activeUnitsCount === 0) {
+            $activeUnitsCount = Loan::where('status', 'dipinjam')->sum('jumlah');
+        }
 
         return view('admin.peminjaman.index', compact(
             'loans',
@@ -110,7 +133,7 @@ class LoanController extends Controller
             'user',
             'categories',
             'highlightId',
-            'activeLoansCount'
+            'activeUnitsCount'
         ));
     }
 
@@ -134,6 +157,15 @@ class LoanController extends Controller
                 ->whereDoesntHave('loans', function ($q) {
                     $q->where('status', 'dipinjam');
                 })
+                ->whereDoesntHave('loanDetails', function ($q) {
+                    $q->where(function ($sub) {
+                        $sub->where('status', 'dipinjam')
+                            ->orWhere(function ($s2) {
+                                $s2->whereNull('status')
+                                   ->whereHas('loan', fn($lq) => $lq->where('status', 'dipinjam'));
+                            });
+                    });
+                })
                 ->lockForUpdate()
                 ->orderBy('kode_barang', 'asc')
                 ->first();
@@ -156,19 +188,17 @@ class LoanController extends Controller
                 'jumlah' => 1,
                 'tanggal_pinjam' => Carbon::parse($validated['tanggal_pinjam']),
                 'tanggal_kembali' => Carbon::parse($validated['tanggal_kembali']),
-                'status' => 'dipinjam', // Direct status 'dipinjam' without approval
+                'status' => 'dipinjam',
                 'alasan_tujuan' => $validated['alasan_tujuan'] ?? null,
             ]);
 
             // Save detail
-            \App\Models\LoanDetail::create([
+            LoanDetail::create([
                 'loan_id' => $loan->id,
                 'inventory_id' => $availableInventory->id,
                 'kode_barang' => $availableInventory->kode_barang,
+                'status' => 'dipinjam',
             ]);
-
-            // Mark the allocated unit as 'dipinjam' (unavailable for other loans)
-            $availableInventory->update(['status' => 'dipinjam']);
 
             return redirect()->route('admin.peminjaman.index', ['highlight' => $loan->id])
                 ->with('success', "Peminjaman '{$loan->kode_peminjaman}' berhasil dibuat dengan status Dipinjam.");
@@ -176,9 +206,9 @@ class LoanController extends Controller
     }
 
     /**
-     * Update loan transaction status:
-     * - 'selesai': item returned, records tanggal_kembali_aktual, releases inventory to 'baik'
-     * - 'dipinjam': reverts finished loan back to active loan if accidentally completed, clears tanggal_kembali_aktual, sets inventory back to 'dipinjam'
+     * Update entire loan transaction status:
+     * - 'selesai': all items returned, records tanggal_kembali_aktual
+     * - 'dipinjam': reverts finished loan back to active loan if accidentally completed
      */
     public function update(Request $request, Loan $loan)
     {
@@ -188,47 +218,87 @@ class LoanController extends Controller
         ]);
 
         return DB::transaction(function () use ($validated, $loan) {
-            if ($validated['status'] === 'selesai') {
-                $now = Carbon::now();
+            $now = Carbon::now();
 
+            if ($validated['status'] === 'selesai') {
                 $loan->update([
                     'status' => 'selesai',
                     'tanggal_kembali_aktual' => $now,
                 ]);
 
-                // Release all allocated inventory units back to available
-                if ($loan->details()->exists()) {
-                    foreach ($loan->details as $detail) {
-                        if ($detail->inventory) {
-                            $detail->inventory->update(['status' => 'baik']);
-                        }
-                    }
-                } elseif ($loan->inventory) {
-                    $loan->inventory->update(['status' => 'baik']);
-                }
+                // Also mark all details as selesai
+                $loan->details()->update([
+                    'status' => 'selesai',
+                    'tanggal_kembali_aktual' => $now,
+                ]);
 
                 return redirect()->back()
-                    ->with('success', "Peminjaman '{$loan->kode_peminjaman}' telah diselesaikan. Unit barang kembali berstatus Tersedia.");
+                    ->with('success', "Seluruh barang pada peminjaman '{$loan->kode_peminjaman}' telah diselesaikan.");
             } else {
-                // Revert to 'dipinjam' if accidentally marked as 'selesai'
+                // Revert all to 'dipinjam'
                 $loan->update([
                     'status' => 'dipinjam',
                     'tanggal_kembali_aktual' => null,
                 ]);
 
-                // Mark the inventory units back to 'dipinjam'
-                if ($loan->details()->exists()) {
-                    foreach ($loan->details as $detail) {
-                        if ($detail->inventory) {
-                            $detail->inventory->update(['status' => 'dipinjam']);
-                        }
-                    }
-                } elseif ($loan->inventory) {
-                    $loan->inventory->update(['status' => 'dipinjam']);
-                }
+                $loan->details()->update([
+                    'status' => 'dipinjam',
+                    'tanggal_kembali_aktual' => null,
+                ]);
 
                 return redirect()->back()
-                    ->with('success', "Status peminjaman '{$loan->kode_peminjaman}' berhasil dikembalikan menjadi 'Dipinjam'.");
+                    ->with('success', "Status seluruh barang pada peminjaman '{$loan->kode_peminjaman}' berhasil dikembalikan menjadi 'Dipinjam'.");
+            }
+        });
+    }
+
+    /**
+     * Update individual unit/item status within a loan (Pisah button selesai masing-masing)
+     */
+    public function updateDetail(Request $request, LoanDetail $loanDetail)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:selesai,dipinjam',
+        ]);
+
+        return DB::transaction(function () use ($validated, $loanDetail) {
+            $loan = $loanDetail->loan;
+            $now = Carbon::now();
+            $itemCode = $loanDetail->kode_barang;
+
+            if ($validated['status'] === 'selesai') {
+                $loanDetail->update([
+                    'status' => 'selesai',
+                    'tanggal_kembali_aktual' => $now,
+                ]);
+
+                // Check if all details of this loan are now completed
+                $remainingActive = $loan->details()->where('status', 'dipinjam')->count();
+                if ($remainingActive === 0) {
+                    $loan->update([
+                        'status' => 'selesai',
+                        'tanggal_kembali_aktual' => $now,
+                    ]);
+                    $message = "Unit barang '{$itemCode}' berhasil diselesaikan. Seluruh barang dalam peminjaman ini telah selesai dikembalikan.";
+                } else {
+                    $message = "Unit barang '{$itemCode}' berhasil diselesaikan dan dikembalikan ke stok. Masih ada {$remainingActive} barang yang belum dikembalikan.";
+                }
+
+                return redirect()->back()->with('success', $message);
+            } else {
+                // Revert this item to 'dipinjam'
+                $loanDetail->update([
+                    'status' => 'dipinjam',
+                    'tanggal_kembali_aktual' => null,
+                ]);
+
+                // Also ensure parent loan status is 'dipinjam'
+                $loan->update([
+                    'status' => 'dipinjam',
+                    'tanggal_kembali_aktual' => null,
+                ]);
+
+                return redirect()->back()->with('success', "Status unit '{$itemCode}' berhasil dikembalikan menjadi 'Dipinjam'.");
             }
         });
     }

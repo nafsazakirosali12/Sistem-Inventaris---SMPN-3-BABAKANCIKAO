@@ -103,17 +103,16 @@ class Inventory extends Model
     }
 
     /**
-     * Status Unit Label (Baik/Tersedia, Dipinjam, Rusak, Perlu Perbaikan, Hilang)
+     * Status Unit Label (Baik, Rusak, Perlu Perbaikan, Hilang)
      */
     public function getStatusLabelAttribute(): string
     {
         $status = strtolower($this->status ?? 'baik');
         return match ($status) {
-            'dipinjam'        => 'Dipinjam',
             'rusak'           => 'Rusak',
             'perlu_perbaikan' => 'Perlu Perbaikan',
             'hilang'          => 'Hilang',
-            default           => 'Tersedia',
+            default           => 'Baik',
         };
     }
 
@@ -124,7 +123,6 @@ class Inventory extends Model
     {
         $status = strtolower($this->status ?? 'baik');
         return match ($status) {
-            'dipinjam'        => 'bg-[#DBEAFE] text-[#1E40AF]',
             'rusak'           => 'bg-[#FEE2E2] text-[#991B1B]',
             'perlu_perbaikan' => 'bg-[#FEF3C7] text-[#92400E]',
             'hilang'          => 'bg-[#F3F4F6] text-[#374151]',
@@ -139,7 +137,6 @@ class Inventory extends Model
     {
         $status = strtolower($this->status ?? 'baik');
         return match ($status) {
-            'dipinjam'        => 'bg-[#2563EB]',
             'rusak'           => 'bg-[#DC2626]',
             'perlu_perbaikan' => 'bg-[#F59E0B]',
             'hilang'          => 'bg-[#6B7280]',
@@ -152,9 +149,18 @@ class Inventory extends Model
      */
     public function getIsCurrentlyBorrowedAttribute(): bool
     {
-        return $this->loans()->where('status', 'dipinjam')->exists()
-            || $this->loanDetails()->whereHas('loan', function ($q) {
-                $q->where('status', 'dipinjam');
-            })->exists();
+        if ($this->loanDetails()->exists()) {
+            return $this->loanDetails()
+                ->where(function ($q) {
+                    $q->where('status', 'dipinjam')
+                      ->orWhere(function ($s2) {
+                          $s2->whereNull('status')
+                             ->whereHas('loan', fn($lq) => $lq->where('status', 'dipinjam'));
+                      });
+                })
+                ->exists();
+        }
+
+        return $this->loans()->where('status', 'dipinjam')->exists();
     }
 }

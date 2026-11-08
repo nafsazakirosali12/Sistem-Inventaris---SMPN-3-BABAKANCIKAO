@@ -236,7 +236,7 @@
                 @endphp
 
                 <div id="loan-card-{{ $loan->id }}"
-                     class="bg-white rounded-xl sm:rounded-2xl border transition-all duration-150 flex flex-col justify-between shadow-xs hover:shadow-sm {{ $isHighlighted ? 'ring-2 ring-[#0F766E] border-[#0F766E] bg-gradient-to-b from-[#F0FDFA]/30 to-white' : 'border-[#D9E4E2]' }}">
+                     class="bg-white rounded-xl sm:rounded-2xl border transition-all duration-200 flex flex-col justify-between shadow-xs hover:shadow-md hover:border-[#0F766E]/60 hover:-translate-y-1 group {{ $isHighlighted ? 'ring-2 ring-[#0F766E] border-[#0F766E] bg-gradient-to-b from-[#F0FDFA]/30 to-white' : 'border-[#D9E4E2]' }}">
 
                     <div class="p-4 sm:p-5 flex-1 flex flex-col">
 

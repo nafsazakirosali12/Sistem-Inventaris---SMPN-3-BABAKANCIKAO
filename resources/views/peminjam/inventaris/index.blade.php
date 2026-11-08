@@ -30,7 +30,7 @@
                         @click="loanModalOpen = true"
                         class="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-bold transition-all shadow-xs cursor-pointer">
                     <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
-                    <span>Ajukan Peminjaman</span>
+                    <span>Pinjam Barang</span>
                     <template x-if="totalBorrowedCount > 0">
                         <span class="px-1.5 py-0.2 rounded-full bg-white text-[#0F766E] text-[11px] font-bold" x-text="totalBorrowedCount"></span>
                     </template>
@@ -43,12 +43,12 @@
             </div>
         </div>
 
-        <!-- Alert Flash Message jika Baru Selesai Mengajukan Peminjaman -->
+        <!-- Alert Flash Message jika Baru Selesai Peminjaman -->
         @if(session('success'))
             <div class="mt-6 p-4 rounded-2xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] flex items-start gap-3 shadow-sm">
                 <span class="material-symbols-outlined text-[24px] text-[#10B981] shrink-0 mt-0.5">check_circle</span>
                 <div class="flex-1">
-                    <h4 class="font-bold text-sm text-[#065F46]">Peminjaman Berhasil Diajukan!</h4>
+                    <h4 class="font-bold text-sm text-[#065F46]">Peminjaman Berhasil!</h4>
                     <p class="text-xs mt-0.5 text-[#047857] leading-relaxed">{{ session('success') }}</p>
                 </div>
             </div>
@@ -92,7 +92,7 @@
                         <option value="">Semua Kategori</option>
                         @foreach($allCategories as $cat)
                             <option value="{{ $cat->id }}" {{ (string)request('category_id') === (string)$cat->id ? 'selected' : '' }}>
-                                {{ $cat->nama_kategori }} ({{ $stockPerCategory[$cat->id] ?? 0 }} unit)
+                                {{ $cat->nama_kategori }} (Stok: {{ $stockPerCategory[$cat->id] ?? 0 }})
                             </option>
                         @endforeach
                     </select>
@@ -170,7 +170,7 @@
                 <div class="bg-white rounded-2xl border border-[#D9E4E2] hover:border-[#0F766E]/50 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden group">
 
                     <div>
-                        <!-- 1. Gambar Inventaris / Kategori -->
+                        <!-- 1. Gambar Inventaris / Kategori (Diambil dari barang pertama terdaftar) -->
                         <div class="relative w-full h-48 bg-[#F3F7F6] overflow-hidden flex items-center justify-center">
                             @if(!empty($category->foto_url))
                                 <img src="{{ $category->foto_url }}"
@@ -184,20 +184,6 @@
                                     <span class="text-[11px] font-semibold text-[#6B7280] tracking-wide">{{ $category->nama_kategori }}</span>
                                 </div>
                             @endif
-
-                            <!-- Kode Kategori Badge (Top-Right) -->
-                            <div class="absolute top-3 right-3">
-                                <span class="px-2.5 py-1 rounded-md bg-[#1F2937]/85 backdrop-blur-xs text-white font-mono text-[10px] font-semibold tracking-wider shadow-2xs">
-                                    {{ $category->kode_kategori }}
-                                </span>
-                            </div>
-
-                            <!-- Total Inventaris Badge (Top-Left) -->
-                            <div class="absolute top-3 left-3">
-                                <span class="px-2.5 py-1 rounded-full bg-white/95 backdrop-blur-xs text-[#374151] font-bold text-[10px] shadow-xs border border-[#D9E4E2]">
-                                    {{ $category->total_inventaris }} Unit Terdaftar
-                                </span>
-                            </div>
                         </div>
 
                         <!-- 2. Informasi Utama Card Kategori -->
@@ -223,17 +209,17 @@
                                 </span>
                             </div>
 
-                            <!-- Stok Tersedia (Format Wajib: Stok Tersedia: X Unit) -->
+                            <!-- Stok -->
                             <div class="pt-2 border-t border-[#F3F4F6]">
                                 @if($isAvailable)
                                     <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F0FDFA] border border-[#CCFBF1] text-[#0F766E] text-xs font-bold">
                                         <span class="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
-                                        <span>Stok Tersedia: {{ $catStock }} Unit</span>
+                                        <span>Stok: {{ $catStock }}</span>
                                     </div>
                                 @else
                                     <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#FEF2F2] border border-[#FEE2E2] text-[#DC2626] text-xs font-bold">
                                         <span class="w-2 h-2 rounded-full bg-[#EF4444]"></span>
-                                        <span>Stok Tersedia: 0 Unit (Habis)</span>
+                                        <span>Stok: 0 (Habis)</span>
                                     </div>
                                 @endif
                             </div>
@@ -308,7 +294,7 @@
                     </div>
                     <div>
                         <h3 class="text-sm sm:text-base font-bold text-[#1F2937]" x-text="`Detail Kategori: ${selectedDetailCategory?.nama_kategori || ''}`"></h3>
-                        <p class="text-[11px] text-[#6B7280]">Informasi lengkap kelompok dan daftar unit inventaris fisik</p>
+                        <p class="text-[11px] text-[#6B7280]"></p>
                     </div>
                 </div>
                 <button type="button"
@@ -334,12 +320,11 @@
                         </template>
                     </div>
 
-                    <!-- 4 Metric Badges -->
+                    <!-- Metric Badges -->
                     <div class="sm:col-span-2 grid grid-cols-2 gap-2.5 text-xs">
                         <div class="p-2.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB]">
                             <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wide">Nama Kategori</p>
                             <p class="font-bold text-[#1F2937] mt-0.5" x-text="selectedDetailCategory?.nama_kategori || '-'"></p>
-                            <span class="inline-block mt-1 font-mono text-[10px] px-2 py-0.5 rounded bg-[#F3F7F6] text-[#0F766E] border border-[#D9E4E2]" x-text="selectedDetailCategory?.kode_kategori || '-'"></span>
                         </div>
 
                         <div class="p-2.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB]">
@@ -347,14 +332,15 @@
                             <p class="font-semibold text-[#1F2937] mt-0.5 text-xs line-clamp-2" x-text="selectedDetailCategory?.ruangan_summary || '-'"></p>
                         </div>
 
-                        <div class="p-2.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB]">
-                            <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wide">Total Inventaris</p>
-                            <p class="font-bold text-[#1F2937] mt-0.5 text-sm" x-text="`${selectedDetailCategory?.total_inventaris || 0} Unit`"></p>
+                        <!-- Stok & Nama Penanggung Jawab Ruangan Bersisian Sesuai Permintaan -->
+                        <div class="p-2.5 rounded-xl bg-[#F0FDFA] border border-[#CCFBF1]">
+                            <p class="text-[10px] text-[#0F766E] font-medium uppercase tracking-wide">Stok</p>
+                            <p class="font-bold text-[#0F766E] mt-0.5 text-sm" x-text="`${selectedDetailCategory?.stok_tersedia || 0} Unit`"></p>
                         </div>
 
-                        <div class="p-2.5 rounded-xl bg-[#F0FDFA] border border-[#CCFBF1]">
-                            <p class="text-[10px] text-[#0F766E] font-medium uppercase tracking-wide">Stok Tersedia</p>
-                            <p class="font-bold text-[#0F766E] mt-0.5 text-sm" x-text="`${selectedDetailCategory?.stok_tersedia || 0} Unit Siap Pakai`"></p>
+                        <div class="p-2.5 rounded-xl bg-[#F9FAFB] border border-[#E5E7EB]">
+                            <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wide">Penanggung Jawab Ruangan</p>
+                            <p class="font-bold text-[#1F2937] mt-0.5 text-xs line-clamp-2" x-text="selectedDetailCategory?.pj_ruangan_summary || '-'"></p>
                         </div>
                     </div>
                 </div>
@@ -367,14 +353,14 @@
                     </div>
                 </template>
 
-                <!-- DAFTAR BARANG DALAM KATEGORI BERDASARKAN MEREK/TIPE, KODE BARANG, DAN STATUS -->
+                <!-- DAFTAR BARANG DALAM KATEGORI BERDASARKAN MEREK/TIPE, KODE BARANG, DAN STATUS (HANYA STATUS BAIK) -->
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <h4 class="text-xs font-bold text-[#1F2937] uppercase tracking-wider flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[16px] text-[#0F766E]">format_list_bulleted</span>
-                            <span>Daftar Barang Fisik dalam Kategori Ini</span>
+                            <span>Daftar Barang dalam Kategori Ini</span>
                         </h4>
-                        <span class="text-[11px] text-[#6B7280]" x-text="`${selectedDetailCategory?.all_units?.length || 0} Unit Terdata`"></span>
+                        <span class="text-[11px] text-[#6B7280]" x-text="`Stok: ${selectedDetailCategory?.stok_tersedia || 0}`"></span>
                     </div>
 
                     <div class="rounded-xl border border-[#D9E4E2] overflow-hidden">
@@ -412,23 +398,21 @@
                                             <div class="font-bold text-[#1F2937]" x-text="unit.nama_barang"></div>
                                             <div class="text-[10px] text-gray-500" x-text="unit.merk_type"></div>
                                         </td>
-                                        <td class="py-2.5 px-3 text-gray-600" x-text="unit.ruangan"></td>
+                                        <td class="py-2.5 px-3">
+                                            <div class="text-gray-700 font-medium" x-text="unit.ruangan"></div>
+                                            <div class="text-[10px] text-gray-500 font-normal" x-show="unit.penanggung_jawab_ruangan && unit.penanggung_jawab_ruangan !== '-'" x-text="`PJ: ${unit.penanggung_jawab_ruangan}`"></div>
+                                        </td>
                                         <td class="py-2.5 px-3 text-center">
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold inline-block"
-                                                  :class="{
-                                                      'bg-[#DCFCE7] text-[#166534]': unit.is_available,
-                                                      'bg-[#DBEAFE] text-[#1E40AF]': unit.is_borrowed,
-                                                      'bg-[#FEE2E2] text-[#991B1B]': unit.status === 'rusak',
-                                                      'bg-[#FEF3C7] text-[#92400E]': unit.status === 'perlu_perbaikan'
-                                                  }"
-                                                  x-text="unit.status_label"></span>
+                                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold inline-block"
+                                                  :class="unit.is_available ? 'bg-[#DCFCE7] text-[#166534]' : 'bg-[#DBEAFE] text-[#1E40AF]'"
+                                                  x-text="unit.is_available ? 'Tersedia' : 'Dipinjam'"></span>
                                         </td>
                                     </tr>
                                 </template>
                                 <template x-if="!selectedDetailCategory?.all_units || selectedDetailCategory.all_units.length === 0">
                                     <tr>
                                         <td colspan="6" class="py-6 text-center text-gray-400 italic">
-                                            Belum ada unit inventaris fisik yang terdaftar pada kategori ini.
+                                            Tidak ada barang berstatus baik pada kategori ini.
                                         </td>
                                     </tr>
                                 </template>
@@ -451,7 +435,7 @@
                             @click="detailModalOpen = false; openLoanModalWithCategory(selectedDetailCategory.id)"
                             class="h-9 px-4 rounded-xl bg-[#0F766E] hover:bg-[#115E59] text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer">
                         <span class="material-symbols-outlined text-[16px]">assignment_add</span>
-                        <span>Pinjam Kategori Ini</span>
+                        <span>Pinjam</span>
                     </button>
                 </template>
             </div>
@@ -491,14 +475,14 @@
                             <span class="material-symbols-outlined text-[20px]">assignment_add</span>
                         </div>
                         <div>
-                            <h3 class="text-sm sm:text-base font-bold text-[#1F2937]">Form Pengajuan Peminjaman</h3>
+                            <h3 class="text-sm sm:text-base font-bold text-[#1F2937]">Form Peminjaman Barang</h3>
                             <p class="text-[11px] text-[#6B7280]"></p>
                         </div>
                     </div>
 
                     <div class="flex items-center gap-2">
                         <span class="px-2.5 py-1 rounded-full bg-[#CCFBF1] text-[#0F766E] font-bold text-xs"
-                              x-text="`Total: ${totalBorrowedCount} Unit`"></span>
+                              x-text="`Total: ${totalBorrowedCount}`"></span>
                         <button type="button"
                                 @click="loanModalOpen = false"
                                 class="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-colors cursor-pointer">
@@ -514,8 +498,7 @@
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
                             <label class="block text-xs font-bold text-[#1F2937] uppercase tracking-wider flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-[16px] text-[#0F766E]">layers</span>
-                                <span>Daftar Kategori Barang yang Diajukan</span>
+                                <span>Daftar Barang yang Dipinjam</span>
                             </label>
                             <span class="text-[11px] text-[#6B7280]" x-text="`${selectedCategories.length} Kategori Dipilih`"></span>
                         </div>
@@ -541,13 +524,12 @@
                                             <div class="min-w-0">
                                                 <div class="flex items-center gap-2">
                                                     <h4 class="font-bold text-[#1F2937] text-sm truncate" x-text="categoriesData[item.category_id]?.nama_kategori"></h4>
-                                                    <span class="px-2 py-0.5 rounded bg-[#F3F7F6] text-[#0F766E] font-mono text-[10px] font-semibold" x-text="categoriesData[item.category_id]?.kode_kategori"></span>
                                                 </div>
                                                 <p class="text-[11px] text-[#6B7280] mt-0.5">
                                                     <span>Ruangan: </span>
                                                     <span class="font-medium text-[#374151]" x-text="categoriesData[item.category_id]?.ruangan_summary"></span>
                                                     <span class="mx-1">•</span>
-                                                    <span class="text-[#0F766E] font-semibold" x-text="`Stok Tersedia: ${categoriesData[item.category_id]?.stok_tersedia || 0} Unit`"></span>
+                                                    <span class="text-[#0F766E] font-semibold" x-text="`Stok: ${categoriesData[item.category_id]?.stok_tersedia || 0}`"></span>
                                                 </p>
                                             </div>
                                         </div>
@@ -579,7 +561,7 @@
                                             <button type="button"
                                                     @click="removeCategory(item.category_id)"
                                                     class="w-8 h-8 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors cursor-pointer"
-                                                    title="Hapus Kategori dari Pengajuan">
+                                                    title="Hapus Kategori">
                                                 <span class="material-symbols-outlined text-[18px]">delete</span>
                                             </button>
                                         </div>
@@ -589,8 +571,7 @@
                                     <div class="mt-3 p-2.5 rounded-lg bg-[#F0FDFA] border border-[#CCFBF1]">
                                         <div class="flex items-center justify-between text-[11px] font-bold text-[#0F766E] mb-1.5">
                                             <div class="flex items-center gap-1.5">
-                                                <span class="material-symbols-outlined text-[15px]">auto_awesome</span>
-                                                <span>Alokasi Barang Otomatis (Berdasarkan Kode Terkecil):</span>
+                                                <span>Alokasi Barang Otomatis:</span>
                                             </div>
                                             <span x-text="`${getAllocatedUnits(item.category_id, item.qty).length} Unit Terpilih`"></span>
                                         </div>
@@ -618,7 +599,7 @@
                                 <div class="p-6 rounded-xl border border-dashed border-[#D9E4E2] text-center bg-[#F8FBFA]">
                                     <span class="material-symbols-outlined text-3xl text-gray-400 mb-1">add_shopping_cart</span>
                                     <p class="text-xs font-semibold text-[#374151]">Belum ada kategori barang yang ditambahkan</p>
-                                    <p class="text-[11px] text-gray-500 mt-0.5">Pilih salah satu kategori barang di bawah ini untuk memulai pengajuan peminjaman.</p>
+                                    <p class="text-[11px] text-gray-500 mt-0.5">Pilih salah satu kategori barang di bawah ini untuk memulai peminjaman.</p>
                                 </div>
                             </template>
                         </div>
@@ -632,7 +613,7 @@
                                             class="w-full h-10 px-3 bg-[#F3F7F6] hover:bg-white rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all font-medium cursor-pointer">
                                         <option value="">+ Tambah Kategori Lain ke Formulir Peminjaman...</option>
                                         <template x-for="cat in availableCategoriesToAdd" :key="cat.id">
-                                            <option :value="cat.id" x-text="`${cat.nama_kategori} (Stok Tersedia: ${cat.stok_tersedia} Unit)`"></option>
+                                            <option :value="cat.id" x-text="`${cat.nama_kategori} (Stok: ${cat.stok_tersedia})`"></option>
                                         </template>
                                     </select>
                                 </div>
@@ -642,7 +623,7 @@
                         <!-- TOTAL KESELURUHAN UNIT BARANG -->
                         <div class="p-3 rounded-xl bg-[#F0FDFA] border border-[#CCFBF1] flex items-center justify-between text-xs">
                             <span class="font-bold text-[#1F2937]">Total Keseluruhan Barang yang Dipinjam:</span>
-                            <span class="font-bold text-sm text-[#0F766E]" x-text="`${totalBorrowedCount} Unit Barang`"></span>
+                            <span class="font-bold text-sm text-[#0F766E]" x-text="`${totalBorrowedCount} Unit`"></span>
                         </div>
                     </div>
 
@@ -798,7 +779,7 @@
                         <template x-if="!isSubmitting">
                             <span class="material-symbols-outlined text-[18px]">check_circle</span>
                         </template>
-                        <span x-text="isSubmitting ? 'Memproses Pengajuan...' : 'Konfirmasi & Ajukan Peminjaman'"></span>
+                        <span x-text="isSubmitting ? 'Memproses...' : 'Konfirmasi Peminjaman'"></span>
                     </button>
                 </div>
 
@@ -830,8 +811,8 @@
                 if (this.totalBorrowedCount === 0) {
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
-                            title: 'Pilih Kategori Barang',
-                            text: 'Silakan tentukan minimal 1 kategori barang dan jumlah unit yang ingin dipinjam.',
+                            title: 'Pilih Barang',
+                            text: 'Silakan tentukan minimal 1 kategori barang yang ingin dipinjam.',
                             confirmButtonColor: '#0F766E',
                             confirmButtonText: 'Mengerti',
                             width: '22rem',
@@ -845,7 +826,7 @@
                             this.loanModalOpen = true;
                         });
                     } else {
-                        alert('Silakan pilih minimal 1 kategori barang yang ingin dipinjam.');
+                        alert('Silakan tentukan minimal 1 kategori barang yang ingin dipinjam.');
                         this.loanModalOpen = true;
                     }
                     return;
@@ -855,7 +836,7 @@
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             title: 'Nama Peminjam Wajib Diisi',
-                            text: 'Silakan masukkan nama lengkap peminjam terlebih dahulu sebelum mengajukan peminjaman.',
+                            text: 'Silakan masukkan nama lengkap peminjam terlebih dahulu.',
                             confirmButtonColor: '#0F766E',
                             confirmButtonText: 'Mengerti',
                             width: '22rem',
@@ -910,7 +891,7 @@
                 if (this.isKembaliInvalid) {
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
-                            title: 'Batas Pengembalian Tidak Valid',
+                            title: 'Waktu Pengembalian Tidak Valid',
                             text: this.kembaliErrorMessage || 'Batas waktu pengembalian tidak valid.',
                             confirmButtonColor: '#0F766E',
                             confirmButtonText: 'Mengerti',
@@ -931,18 +912,18 @@
                     return;
                 }
 
-                // Alert Konfirmasi Yakin/Tidak Sebelum Mengajukan Peminjaman
+                // Alert Konfirmasi Yakin/Tidak Sebelum Meminjam
                 const borrowerName = this.borrowerName.trim();
                 const totalUnits = this.totalBorrowedCount;
 
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
-                        title: 'Ajukan Peminjaman?',
-                        text: `Apakah Anda yakin ingin mengajukan peminjaman sebanyak ${totalUnits} unit barang atas nama '${borrowerName}'?`,
+                        title: 'Konfirmasi Peminjaman',
+                        text: `Apakah Anda yakin ingin meminjam ${totalUnits} unit barang atas nama '${borrowerName}'?`,
                         showCancelButton: true,
                         confirmButtonColor: '#0F766E',
                         cancelButtonColor: '#9CA3AF',
-                        confirmButtonText: 'Ya, Ajukan Peminjaman',
+                        confirmButtonText: 'Ya, Konfirmasi',
                         cancelButtonText: 'Batal',
                         reverseButtons: true,
                         width: '24rem',
@@ -963,7 +944,7 @@
                         }
                     });
                 } else {
-                    if (confirm(`Apakah Anda yakin ingin mengajukan peminjaman sebanyak ${totalUnits} unit barang atas nama '${borrowerName}'?`)) {
+                    if (confirm(`Apakah Anda yakin ingin meminjam ${totalUnits} unit barang atas nama '${borrowerName}'?`)) {
                         this.isSubmitting = true;
                         this.$refs.loanForm.submit();
                     } else {

@@ -59,10 +59,10 @@
                     Kelola seluruh pengajuan dan riwayat peminjaman sarana dan prasarana oleh guru dan staf {{ $schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao' }}.
                 </p>
             </div>
-            @if(isset($activeLoansCount) && $activeLoansCount > 0)
+            @if(isset($activeUnitsCount) && $activeUnitsCount > 0)
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#DBEAFE] border border-[#BFDBFE] text-[#1E40AF] text-xs font-semibold">
                     <span class="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse"></span>
-                    <span>{{ $activeLoansCount }} Barang Sedang Dipinjam</span>
+                    <span>{{ $activeUnitsCount }} Barang Sedang Dipinjam</span>
                 </div>
             @endif
         </div>
@@ -163,87 +163,110 @@
                     <tr class="bg-[#F0FDFA] text-[#1F2937] text-xs font-semibold border-b border-[#D9E4E2]">
                         <th class="py-3.5 px-4 text-center w-12">No</th>
                         <th class="py-3.5 px-4 w-36">Kode Pinjam</th>
-                        <th class="py-3.5 px-4 min-w-[160px]">Peminjam</th>
-                        <th class="py-3.5 px-4 min-w-[200px]">Kategori & Unit Barang</th>
-                        <th class="py-3.5 px-4 min-w-[180px]">Jadwal Peminjaman</th>
-                        <th class="py-3.5 px-4 text-center w-36">Status</th>
+                        <th class="py-3.5 px-4 min-w-[150px]">Peminjam</th>
+                        <th class="py-3.5 px-4 min-w-[240px]">Rincian Barang</th>
+                        <th class="py-3.5 px-4 min-w-[170px]">Jadwal Peminjaman</th>
+                        <th class="py-3.5 px-4 text-center w-32">Status</th>
                         <th class="py-3.5 px-4 text-center w-32">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-[#D9E4E2] text-xs text-[#1F2937]">
+                <tbody class="text-xs text-[#1F2937]">
                     @forelse ($loans as $loan)
                         @php
+                            $loanIteration = $loop->iteration + ($loans->currentPage() - 1) * $loans->perPage();
                             $isHighlighted = (isset($highlightId) && $highlightId == $loan->id);
                             $isTerlambat = $loan->is_terlambat;
+                            $items = $loan->details->isNotEmpty() ? $loan->details : collect([$loan]);
+                            $totalItems = $items->count();
                         @endphp
-                        <tr id="loan-row-{{ $loan->id }}"
-                            class="transition-colors {{ $isHighlighted ? 'bg-[#FEF3C7] border-l-4 border-[#F59E0B]' : 'hover:bg-[#F8FBFA]' }}">
-                            
-                            <!-- No -->
-                            <td class="py-3.5 px-4 text-center text-[#6B7280] font-medium">
-                                {{ $loop->iteration + ($loans->currentPage() - 1) * $loans->perPage() }}
-                            </td>
+                        @foreach ($items as $idx => $item)
+                            @php
+                                $isFirst = ($idx === 0);
+                                $isLast = ($idx === $totalItems - 1);
+                                $isDetail = $item instanceof \App\Models\LoanDetail;
+                                $itemStatus = $isDetail ? ($item->status ?? $loan->status) : $loan->status;
+                                $isItemDipinjam = ($itemStatus === 'dipinjam');
+                                $catName = $isDetail ? ($item->inventory?->category?->nama_kategori ?? $loan->category?->nama_kategori ?? '-') : ($loan->category?->nama_kategori ?? '-');
+                                $itemCode = $isDetail ? $item->kode_barang : ($loan->inventory?->kode_barang ?? '-');
+                                $itemName = $isDetail ? ($item->inventory?->nama_barang ?? 'Barang Inventaris') : ($loan->inventory?->nama_barang ?? 'Barang Inventaris');
+                                $roomName = $isDetail ? ($item->inventory?->room?->nama_ruangan ?? null) : ($loan->inventory?->room?->nama_ruangan ?? null);
+                                $detailId = $isDetail ? $item->id : null;
+                            @endphp
+                            <tr @if($isFirst) id="loan-row-{{ $loan->id }}" @endif
+                                class="transition-colors {{ $isHighlighted ? 'bg-[#FEF3C7] border-l-4 border-[#F59E0B]' : 'hover:bg-[#F8FBFA]' }} {{ $isLast ? 'border-b border-[#D9E4E2]' : 'border-b border-[#F3F7F6]' }}">
+                                
+                                @if ($isFirst)
+                                    <!-- No -->
+                                    <td rowspan="{{ $totalItems }}" class="py-3.5 px-4 text-center text-[#6B7280] font-medium align-middle border-b border-[#D9E4E2]">
+                                        {{ $loanIteration }}
+                                    </td>
 
-                            <!-- Kode Pinjam -->
-                            <td class="py-3.5 px-4">
-                                <span class="px-2.5 py-1 rounded bg-[#F3F7F6] font-mono text-[11px] font-bold text-[#1F2937] border border-[#D9E4E2] inline-block">
-                                    {{ $loan->kode_peminjaman }}
-                                </span>
-                            </td>
+                                    <!-- Kode Pinjam -->
+                                    <td rowspan="{{ $totalItems }}" class="py-3.5 px-4 align-middle border-b border-[#D9E4E2]">
+                                        <span class="px-2.5 py-1 rounded bg-[#F3F7F6] font-mono text-[11px] font-bold text-[#1F2937] border border-[#D9E4E2] inline-block">
+                                            {{ $loan->kode_peminjaman }}
+                                        </span>
+                                    </td>
 
-                            <!-- Nama Peminjam -->
-                            <td class="py-3.5 px-4">
-                                <div class="font-bold text-[#1F2937] text-xs">
-                                    {{ $loan->nama_peminjam }}
-                                </div>
-                                @if($loan->alasan_tujuan)
-                                    <div class="text-[11px] text-[#6B7280] mt-0.5 truncate max-w-xs" title="{{ $loan->alasan_tujuan }}">
-                                        {{ $loan->alasan_tujuan }}
-                                    </div>
+                                    <!-- Nama Peminjam -->
+                                    <td rowspan="{{ $totalItems }}" class="py-3.5 px-4 align-middle border-b border-[#D9E4E2]">
+                                        <div class="font-bold text-[#1F2937] text-xs">
+                                            {{ $loan->nama_peminjam }}
+                                        </div>
+                                        @if($loan->alasan_tujuan)
+                                            <div class="text-[11px] text-[#6B7280] mt-0.5 truncate max-w-xs" title="{{ $loan->alasan_tujuan }}">
+                                                {{ $loan->alasan_tujuan }}
+                                            </div>
+                                        @endif
+                                    </td>
                                 @endif
-                            </td>
 
-                            <!-- Kategori & Unit Terpilih -->
-                            <td class="py-3.5 px-4">
-                                <div class="font-semibold text-[#0F766E]">
-                                    {{ $loan->category->nama_kategori ?? '-' }}
-                                </div>
-                                <div class="text-[11px] text-[#4B5563] mt-0.5">
-                                    @if($loan->inventory)
-                                        <span class="font-mono font-medium text-[#1F2937]">{{ $loan->inventory->kode_barang }}</span> - {{ $loan->inventory->nama_barang }}
-                                    @else
-                                        <span class="text-[#9CA3AF] italic">Unit belum teralokasi</span>
-                                    @endif
-                                </div>
-                            </td>
-
-                            <!-- Jadwal Peminjaman & Pengembalian Aktual -->
-                            <td class="py-3.5 px-4 text-[#4B5563]">
-                                <div class="text-[11px]">
-                                    <span class="text-[#6B7280]">Dipinjam:</span>
-                                    <span class="font-medium text-[#1F2937]">{{ $loan->tanggal_pinjam ? $loan->tanggal_pinjam->format('d/m/Y H:i') : '-' }}</span>
-                                </div>
-                                <div class="text-[11px] mt-0.5">
-                                    <span class="text-[#6B7280]">Jadwal Kembali:</span>
-                                    <span class="font-medium {{ $isTerlambat && $loan->status === 'dipinjam' ? 'text-[#DC2626] font-bold' : 'text-[#1F2937]' }}">{{ $loan->tanggal_kembali ? $loan->tanggal_kembali->format('d/m/Y H:i') : '-' }}</span>
-                                </div>
-                                @if($loan->tanggal_kembali_aktual)
-                                    <div class="text-[11px] mt-0.5 text-[#166534] font-medium">
-                                        <span>Dikembalikan: {{ $loan->tanggal_kembali_aktual->format('d/m/Y H:i') }}</span>
+                                <!-- Rincian Barang (HANYA keterangan barang-barangnya saja) -->
+                                <td class="py-3 px-4 align-middle">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <span class="font-bold text-[#0F766E] text-xs">
+                                            {{ $catName }}
+                                        </span>
+                                        <span class="px-1.5 py-0.5 rounded font-mono text-[10px] font-bold text-[#1F2937] bg-[#F3F7F6] border border-[#D9E4E2]">
+                                            {{ $itemCode }}
+                                        </span>
                                     </div>
-                                @endif
-                                @if($isTerlambat && $loan->status === 'dipinjam')
-                                    <div class="text-[11px] mt-1 flex items-center gap-1 text-[#DC2626] font-bold">
-                                        <span class="w-2 h-2 rounded-full bg-[#DC2626] inline-block"></span>
-                                        Terlambat
+                                    <div class="text-[11px] text-[#4B5563] truncate mt-0.5" title="{{ $itemName }}">
+                                        {{ $itemName }}
+                                        @if($roomName)
+                                            <span class="text-[#6B7280]">({{ $roomName }})</span>
+                                        @endif
                                     </div>
-                                @endif
-                            </td>
+                                </td>
 
-                            <!-- Status Badge: Hanya Dipinjam & Selesai -->
-                            <td class="py-3.5 px-4 text-center">
-                                <div class="flex flex-col items-center gap-1 justify-center">
-                                    @if ($loan->status === 'dipinjam')
+                                @if ($isFirst)
+                                    <!-- Jadwal Peminjaman -->
+                                    <td rowspan="{{ $totalItems }}" class="py-3.5 px-4 text-[#4B5563] align-middle border-b border-[#D9E4E2]">
+                                        <div class="text-[11px]">
+                                            <span class="text-[#6B7280]">Dipinjam:</span>
+                                            <span class="font-medium text-[#1F2937]">{{ $loan->tanggal_pinjam ? $loan->tanggal_pinjam->format('d/m/Y H:i') : '-' }}</span>
+                                        </div>
+                                        <div class="text-[11px] mt-0.5">
+                                            <span class="text-[#6B7280]">Jadwal Kembali:</span>
+                                            <span class="font-medium {{ $isTerlambat && $loan->status === 'dipinjam' ? 'text-[#DC2626] font-bold' : 'text-[#1F2937]' }}">{{ $loan->tanggal_kembali ? $loan->tanggal_kembali->format('d/m/Y H:i') : '-' }}</span>
+                                        </div>
+                                        @if($loan->tanggal_kembali_aktual)
+                                            <div class="text-[11px] mt-0.5 text-[#166534] font-medium">
+                                                <span>Dikembalikan: {{ $loan->tanggal_kembali_aktual->format('d/m/Y H:i') }}</span>
+                                            </div>
+                                        @endif
+                                        @if($isTerlambat && $loan->status === 'dipinjam')
+                                            <div class="text-[11px] mt-1 flex items-center gap-1 text-[#DC2626] font-bold">
+                                                <span class="w-2 h-2 rounded-full bg-[#DC2626] inline-block"></span>
+                                                Terlambat
+                                            </div>
+                                        @endif
+                                    </td>
+                                @endif
+
+                                <!-- Status Masing-masing Barang (Sejajar dengan barang dan tombol aksi) -->
+                                <td class="py-3 px-4 text-center align-middle">
+                                    @if ($isItemDipinjam)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#DBEAFE] text-[#1E40AF]">
                                             <span class="w-1.5 h-1.5 rounded-full bg-[#2563EB] mr-1.5"></span>
                                             Dipinjam
@@ -254,32 +277,52 @@
                                             Selesai
                                         </span>
                                     @endif
-                                </div>
-                            </td>
+                                </td>
 
-                            <!-- Aksi: Selesaikan (Jika Dipinjam) atau Edit Status (Jika Selesai) -->
-                            <td class="py-3.5 px-4 text-center">
-                                <div class="inline-flex items-center gap-1.5 justify-center">
-                                    @if ($loan->status === 'dipinjam')
-                                        <button type="button"
-                                                onclick="confirmCompleteLoan({{ $loan->id }}, '{{ addslashes($loan->nama_peminjam) }}', '{{ addslashes($loan->kode_peminjaman) }}')"
-                                                class="px-2.5 py-1.5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-semibold flex items-center gap-1 shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 active:scale-[0.99]"
-                                                title="Selesaikan Peminjaman (Barang Dikembalikan)">
-                                            <span class="material-symbols-outlined text-[16px]">task_alt</span>
-                                            <span>Selesaikan</span>
-                                        </button>
-                                    @else
-                                        <button type="button"
-                                                onclick="confirmRevertLoan({{ $loan->id }}, '{{ addslashes($loan->nama_peminjam) }}', '{{ addslashes($loan->kode_peminjaman) }}')"
-                                                class="text-[#16A34A] hover:text-[#15803D] hover:bg-[#DCFCE7]/70 px-2 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all focus:outline-none focus:ring-2 focus:ring-[#16A34A]/30 active:scale-[0.98] cursor-pointer"
-                                                title="Klik jika ingin membatalkan status selesai (kembali ke Dipinjam)">
-                                            <span class="material-symbols-outlined text-[16px]">check_circle</span>
-                                            <span>Selesai</span>
-                                        </button>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
+                                <!-- Aksi Tombol Selesai Masing-masing Barang (Sejajar dengan barang dan status) -->
+                                <td class="py-3 px-4 text-center align-middle">
+                                    <div class="inline-flex items-center gap-1.5 justify-center">
+                                        @if ($isItemDipinjam)
+                                            @if ($detailId)
+                                                <button type="button"
+                                                        onclick="confirmCompleteDetail({{ $detailId }}, '{{ addslashes($itemCode) }}', '{{ addslashes($loan->nama_peminjam) }}')"
+                                                        class="px-2.5 py-1.5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-semibold flex items-center gap-1 shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 active:scale-[0.98] cursor-pointer"
+                                                        title="Selesaikan peminjaman barang ini">
+                                                    <span class="material-symbols-outlined text-[16px]">task_alt</span>
+                                                    <span>Selesaikan</span>
+                                                </button>
+                                            @else
+                                                <button type="button"
+                                                        onclick="confirmCompleteLoan({{ $loan->id }}, '{{ addslashes($loan->nama_peminjam) }}', '{{ addslashes($loan->kode_peminjaman) }}')"
+                                                        class="px-2.5 py-1.5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-semibold flex items-center gap-1 shadow-2xs transition-all focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 active:scale-[0.98] cursor-pointer"
+                                                        title="Selesaikan peminjaman barang ini">
+                                                    <span class="material-symbols-outlined text-[16px]">task_alt</span>
+                                                    <span>Selesaikan</span>
+                                                </button>
+                                            @endif
+                                        @else
+                                            @if ($detailId)
+                                                <button type="button"
+                                                        onclick="confirmRevertDetail({{ $detailId }}, '{{ addslashes($itemCode) }}', '{{ addslashes($loan->nama_peminjam) }}')"
+                                                        class="text-[#16A34A] hover:text-[#15803D] hover:bg-[#DCFCE7]/70 px-2 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all focus:outline-none focus:ring-2 focus:ring-[#16A34A]/30 active:scale-[0.98] cursor-pointer"
+                                                        title="Klik jika ingin membatalkan status selesai (kembali ke Dipinjam)">
+                                                    <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                                                    <span>Selesai</span>
+                                                </button>
+                                            @else
+                                                <button type="button"
+                                                        onclick="confirmRevertLoan({{ $loan->id }}, '{{ addslashes($loan->nama_peminjam) }}', '{{ addslashes($loan->kode_peminjaman) }}')"
+                                                        class="text-[#16A34A] hover:text-[#15803D] hover:bg-[#DCFCE7]/70 px-2 py-1 rounded-md text-xs font-semibold inline-flex items-center gap-1 transition-all focus:outline-none focus:ring-2 focus:ring-[#16A34A]/30 active:scale-[0.98] cursor-pointer"
+                                                        title="Klik jika ingin membatalkan status selesai (kembali ke Dipinjam)">
+                                                    <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                                                    <span>Selesai</span>
+                                                </button>
+                                            @endif
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
                     @empty
                         <tr>
                             <td colspan="7" class="py-12 text-center">
@@ -316,11 +359,18 @@
 
 </div>
 
-<!-- Hidden Form for Completing/Updating Loan Status -->
+<!-- Hidden Form for Completing/Updating Entire Loan Status -->
 <form id="formCompleteLoan" method="POST" class="hidden">
     @csrf
     @method('PUT')
     <input type="hidden" id="input_loan_status" name="status" value="selesai">
+</form>
+
+<!-- Hidden Form for Completing/Updating Individual Item Detail Status -->
+<form id="formCompleteLoanDetail" method="POST" class="hidden">
+    @csrf
+    @method('PUT')
+    <input type="hidden" id="input_detail_status" name="status" value="selesai">
 </form>
 
 @push('scripts')
@@ -414,6 +464,66 @@
                 const statusInput = document.getElementById('input_loan_status');
                 if (statusInput) statusInput.value = 'dipinjam';
                 form.action = `/admin/peminjaman/${id}`;
+                form.submit();
+            }
+        });
+    }
+
+    // Selesaikan Individual Item Detail Confirmation Dialog
+    function confirmCompleteDetail(detailId, itemCode, borrowerName) {
+        Swal.fire({
+            title: 'Selesaikan unit barang ini?',
+            text: `Apakah Anda yakin ingin menyelesaikan peminjaman unit '${itemCode}' oleh '${borrowerName}'? Unit barang akan kembali berstatus Tersedia di sistem.`,
+            showCancelButton: true,
+            confirmButtonColor: '#0F766E',
+            cancelButtonColor: '#9CA3AF',
+            confirmButtonText: 'Ya, Selesaikan',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            width: '24rem',
+            customClass: {
+                popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm',
+                cancelButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-gray-200 hover:bg-gray-300 text-gray-700 mr-2'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('formCompleteLoanDetail');
+                const statusInput = document.getElementById('input_detail_status');
+                if (statusInput) statusInput.value = 'selesai';
+                form.action = `/admin/peminjaman/detail/${detailId}`;
+                form.submit();
+            }
+        });
+    }
+
+    // Batal Selesai Individual Item Detail Confirmation Dialog
+    function confirmRevertDetail(detailId, itemCode, borrowerName) {
+        Swal.fire({
+            title: 'Batal selesai barang?',
+            text: `Apakah Anda yakin ingin membatalkan status selesai pada unit '${itemCode}' oleh '${borrowerName}'? Unit barang akan kembali berstatus Sedang Dipinjam.`,
+            showCancelButton: true,
+            confirmButtonColor: '#0F766E',
+            cancelButtonColor: '#9CA3AF',
+            confirmButtonText: 'Ya, Batal Selesai',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            width: '24rem',
+            customClass: {
+                popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm',
+                cancelButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-gray-200 hover:bg-gray-300 text-gray-700 mr-2'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('formCompleteLoanDetail');
+                const statusInput = document.getElementById('input_detail_status');
+                if (statusInput) statusInput.value = 'dipinjam';
+                form.action = `/admin/peminjaman/detail/${detailId}`;
                 form.submit();
             }
         });

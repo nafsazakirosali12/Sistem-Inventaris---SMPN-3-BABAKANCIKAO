@@ -418,7 +418,7 @@
                                 {{ $inv->room->nama_ruangan ?? '-' }}
                             </td>
 
-                            <!-- Status Unit (Kondisi Fisik) -->
+                            <!-- Status Unit (Kondisi Fisik: Baik, Rusak, Perlu Perbaikan, Hilang) -->
                             <td class="py-3.5 px-4 text-center">
                                 <div class="flex flex-col items-center gap-1">
                                     @if($statusUnit === 'rusak')
@@ -435,11 +435,6 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#F3F4F6] text-[#374151]">
                                             <span class="w-1.5 h-1.5 rounded-full bg-[#6B7280] mr-1.5"></span>
                                             Hilang
-                                        </span>
-                                    @elseif($statusUnit === 'dipinjam')
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#DBEAFE] text-[#1E40AF]">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-[#2563EB] mr-1.5"></span>
-                                            Dipinjam
                                         </span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#DCFCE7] text-[#166534]">

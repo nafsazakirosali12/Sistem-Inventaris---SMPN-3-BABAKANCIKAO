@@ -151,87 +151,70 @@
                 </div>
             </div>
 
-            <!-- Grid Form Utama: Kategori, Ruangan, Status Unit -->
+            <!-- Grid Form Utama: Kategori, Ruangan, Status Unit (Select2 Searchable) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Dropdown Kategori -->
+                <!-- Dropdown Kategori (Select2) -->
                 <div class="flex flex-col gap-1.5">
                     <label for="category_id" class="text-xs font-semibold text-[#1F2937]">
                         Kategori Barang <span class="text-[#DC2626]">*</span>
                     </label>
-                    <div class="relative">
-                        <select id="category_id"
-                                name="category_id"
-                                required
-                                class="w-full h-10 pl-3 pr-8 bg-[#F3F7F6] text-xs text-[#1F2937] rounded-lg appearance-none cursor-pointer border {{ $errors->has('category_id') ? 'border-[#DC2626]' : 'border-[#D9E4E2]' }} focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all truncate">
-                            <option value="">-- Pilih Kategori --</option>
-                            @foreach ($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ old('category_id', $inventory->category_id) == $cat->id ? 'selected' : '' }}>
-                                    {{ $cat->nama_kategori }} ({{ $cat->kode_kategori }})
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">
-                            <span class="material-symbols-outlined text-[18px]">expand_more</span>
-                        </div>
-                    </div>
+                    <select id="category_id"
+                            name="category_id"
+                            required
+                            class="select2-form w-full">
+                        <option value="">-- Pilih Kategori --</option>
+                        @foreach ($categories as $cat)
+                            <option value="{{ $cat->id }}" {{ old('category_id', $inventory->category_id) == $cat->id ? 'selected' : '' }}>
+                                {{ $cat->nama_kategori }} ({{ $cat->kode_kategori }})
+                            </option>
+                        @endforeach
+                    </select>
                     @error('category_id')
                         <p class="text-xs text-[#DC2626] mt-0.5">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Dropdown Ruangan -->
+                <!-- Dropdown Ruangan (Select2) -->
                 <div class="flex flex-col gap-1.5">
                     <label for="room_id" class="text-xs font-semibold text-[#1F2937]">
                         Ruangan Penempatan <span class="text-[#DC2626]">*</span>
                     </label>
-                    <div class="relative">
-                        <select id="room_id"
-                                name="room_id"
-                                required
-                                class="w-full h-10 pl-3 pr-8 bg-[#F3F7F6] text-xs text-[#1F2937] rounded-lg appearance-none cursor-pointer border {{ $errors->has('room_id') ? 'border-[#DC2626]' : 'border-[#D9E4E2]' }} focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all truncate">
-                            <option value="">-- Pilih Ruangan --</option>
-                            @foreach ($rooms as $room)
-                                <option value="{{ $room->id }}" {{ old('room_id', $inventory->room_id) == $room->id ? 'selected' : '' }}>
-                                    {{ $room->nama_ruangan }} ({{ $room->kode_ruangan }})
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">
-                            <span class="material-symbols-outlined text-[18px]">expand_more</span>
-                        </div>
-                    </div>
+                    <select id="room_id"
+                            name="room_id"
+                            required
+                            class="select2-form w-full">
+                        <option value="">-- Pilih Ruangan --</option>
+                        @foreach ($rooms as $room)
+                            <option value="{{ $room->id }}" {{ old('room_id', $inventory->room_id) == $room->id ? 'selected' : '' }}>
+                                {{ $room->nama_ruangan }} ({{ $room->kode_ruangan }})
+                            </option>
+                        @endforeach
+                    </select>
                     @error('room_id')
                         <p class="text-xs text-[#DC2626] mt-0.5">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Status Unit: Baik, Rusak, Perlu Perbaikan, Hilang -->
+                <!-- Status Unit (Select2): Baik, Rusak, Perlu Perbaikan, Hilang -->
                 <div class="flex flex-col gap-1.5">
                     <label for="status" class="text-xs font-semibold text-[#1F2937]">
                         Status Unit <span class="text-[#DC2626]">*</span>
                     </label>
-                    <div class="relative">
-                        @php
-                            $currStatus = strtolower(old('status', $inventory->status ?? 'baik'));
-                            // Jangan tampilkan 'dipinjam' di form edit — status dipinjam dikelola oleh sistem peminjaman
-                            if ($currStatus === 'dipinjam') {
-                                $currStatus = 'baik';
-                            }
-                        @endphp
-                        <select id="status"
-                                name="status"
-                                required
-                                class="w-full h-10 pl-3 pr-8 bg-[#F3F7F6] text-xs text-[#1F2937] rounded-lg appearance-none cursor-pointer border {{ $errors->has('status') ? 'border-[#DC2626]' : 'border-[#D9E4E2]' }} focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
-                            <option value="baik" {{ $currStatus === 'baik' ? 'selected' : '' }}>Baik</option>
-                            <option value="rusak" {{ $currStatus === 'rusak' ? 'selected' : '' }}>Rusak</option>
-                            <option value="perlu_perbaikan" {{ $currStatus === 'perlu_perbaikan' ? 'selected' : '' }}>Perlu Perbaikan</option>
-                            <option value="hilang" {{ $currStatus === 'hilang' ? 'selected' : '' }}>Hilang</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">
-                            <span class="material-symbols-outlined text-[18px]">expand_more</span>
-                        </div>
-                    </div>
-                    <!-- <span class="text-[11px] text-[#6B7280]">Kondisi fisik unit barang (bukan status transaksi peminjaman).</span> -->
+                    @php
+                        $currStatus = strtolower(old('status', $inventory->status ?? 'baik'));
+                        if ($currStatus === 'dipinjam') {
+                            $currStatus = 'baik';
+                        }
+                    @endphp
+                    <select id="status"
+                            name="status"
+                            required
+                            class="select2-form w-full">
+                        <option value="baik" {{ $currStatus === 'baik' ? 'selected' : '' }}>Baik</option>
+                        <option value="rusak" {{ $currStatus === 'rusak' ? 'selected' : '' }}>Rusak</option>
+                        <option value="perlu_perbaikan" {{ $currStatus === 'perlu_perbaikan' ? 'selected' : '' }}>Perlu Perbaikan</option>
+                        <option value="hilang" {{ $currStatus === 'hilang' ? 'selected' : '' }}>Hilang</option>
+                    </select>
                     @error('status')
                         <p class="text-xs text-[#DC2626] mt-0.5">{{ $message }}</p>
                     @enderror

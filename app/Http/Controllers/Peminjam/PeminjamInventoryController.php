@@ -29,26 +29,28 @@ class PeminjamInventoryController extends Controller
         // 1. All categories for Select2 filter
         $allCategories = Category::orderBy('nama_kategori')->get();
 
-        // 2. Query categories with eager loaded inventories and rooms
+        // 2. Query categories with eager loaded inventories with status 'baik' and rooms
         $categoryQuery = Category::with(['inventories' => function ($q) {
             $q->with('room')
-              ->whereNotIn('status', ['hilang'])
+              ->where('status', 'baik')
               ->orderBy('kode_barang', 'asc');
         }]);
 
-        // Search filter (nama kategori, kode kategori, merek/tipe barang di dalamnya, atau ruangan)
+        // Search filter (nama kategori, merek/tipe barang di dalamnya, atau ruangan)
         if ($request->filled('search')) {
             $search = trim($request->input('search'));
             $categoryQuery->where(function ($q) use ($search) {
                 $q->where('nama_kategori', 'like', "%{$search}%")
-                  ->orWhere('kode_kategori', 'like', "%{$search}%")
                   ->orWhere('keterangan', 'like', "%{$search}%")
                   ->orWhereHas('inventories', function ($iq) use ($search) {
-                      $iq->where('nama_barang', 'like', "%{$search}%")
-                         ->orWhere('kode_barang', 'like', "%{$search}%")
-                         ->orWhere('merk_type', 'like', "%{$search}%")
-                         ->orWhereHas('room', function ($rq) use ($search) {
-                             $rq->where('nama_ruangan', 'like', "%{$search}%");
+                      $iq->where('status', 'baik')
+                         ->where(function ($sq) use ($search) {
+                             $sq->where('nama_barang', 'like', "%{$search}%")
+                                ->orWhere('kode_barang', 'like', "%{$search}%")
+                                ->orWhere('merk_type', 'like', "%{$search}%")
+                                ->orWhereHas('room', function ($rq) use ($search) {
+                                    $rq->where('nama_ruangan', 'like', "%{$search}%");
+                                });
                          });
                   });
             });
@@ -59,14 +61,21 @@ class PeminjamInventoryController extends Controller
             $categoryQuery->where('id', $request->input('category_id'));
         }
 
+        // Pagination: 8 cards per page when more than 8 cards
         $categories = $categoryQuery->orderBy('nama_kategori', 'asc')
-            ->paginate(12)
+            ->paginate(8)
             ->withQueryString();
 
         // 3. Prepare detailed metadata map for each category (available stock, units, rooms, photo)
         $activeBorrowedInventoryIds = DB::table('loan_details')
             ->join('loans', 'loan_details.loan_id', '=', 'loans.id')
-            ->where('loans.status', 'dipinjam')
+            ->where(function ($q) {
+                $q->where('loan_details.status', 'dipinjam')
+                  ->orWhere(function ($s2) {
+                      $s2->whereNull('loan_details.status')
+                         ->where('loans.status', 'dipinjam');
+                  });
+            })
             ->pluck('loan_details.inventory_id')
             ->filter()
             ->unique()
@@ -80,9 +89,11 @@ class PeminjamInventoryController extends Controller
 
         $borrowedIdsSet = array_flip(array_unique(array_merge($activeBorrowedInventoryIds, $directBorrowedIds)));
 
-        // Load all categories with inventories to feed the multi-category loan modal
+        // Load all categories with inventories having status 'baik' to feed the multi-category loan modal
         $allCategoriesWithInventories = Category::with(['inventories' => function ($q) {
-            $q->with('room')->orderBy('kode_barang', 'asc');
+            $q->with('room')
+              ->where('status', 'baik')
+              ->orderBy('kode_barang', 'asc');
         }])->orderBy('nama_kategori')->get();
 
         $categoriesDataMap = [];
@@ -92,6 +103,7 @@ class PeminjamInventoryController extends Controller
             $allUnits = [];
             $availableUnits = [];
             $rooms = [];
+            $pjRooms = [];
 
             // Gambar kategori diambil dari gambar barang pertama yang terdaftar di database (id terkecil)
             $firstRegisteredInv = $cat->inventories->sortBy('id')->first();
@@ -103,24 +115,35 @@ class PeminjamInventoryController extends Controller
                 : ($firstWithPhoto ? $firstWithPhoto->foto_url : null);
 
             foreach ($cat->inventories as $inv) {
-                if ($inv->room && !in_array($inv->room->nama_ruangan, $rooms)) {
-                    $rooms[] = $inv->room->nama_ruangan;
+                // Hanya barang berstatus baik yang diproses dan ditampilkan
+                if ($inv->status !== 'baik') {
+                    continue;
+                }
+
+                if ($inv->room) {
+                    if (!in_array($inv->room->nama_ruangan, $rooms)) {
+                        $rooms[] = $inv->room->nama_ruangan;
+                    }
+                    if (!empty($inv->room->penanggung_jawab) && !in_array($inv->room->penanggung_jawab, $pjRooms)) {
+                        $pjRooms[] = $inv->room->penanggung_jawab;
+                    }
                 }
 
                 $isBorrowed = isset($borrowedIdsSet[$inv->id]) || $inv->status === 'dipinjam';
-                $isAvailable = ($inv->status === 'baik') && !$isBorrowed;
+                $isAvailable = !$isBorrowed;
 
                 $unitData = [
                     'id' => $inv->id,
                     'kode_barang' => $inv->kode_barang,
                     'nama_barang' => $inv->nama_barang,
                     'merk_type' => $inv->merk_type ?: '-',
-                    'foto_url' => $inv->foto_url, // Ditambahkan agar pop-up detail bisa menampilkan gambar setiap unit fisik
+                    'foto_url' => $inv->foto_url, // Pop-up detail bisa menampilkan gambar setiap unit fisik
                     'ruangan' => $inv->room->nama_ruangan ?? 'Ruang Belum Diatur',
+                    'penanggung_jawab_ruangan' => $inv->room->penanggung_jawab ?? '-',
                     'status' => $inv->status,
                     'is_borrowed' => $isBorrowed,
                     'is_available' => $isAvailable,
-                    'status_label' => $isBorrowed ? 'Sedang Dipinjam' : ($inv->status === 'baik' ? 'Tersedia' : ucfirst($inv->status)),
+                    'status_label' => $isBorrowed ? 'Dipinjam' : 'Tersedia',
                 ];
 
                 $allUnits[] = $unitData;
@@ -140,6 +163,7 @@ class PeminjamInventoryController extends Controller
                 'keterangan' => $cat->keterangan ?: '-',
                 'foto_url' => $fotoUrl,
                 'ruangan_summary' => !empty($rooms) ? implode(', ', $rooms) : 'Ruang Belum Diatur',
+                'pj_ruangan_summary' => !empty($pjRooms) ? implode(', ', $pjRooms) : 'Belum Ditentukan',
                 'total_inventaris' => count($allUnits),
                 'stok_tersedia' => $stokTersedia,
                 'available_units' => $availableUnits,
@@ -153,6 +177,7 @@ class PeminjamInventoryController extends Controller
             $cat->stok_tersedia = $data ? $data['stok_tersedia'] : 0;
             $cat->total_inventaris = $data ? $data['total_inventaris'] : 0;
             $cat->ruangan_summary = $data ? $data['ruangan_summary'] : 'Ruang Belum Diatur';
+            $cat->pj_ruangan_summary = $data ? $data['pj_ruangan_summary'] : 'Belum Ditentukan';
             $cat->foto_url = $data ? $data['foto_url'] : null;
         }
 
@@ -241,8 +266,12 @@ class PeminjamInventoryController extends Controller
                         $q->where('status', 'dipinjam');
                     })
                     ->whereDoesntHave('loanDetails', function ($q) {
-                        $q->whereHas('loan', function ($lq) {
-                            $lq->where('status', 'dipinjam');
+                        $q->where(function ($sub) {
+                            $sub->where('status', 'dipinjam')
+                                ->orWhere(function ($s2) {
+                                    $s2->whereNull('status')
+                                       ->whereHas('loan', fn($lq) => $lq->where('status', 'dipinjam'));
+                                });
                         });
                     })
                     ->lockForUpdate()
@@ -280,21 +309,18 @@ class PeminjamInventoryController extends Controller
                 'alasan_tujuan' => $validated['alasan_tujuan'] ?? null,
             ]);
 
-            // Save each allocated unit in LoanDetail and mark inventory as 'dipinjam'
+            // Save each allocated unit in LoanDetail
             foreach ($allAllocatedInventories as $unit) {
                 LoanDetail::create([
                     'loan_id' => $loan->id,
                     'inventory_id' => $unit->id,
                     'kode_barang' => $unit->kode_barang,
+                    'status' => 'dipinjam',
                 ]);
-
-                $unit->update(['status' => 'dipinjam']);
             }
 
-            $allocatedCodes = collect($allAllocatedInventories)->pluck('kode_barang')->implode(', ');
-
             return redirect()->route('peminjam.riwayat.index', ['highlight' => $loan->id])
-                ->with('success', "Pengajuan peminjaman '{$loan->kode_peminjaman}' untuk {$totalUnitsCount} unit barang berhasil diajukan! Kode barang yang dialokasikan: {$allocatedCodes}.");
+                ->with('success', "Peminjaman berhasil! {$totalUnitsCount} unit barang telah berhasil dipinjam.");
         });
     }
 

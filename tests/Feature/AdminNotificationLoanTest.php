@@ -180,7 +180,8 @@ class AdminNotificationLoanTest extends TestCase
         $loan->refresh();
         $this->assertEquals('dipinjam', $loan->status);
         $this->assertNull($loan->tanggal_kembali_aktual);
-        $this->assertEquals('dipinjam', $this->inventory->refresh()->status);
+        $this->assertTrue($this->inventory->refresh()->is_currently_borrowed);
+        $this->assertEquals('baik', $this->inventory->status);
     }
 
     public function test_double_borrowing_prevention_auto_selects_next_available_unit(): void
@@ -259,5 +260,64 @@ class AdminNotificationLoanTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Tidak ada data peminjaman ditemukan');
+    }
+
+    public function test_admin_can_complete_individual_loan_detail_separately(): void
+    {
+        $loan = Loan::create([
+            'kode_peminjaman' => 'PINJAM-MULTI-001',
+            'nama_peminjam' => 'Budi Penguji Multi',
+            'user_id' => $this->peminjam->id,
+            'category_id' => $this->category->id,
+            'inventory_id' => $this->inventory->id,
+            'jumlah' => 2,
+            'tanggal_pinjam' => Carbon::now(),
+            'tanggal_kembali' => Carbon::now()->addHours(2),
+            'status' => 'dipinjam',
+        ]);
+
+        $detail1 = \App\Models\LoanDetail::create([
+            'loan_id' => $loan->id,
+            'inventory_id' => $this->inventory->id,
+            'kode_barang' => $this->inventory->kode_barang,
+            'status' => 'dipinjam',
+        ]);
+
+        $detail2 = \App\Models\LoanDetail::create([
+            'loan_id' => $loan->id,
+            'inventory_id' => $this->inventory2->id,
+            'kode_barang' => $this->inventory2->kode_barang,
+            'status' => 'dipinjam',
+        ]);
+
+        // Complete detail 1 only
+        $response1 = $this->actingAs($this->admin)->put(route('admin.peminjaman.detail.update', $detail1->id), [
+            'status' => 'selesai',
+        ]);
+
+        $response1->assertRedirect();
+        $response1->assertSessionHas('success');
+
+        $detail1->refresh();
+        $detail2->refresh();
+        $loan->refresh();
+
+        $this->assertEquals('selesai', $detail1->status);
+        $this->assertEquals('dipinjam', $detail2->status);
+        $this->assertEquals('dipinjam', $loan->status); // Still active because detail 2 is not completed
+        $this->assertFalse($this->inventory->refresh()->is_currently_borrowed);
+        $this->assertTrue($this->inventory2->refresh()->is_currently_borrowed);
+
+        // Complete detail 2
+        $response2 = $this->actingAs($this->admin)->put(route('admin.peminjaman.detail.update', $detail2->id), [
+            'status' => 'selesai',
+        ]);
+
+        $detail2->refresh();
+        $loan->refresh();
+
+        $this->assertEquals('selesai', $detail2->status);
+        $this->assertEquals('selesai', $loan->status); // All completed!
+        $this->assertFalse($this->inventory2->refresh()->is_currently_borrowed);
     }
 }

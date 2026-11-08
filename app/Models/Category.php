@@ -33,6 +33,15 @@ class Category extends Model
             ->whereDoesntHave('loans', function ($q) {
                 $q->where('status', 'dipinjam');
             })
+            ->whereDoesntHave('loanDetails', function ($q) {
+                $q->where(function ($sub) {
+                    $sub->where('status', 'dipinjam')
+                        ->orWhere(function ($s2) {
+                            $s2->whereNull('status')
+                               ->whereHas('loan', fn($lq) => $lq->where('status', 'dipinjam'));
+                        });
+                });
+            })
             ->count();
     }
 
@@ -45,6 +54,15 @@ class Category extends Model
             ->where('status', 'baik')
             ->whereDoesntHave('loans', function ($q) {
                 $q->where('status', 'dipinjam');
+            })
+            ->whereDoesntHave('loanDetails', function ($q) {
+                $q->where(function ($sub) {
+                    $sub->where('status', 'dipinjam')
+                        ->orWhere(function ($s2) {
+                            $s2->whereNull('status')
+                               ->whereHas('loan', fn($lq) => $lq->where('status', 'dipinjam'));
+                        });
+                });
             })
             ->orderBy('kode_barang', 'asc')
             ->get();

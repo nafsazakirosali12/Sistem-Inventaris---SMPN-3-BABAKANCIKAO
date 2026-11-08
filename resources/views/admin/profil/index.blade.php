@@ -22,24 +22,17 @@
                             @click="enableEditMode()"
                             class="h-10 px-4 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 active:scale-[0.99]">
                         <span class="material-symbols-outlined text-[18px]">edit</span>
-                        <span>Edit Profil Sekolah</span>
+                        <span>Ubah Profil Sekolah</span>
                     </button>
                 </template>
 
                 <template x-if="isEditing">
-                    <div class="flex items-center gap-2">
-                        <button type="button"
-                                @click="cancelEditMode()"
-                                class="h-10 px-4 rounded-lg bg-white border border-[#D9E4E2] text-xs font-semibold text-[#4B5563] hover:text-[#1F2937] hover:bg-[#F3F7F6] transition-colors">
-                            Batal
-                        </button>
-                        <button type="button"
-                                @click="submitProfileForm()"
-                                class="h-10 px-5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 active:scale-[0.99]">
-                            <span class="material-symbols-outlined text-[18px]">save</span>
-                            <span>Simpan Perubahan</span>
-                        </button>
-                    </div>
+                    <button type="button"
+                            @click="cancelEditMode()"
+                            class="h-10 px-4 rounded-lg bg-white border border-[#D9E4E2] text-xs font-semibold text-[#4B5563] hover:text-[#1F2937] hover:bg-[#F3F7F6] transition-colors flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                        <span>Batal</span>
+                    </button>
                 </template>
             </div>
         </div>
@@ -62,7 +55,7 @@
                 </div>
                 <div>
                     <span class="font-bold text-[#1F2937]">Mode Baca (Read-Only)</span>
-                    <p class="text-[11px] text-[#6B7280]">Formulir terkunci untuk mencegah perubahan yang tidak disengaja. Klik tombol <strong>Edit Profil Sekolah</strong> di atas untuk mengubah data.</p>
+                    <p class="text-[11px] text-[#6B7280]">Formulir terkunci untuk mencegah perubahan yang tidak disengaja. Klik tombol <strong>Ubah Profil Sekolah</strong> di atas untuk mengubah data.</p>
                 </div>
             </div>
         </div>
@@ -485,18 +478,18 @@
             </div>
         </div>
 
-        <!-- Sticky Bottom Bar when editing -->
-        <div x-show="isEditing" class="p-4 rounded-xl bg-white border border-[#D9E4E2] shadow-md flex items-center justify-end gap-3 sticky bottom-4 z-20">
+        <!-- Bottom Action Buttons when editing (Bukan yang nempel & tanpa card putih) -->
+        <div x-show="isEditing" class="flex items-center justify-end gap-3 pt-2">
             <button type="button"
                     @click="cancelEditMode()"
-                    class="h-10 px-4 rounded-lg bg-white border border-[#D9E4E2] text-xs font-semibold text-[#4B5563] hover:text-[#1F2937] hover:bg-[#F3F7F6] transition-colors">
+                    class="h-10 px-5 rounded-lg bg-white border border-[#D9E4E2] text-xs font-semibold text-[#4B5563] hover:text-[#1F2937] hover:bg-[#F3F7F6] transition-colors cursor-pointer">
                 Batal
             </button>
             <button type="button"
                     @click="submitProfileForm()"
-                    class="h-10 px-5 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 active:scale-[0.99]">
+                    class="h-10 px-6 rounded-lg bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#0F766E]/40 active:scale-[0.99] cursor-pointer">
                 <span class="material-symbols-outlined text-[18px]">save</span>
-                <span>Simpan Perubahan Profil</span>
+                <span>Simpan Perubahan</span>
             </button>
         </div>
     </form>
