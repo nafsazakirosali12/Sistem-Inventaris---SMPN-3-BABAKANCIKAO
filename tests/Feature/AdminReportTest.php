@@ -261,7 +261,7 @@ class AdminReportTest extends TestCase
         $response->assertSee('Semua Kategori');
         $response->assertSee('Semua Ruangan');
         $response->assertSee('downloadOfficialDocument()', false);
-        $response->assertSee('Unduh Dokumen Asli (.pdf)');
+        $response->assertSee('Unduh Dokumen (.pdf)');
     }
 
     public function test_admin_can_filter_by_multiple_categories_and_rooms(): void

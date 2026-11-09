@@ -478,7 +478,7 @@
         <div class="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl border border-[#D9E4E2] transform transition-all">
 
             <!-- Form Multi-Kategori -->
-            <form x-ref="loanForm" method="POST" action="{{ route('peminjam.peminjaman.store') }}" @submit.prevent="submitLoanForm()">
+            <form x-ref="loanForm" method="POST" action="{{ route('peminjam.peminjaman.store') }}" @submit.prevent="submitLoanForm()" novalidate>
                 @csrf
 
                 <!-- Modal Header -->
@@ -806,7 +806,7 @@
             detailModalOpen: false,
             loanModalOpen: false,
             selectedDetailCategory: null,
-            borrowerName: '{{ addslashes(auth()->user()->name ?? "") }}', // Default nama akun yang login, bisa disesuaikan jika perlu
+            borrowerName: '', // Dikosongkan default agar peminjam menginput sendiri nama peminjam dan wajib diisi
             tanggalPinjam: '',
             tanggalKembali: '',
             minPinjamDatetime: '',
@@ -1004,9 +1004,8 @@
             },
 
             handleCancelLoan() {
-                const defaultBorrower = '{{ addslashes(auth()->user()->name ?? "") }}';
                 const hasData = (this.selectedCategories && this.selectedCategories.length > 0) ||
-                                (this.borrowerName && this.borrowerName.trim() !== defaultBorrower && this.borrowerName.trim().length > 0) ||
+                                (this.borrowerName && this.borrowerName.trim().length > 0) ||
                                 (this.alasanTujuan && this.alasanTujuan.trim().length > 0);
 
                 if (!hasData) {
@@ -1061,7 +1060,7 @@
 
             resetLoanFormData() {
                 this.selectedCategories = [];
-                this.borrowerName = '{{ addslashes(auth()->user()->name ?? "") }}';
+                this.borrowerName = '';
                 this.alasanTujuan = '';
                 this.selectedAddCategoryId = '';
                 this.updateRealtimeClock(true);

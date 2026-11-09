@@ -28,6 +28,7 @@
           method="POST"
           enctype="multipart/form-data"
           onsubmit="return handleFormSubmit(event)"
+          novalidate
           class="flex flex-col gap-6">
         @csrf
 
@@ -448,14 +449,16 @@
         if (file) {
             if (file.size > 2097152) {
                 Swal.fire({
-                    icon: 'warning',
                     title: 'Ukuran File Terlalu Besar',
                     text: 'Ukuran foto maksimal 2 MB. Silakan pilih foto dengan ukuran lebih kecil.',
                     confirmButtonColor: '#0F766E',
-                    confirmButtonText: 'Mengerti',
+                    confirmButtonText: 'Tutup',
+                    width: '22rem',
                     customClass: {
                         popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
-                        confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                        title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                        htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                        confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                     }
                 });
                 input.value = '';
@@ -501,31 +504,26 @@
         const status = document.getElementById('status').value;
         const fotoInput = document.getElementById('foto_input');
 
-        if (!kode || !nama || !kategori || !ruangan || !status) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Data Belum Lengkap',
-                text: 'Pastikan seluruh field wajib pada Informasi Utama (Kode Barang, Nama, Kategori, Ruangan, Status Unit) telah terisi.',
-                confirmButtonColor: '#0F766E',
-                confirmButtonText: 'Lengkapi Data',
-                customClass: {
-                    popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
-                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
-                }
-            });
-            return false;
-        }
+        const missingFields = [];
+        if (!fotoInput || !fotoInput.files || fotoInput.files.length === 0) missingFields.push('Foto Barang');
+        if (!kode) missingFields.push('Kode Barang');
+        if (!nama) missingFields.push('Nama Barang');
+        if (!kategori) missingFields.push('Kategori Barang');
+        if (!ruangan) missingFields.push('Ruangan / Lokasi');
+        if (!status) missingFields.push('Status Unit');
 
-        if (!fotoInput || !fotoInput.files || fotoInput.files.length === 0) {
+        if (missingFields.length > 0) {
             Swal.fire({
-                icon: 'warning',
-                title: 'Foto Belum Diunggah',
-                text: 'Foto barang inventaris wajib diunggah sebelum data dapat disimpan.',
+                title: 'Form Belum Lengkap',
+                text: `${missingFields.join(', ')} wajib diisi atau dipilih.`,
                 confirmButtonColor: '#0F766E',
-                confirmButtonText: 'Unggah Foto',
+                confirmButtonText: 'Tutup',
+                width: '22rem',
                 customClass: {
                     popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
-                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                    title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                    htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                 }
             });
             return false;

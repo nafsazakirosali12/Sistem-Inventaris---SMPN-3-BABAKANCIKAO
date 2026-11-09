@@ -108,7 +108,7 @@
                                             onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->username) }}')"
                                             class="w-8 h-8 rounded-lg hover:bg-[#CCFBF1] text-[#0F766E] flex items-center justify-center transition-colors focus:outline-none"
                                             title="Ubah Nama Pengguna / Kata Sandi">
-                                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                                        <span class="material-symbols-outlined text-[18px]">Ubah</span>
                                     </button>
 
                                     <!-- Tombol Hapus -->
@@ -188,7 +188,7 @@
         </div>
 
         <!-- Modal Form -->
-        <form id="formStoreAccount" action="{{ route('admin.akun.store') }}" method="POST" onsubmit="return handleStoreAccountSubmit(event)" class="p-6 flex flex-col gap-4">
+        <form id="formStoreAccount" action="{{ route('admin.akun.store') }}" method="POST" onsubmit="return handleStoreAccountSubmit(event)" novalidate class="p-6 flex flex-col gap-4">
             @csrf
 
             <!-- Role Indicator Info -->
@@ -228,9 +228,12 @@
                            placeholder="Minimal 6 karakter"
                            required
                            class="w-full h-10 px-3 pr-10 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
-                    <div class="absolute right-3.5 inset-y-0 flex items-center pointer-events-none text-[#6B7280]">
-                        <span class="material-symbols-outlined text-[18px] leading-none select-none">lock</span>
-                    </div>
+                    <button type="button"
+                            onclick="togglePasswordVisibility('add_password', 'add_password_icon')"
+                            class="absolute right-2.5 inset-y-0 my-auto w-7 h-7 flex items-center justify-center text-[#6B7280] hover:text-[#0F766E] transition-colors focus:outline-none cursor-pointer"
+                            title="Lihat kata sandi">
+                        <span id="add_password_icon" class="material-symbols-outlined text-[18px] leading-none select-none">visibility_off</span>
+                    </button>
                 </div>
             </div>
 
@@ -269,7 +272,7 @@
         </div>
 
         <!-- Modal Form -->
-        <form id="formEditAkun" method="POST" class="p-6 flex flex-col gap-4">
+        <form id="formEditAkun" method="POST" onsubmit="event.preventDefault(); promptSaveEditAccount();" novalidate class="p-6 flex flex-col gap-4">
             @csrf
             @method('PUT')
 
@@ -301,9 +304,12 @@
                            name="password"
                            placeholder="Kosongkan jika tidak diubah"
                            class="w-full h-10 px-3 pr-10 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
-                    <div class="absolute right-3.5 inset-y-0 flex items-center pointer-events-none text-[#6B7280]">
-                        <span class="material-symbols-outlined text-[18px] leading-none select-none">lock</span>
-                    </div>
+                    <button type="button"
+                            onclick="togglePasswordVisibility('edit_password', 'edit_password_icon')"
+                            class="absolute right-2.5 inset-y-0 my-auto w-7 h-7 flex items-center justify-center text-[#6B7280] hover:text-[#0F766E] transition-colors focus:outline-none cursor-pointer"
+                            title="Lihat kata sandi">
+                        <span id="edit_password_icon" class="material-symbols-outlined text-[18px] leading-none select-none">visibility_off</span>
+                    </button>
                 </div>
             </div>
 
@@ -327,9 +333,33 @@
 <script>
     let isConfirmedAccountSubmission = false;
 
+    // Toggle visibility kata sandi (ubah type password <-> text dan ganti ikon mata)
+    function togglePasswordVisibility(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (!input || !icon) return;
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.textContent = 'visibility';
+            icon.parentElement.setAttribute('title', 'Sembunyikan kata sandi');
+        } else {
+            input.type = 'password';
+            icon.textContent = 'visibility_off';
+            icon.parentElement.setAttribute('title', 'Lihat kata sandi');
+        }
+    }
+
     // Modal Tambah Akun
     function openAddAccountModal() {
         document.getElementById('modalTambahAkun').classList.remove('hidden');
+        const passInput = document.getElementById('add_password');
+        const passIcon = document.getElementById('add_password_icon');
+        if (passInput) passInput.type = 'password';
+        if (passIcon) {
+            passIcon.textContent = 'visibility_off';
+            passIcon.parentElement.setAttribute('title', 'Lihat kata sandi');
+        }
         setTimeout(() => {
             const input = document.getElementById('add_username');
             if (input) input.focus();
@@ -338,6 +368,13 @@
 
     function closeAddAccountModal() {
         document.getElementById('modalTambahAkun').classList.add('hidden');
+        const passInput = document.getElementById('add_password');
+        const passIcon = document.getElementById('add_password_icon');
+        if (passInput) passInput.type = 'password';
+        if (passIcon) {
+            passIcon.textContent = 'visibility_off';
+            passIcon.parentElement.setAttribute('title', 'Lihat kata sandi');
+        }
     }
 
     // Konfirmasi Tambah Akun
@@ -350,17 +387,22 @@
         const username = document.getElementById('add_username').value.trim();
         const password = document.getElementById('add_password').value;
 
-        if (!username || !password) {
+        const missingFields = [];
+        if (!username) missingFields.push('Nama Pengguna');
+        if (!password) missingFields.push('Kata Sandi');
+
+        if (missingFields.length > 0) {
             Swal.fire({
-                title: 'Formulir Belum Lengkap',
-                text: 'Nama pengguna dan kata sandi wajib diisi.',
+                title: 'Form Belum Lengkap',
+                text: `${missingFields.join(' dan ')} wajib diisi.`,
                 confirmButtonColor: '#0F766E',
+                confirmButtonText: 'Tutup',
                 width: '22rem',
                 customClass: {
                     popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                     title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
                     htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
-                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                 }
             });
             return false;
@@ -371,12 +413,13 @@
                 title: 'Kata Sandi Terlalu Pendek',
                 text: 'Kata sandi minimal terdiri dari 6 karakter.',
                 confirmButtonColor: '#0F766E',
+                confirmButtonText: 'Tutup',
                 width: '22rem',
                 customClass: {
                     popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                     title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
                     htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
-                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                 }
             });
             return false;
@@ -415,30 +458,68 @@
         form.action = `/admin/akun/${id}`;
 
         document.getElementById('edit_username').value = username;
-        document.getElementById('edit_password').value = '';
+        const passInput = document.getElementById('edit_password');
+        const passIcon = document.getElementById('edit_password_icon');
+        if (passInput) {
+            passInput.value = '';
+            passInput.type = 'password';
+        }
+        if (passIcon) {
+            passIcon.textContent = 'visibility_off';
+            passIcon.parentElement.setAttribute('title', 'Lihat kata sandi');
+        }
 
         document.getElementById('modalEditAkun').classList.remove('hidden');
     }
 
     function closeEditAccountModal() {
         document.getElementById('modalEditAkun').classList.add('hidden');
+        const passInput = document.getElementById('edit_password');
+        const passIcon = document.getElementById('edit_password_icon');
+        if (passInput) {
+            passInput.value = '';
+            passInput.type = 'password';
+        }
+        if (passIcon) {
+            passIcon.textContent = 'visibility_off';
+            passIcon.parentElement.setAttribute('title', 'Lihat kata sandi');
+        }
     }
 
     // Konfirmasi Edit Akun
     function promptSaveEditAccount() {
-        const usernameInput = document.getElementById('edit_username').value.trim();
+        const usernameInput = document.getElementById('edit_username') ? document.getElementById('edit_username').value.trim() : '';
+        const passwordInput = document.getElementById('edit_password') ? document.getElementById('edit_password').value : '';
 
         if (!usernameInput) {
             Swal.fire({
-                title: 'Formulir Belum Lengkap',
+                title: 'Form Belum Lengkap',
                 text: 'Nama pengguna wajib diisi.',
                 confirmButtonColor: '#0F766E',
+                confirmButtonText: 'Tutup',
                 width: '22rem',
                 customClass: {
                     popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                     title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
                     htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
-                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
+                }
+            });
+            return;
+        }
+
+        if (passwordInput && passwordInput.length < 6) {
+            Swal.fire({
+                title: 'Kata Sandi Terlalu Pendek',
+                text: 'Kata sandi baru minimal terdiri dari 6 karakter.',
+                confirmButtonColor: '#0F766E',
+                confirmButtonText: 'Tutup',
+                width: '22rem',
+                customClass: {
+                    popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                    title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                    htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                 }
             });
             return;

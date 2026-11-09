@@ -197,7 +197,7 @@ class PeminjamInventoryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_peminjam' => 'required|string|min:3|max:150',
+            'nama_peminjam' => 'required|string|max:150',
             'tanggal_pinjam' => [
                 'required',
                 'date',
@@ -218,7 +218,6 @@ class PeminjamInventoryController extends Controller
             'jumlah' => 'nullable|integer|min:1|max:100',
         ], [
             'nama_peminjam.required' => 'Nama peminjam wajib diisi.',
-            'nama_peminjam.min' => 'Nama peminjam minimal 3 karakter.',
             'tanggal_pinjam.required' => 'Tanggal & jam peminjaman wajib diisi.',
             'tanggal_kembali.required' => 'Batas tanggal & jam pengembalian wajib diisi.',
             'tanggal_kembali.after_or_equal' => 'Batas tanggal dan jam pengembalian tidak boleh sebelum waktu peminjaman.',
