@@ -382,16 +382,10 @@
         </div>
 
         <!-- ═══════════════════════════════════════════════════════════
-             4. PAGINATION (flow.md 5: 6 per halaman)
+             4. PAGINATION (Konsisten dengan Katalog Peminjaman)
         ════════════════════════════════════════════════════════════ -->
-        <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-[#D9E4E2]">
-            <p class="text-xs text-[#6B7280]">
-                Menampilkan <span class="font-medium text-[#1F2937]">{{ $loans->firstItem() ?? 0 }}-{{ $loans->lastItem() ?? 0 }}</span> dari <span class="font-medium text-[#1F2937]">{{ $loans->total() }}</span> riwayat
-            </p>
-
-            <div class="pagination-custom">
-                {{ $loans->links() }}
-            </div>
+        <div class="mt-8 pt-6 border-t border-[#D9E4E2]">
+            {{ $loans->links() }}
         </div>
     @endif
 

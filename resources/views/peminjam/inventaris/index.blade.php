@@ -259,8 +259,8 @@
             @endforeach
         </div>
 
-        <!-- Pagination -->
-        <div class="mt-8">
+        <!-- Pagination (Konsisten dengan Riwayat) -->
+        <div class="mt-8 pt-6 border-t border-[#D9E4E2]">
             {{ $categories->links() }}
         </div>
     @endif
@@ -459,8 +459,8 @@
          x-transition:leave-end="opacity-0"
          class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
          style="display: none;"
-         @click.self="if (typeof Swal === 'undefined' || !Swal.isVisible()) loanModalOpen = false"
-         @keydown.escape.window="if (typeof Swal === 'undefined' || !Swal.isVisible()) loanModalOpen = false">
+         @click.self="if (typeof Swal === 'undefined' || !Swal.isVisible()) handleCancelLoan()"
+         @keydown.escape.window="if (typeof Swal === 'undefined' || !Swal.isVisible()) handleCancelLoan()">
 
         <div class="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl border border-[#D9E4E2] transform transition-all">
 
@@ -484,7 +484,7 @@
                         <span class="px-2.5 py-1 rounded-full bg-[#CCFBF1] text-[#0F766E] font-bold text-xs"
                               x-text="`Total: ${totalBorrowedCount}`"></span>
                         <button type="button"
-                                @click="loanModalOpen = false"
+                                @click="handleCancelLoan()"
                                 class="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 flex items-center justify-center transition-colors cursor-pointer">
                             <span class="material-symbols-outlined text-[20px]">close</span>
                         </button>
@@ -619,12 +619,6 @@
                                 </div>
                             </div>
                         </template>
-
-                        <!-- TOTAL KESELURUHAN UNIT BARANG -->
-                        <div class="p-3 rounded-xl bg-[#F0FDFA] border border-[#CCFBF1] flex items-center justify-between text-xs">
-                            <span class="font-bold text-[#1F2937]">Total Keseluruhan Barang yang Dipinjam:</span>
-                            <span class="font-bold text-sm text-[#0F766E]" x-text="`${totalBorrowedCount} Unit`"></span>
-                        </div>
                     </div>
 
 
@@ -764,7 +758,7 @@
                 <!-- Modal Footer -->
                 <div class="px-6 py-4 bg-[#F8FBFA] border-t border-[#D9E4E2] flex items-center justify-between">
                     <button type="button"
-                            @click="loanModalOpen = false"
+                            @click="handleCancelLoan()"
                             class="h-10 px-4 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs transition-colors cursor-pointer">
                         Batal
                     </button>
@@ -951,6 +945,69 @@
                         this.loanModalOpen = true;
                     }
                 }
+            },
+
+            handleCancelLoan() {
+                const hasData = (this.selectedCategories && this.selectedCategories.length > 0) ||
+                                (this.borrowerName && this.borrowerName.trim().length > 0) ||
+                                (this.alasanTujuan && this.alasanTujuan.trim().length > 0);
+
+                if (!hasData) {
+                    this.loanModalOpen = false;
+                    return;
+                }
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Batalkan Peminjaman?',
+                        text: 'Apakah Anda ingin menyimpan data barang yang sudah dipilih dan diisi, atau menghapus seluruh isian?',
+                        showDenyButton: true,
+                        showCancelButton: true,
+                        confirmButtonColor: '#0F766E',
+                        denyButtonColor: '#DC2626',
+                        cancelButtonColor: '#9CA3AF',
+                        confirmButtonText: 'Simpan Data',
+                        denyButtonText: 'Hapus Data',
+                        cancelButtonText: 'Kembali',
+                        reverseButtons: true,
+                        width: '26rem',
+                        customClass: {
+                            popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                            title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                            htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                            confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm',
+                            denyButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#DC2626] hover:bg-[#B91C1C] text-white shadow-sm mr-2',
+                            cancelButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-gray-200 hover:bg-gray-300 text-gray-700 mr-2'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Simpan: formulir ditutup, isian dan pilihan barang tetap tersimpan di form
+                            this.loanModalOpen = false;
+                        } else if (result.isDenied) {
+                            // Hapus: kosongkan pilihan barang dan seluruh isian form, lalu tutup
+                            this.resetLoanFormData();
+                            this.loanModalOpen = false;
+                        } else {
+                            // Kembali: tetap di modal form peminjaman
+                            this.loanModalOpen = true;
+                        }
+                    });
+                } else {
+                    if (confirm('Simpan pilihan dan isian barang? Klik OK untuk simpan, atau Batal untuk menghapus isian.')) {
+                        this.loanModalOpen = false;
+                    } else {
+                        this.resetLoanFormData();
+                        this.loanModalOpen = false;
+                    }
+                }
+            },
+
+            resetLoanFormData() {
+                this.selectedCategories = [];
+                this.borrowerName = '';
+                this.alasanTujuan = '';
+                this.selectedAddCategoryId = '';
+                this.updateRealtimeClock(true);
             },
 
             init() {

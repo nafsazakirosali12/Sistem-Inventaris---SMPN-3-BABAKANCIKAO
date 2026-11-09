@@ -22,6 +22,7 @@
     .kib-table {
         width: 100%;
         border-collapse: collapse;
+        table-layout: fixed;
         font-size: 9px;
         line-height: 1.25;
     }
@@ -77,7 +78,7 @@
             page-break-inside: auto;
         }
         .kib-table thead {
-            display: table-header-group;
+            display: table-row-group !important; /* Mencegah pengulangan judul kolom saat ganti halaman */
         }
         .kib-table tr {
             page-break-inside: avoid;
@@ -85,7 +86,7 @@
         }
         @page {
             size: A4 landscape;
-            margin: 0;
+            margin: 2.54cm 2.54cm 2.54cm 2.54cm; /* Margin 2.54 cm pada seluruh sisi */
         }
     }
 </style>
@@ -194,15 +195,19 @@
                     <span class="bg-white px-2 py-0.5 rounded border border-[#CCFBF1]">Cari: "{{ $filters['search'] }}"</span>
                 @endif
                 @if(!empty($filters['category_id']))
-                    @php $catObj = \App\Models\Category::find($filters['category_id']); @endphp
-                    @if($catObj)
-                        <span class="bg-white px-2 py-0.5 rounded border border-[#CCFBF1]">Kategori: {{ $catObj->nama_kategori }}</span>
+                    @php
+                        $catNames = \App\Models\Category::findMany((array)$filters['category_id'])->pluck('nama_kategori')->implode(', ');
+                    @endphp
+                    @if($catNames)
+                        <span class="bg-white px-2 py-0.5 rounded border border-[#CCFBF1]">Kategori: {{ $catNames }}</span>
                     @endif
                 @endif
                 @if(!empty($filters['room_id']))
-                    @php $roomObj = \App\Models\Room::find($filters['room_id']); @endphp
-                    @if($roomObj)
-                        <span class="bg-white px-2 py-0.5 rounded border border-[#CCFBF1]">Ruangan: {{ $roomObj->nama_ruangan }}</span>
+                    @php
+                        $roomNames = \App\Models\Room::findMany((array)$filters['room_id'])->pluck('nama_ruangan')->implode(', ');
+                    @endphp
+                    @if($roomNames)
+                        <span class="bg-white px-2 py-0.5 rounded border border-[#CCFBF1]">Ruangan: {{ $roomNames }}</span>
                     @endif
                 @endif
                 @if(!empty($filters['status']))
@@ -300,28 +305,28 @@
             <div class="mt-4">
                 <table class="kib-table">
                     <thead>
-                        <!-- Row 1: Header Titles -->
+                        <!-- Row 1: Header Titles (Proposi 100% Sesuai PDF Asli) -->
                         <tr>
-                            <th rowspan="2" class="w-9">No.</th>
-                            <th rowspan="2" class="w-24">Kode Barang</th>
-                            <th rowspan="2" class="w-44">Jenis Barang / Nama Barang</th>
-                            <th rowspan="2" class="w-20">Nomor Registrasi</th>
-                            <th rowspan="2" class="w-28">Merk / Type</th>
-                            <th rowspan="2" class="w-18">Ukuran / CC</th>
-                            <th rowspan="2" class="w-20">Bahan</th>
-                            <th rowspan="2" class="w-16">Tahun Pembelian</th>
-                            <th colspan="5" class="py-1">Nomor</th>
-                            <th rowspan="2" class="w-24">Asal Usul Cara Perolehan</th>
-                            <th rowspan="2" class="w-28">Harga (Ribuan Rp)</th>
-                            <th rowspan="2" class="w-28">Keterangan</th>
+                            <th rowspan="2" style="width: 3%;">No.</th>
+                            <th rowspan="2" style="width: 8%;">Kode Barang</th>
+                            <th rowspan="2" style="width: 18%;">Jenis Barang / Nama Barang</th>
+                            <th rowspan="2" style="width: 4.5%;">Nomor Registrasi</th>
+                            <th rowspan="2" style="width: 8%;">Merk / Type</th>
+                            <th rowspan="2" style="width: 4.5%;">Ukuran / CC</th>
+                            <th rowspan="2" style="width: 4.5%;">Bahan</th>
+                            <th rowspan="2" style="width: 4.5%;">Tahun Pembelian</th>
+                            <th colspan="5" class="py-1" style="width: 20%;">Nomor</th>
+                            <th rowspan="2" style="width: 7%;">Asal Usul Cara Perolehan</th>
+                            <th rowspan="2" style="width: 9%;">Harga (Ribuan Rp)</th>
+                            <th rowspan="2" style="width: 9%;">Keterangan</th>
                         </tr>
                         <!-- Row 2: Sub-columns for Nomor -->
                         <tr>
-                            <th class="w-16">Pabrik</th>
-                            <th class="w-16">Rangka</th>
-                            <th class="w-16">Mesin</th>
-                            <th class="w-16">Polisi</th>
-                            <th class="w-16">BPKB</th>
+                            <th style="width: 4%;">Pabrik</th>
+                            <th style="width: 4%;">Rangka</th>
+                            <th style="width: 4%;">Mesin</th>
+                            <th style="width: 4%;">Polisi</th>
+                            <th style="width: 4%;">BPKB</th>
                         </tr>
                         <!-- Row 3: Column Numbers [1] to [16] -->
                         <tr class="col-numbers">

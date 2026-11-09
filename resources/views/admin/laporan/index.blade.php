@@ -3,94 +3,251 @@
 @section('title', 'Laporan Inventaris Barang')
 
 @push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
-    /* ── Select2 Custom Multi-Select & Single Select Theme ────────── */
-    .select2-container--default .select2-selection--multiple {
+    /* ── Select2 Custom Single Select Theme (Konsisten & Rapi) ── */
+    #reportFilterForm .select2-container--default .select2-selection--single {
         background-color: #F3F7F6;
         border: 1px solid #D9E4E2;
         border-radius: 0.5rem;
-        min-height: 40px;
-        padding: 3px 6px;
+        height: 40px !important;
         transition: all 0.15s ease-in-out;
         display: flex !important;
-        flex-wrap: wrap !important;
         align-items: center !important;
-        gap: 4px !important;
+        position: relative;
     }
-    .select2-container--default.select2-container--focus .select2-selection--multiple,
-    .select2-container--default.select2-container--open .select2-selection--multiple {
+    #reportFilterForm .select2-container--default.select2-container--focus .select2-selection--single,
+    #reportFilterForm .select2-container--default.select2-container--open .select2-selection--single {
         background-color: #ffffff;
         border-color: #0F766E;
-        box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.18);
+        box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.2);
         outline: none;
     }
+    #reportFilterForm .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 38px !important;
+        font-size: 0.75rem;
+        color: #1F2937;
+        padding-left: 0.75rem !important;
+        padding-right: 2rem !important;
+        font-weight: 500;
+    }
+    #reportFilterForm .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 38px !important;
+        right: 8px !important;
+        width: 20px;
+        position: absolute;
+        top: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-    /* Pilihan chip badge yang rapi berbentuk pill modern */
-    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    /* ── Select2 Custom Multi-Select (Kondisi Barang: Desain Identik dengan Dropdown Lain, Konsisten & Rapi) ── */
+    #reportFilterForm .select2-container {
+        height: 40px !important;
+        max-height: 40px !important;
+        width: 100% !important;
+    }
+    #reportFilterForm .select2-container--default .select2-selection--multiple {
+        background-color: #F3F7F6;
+        border: 1px solid #D9E4E2;
+        border-radius: 0.5rem;
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        padding: 3px 28px 3px 0.75rem !important;
+        box-sizing: border-box !important;
+        transition: all 0.15s ease-in-out;
         position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        cursor: pointer;
+        overflow: hidden !important;
+    }
+    #reportFilterForm .select2-container--default .select2-selection--multiple:hover {
+        border-color: #0F766E !important;
+    }
+    #reportFilterForm .select2-container--default.select2-container--focus .select2-selection--multiple,
+    #reportFilterForm .select2-container--default.select2-container--open .select2-selection--multiple {
+        background-color: #ffffff !important;
+        border-color: #0F766E !important;
+        box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.2) !important;
+        outline: none !important;
+    }
+
+    /* Panah Dropdown Konsisten di Kanan (Sama Persis dengan Dropdown Single Lainnya) */
+    #reportFilterForm .select2-container--default .select2-selection--multiple::after {
+        content: '';
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        margin-top: -2px;
+        border-color: #6B7280 transparent transparent transparent;
+        border-style: solid;
+        border-width: 5px 4px 0 4px;
+        height: 0;
+        width: 0;
+        pointer-events: none;
+        transition: transform 0.2s ease;
+    }
+    #reportFilterForm .select2-container--default.select2-container--open .select2-selection--multiple::after {
+        border-color: transparent transparent #0F766E transparent;
+        border-width: 0 4px 5px 4px;
+    }
+
+    /* Rendered Container: Scroll ke Bawah (Vertikal) Secara Halus jika Banyak Opsi Terpilih */
+    #reportFilterForm .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 3px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        list-style: none !important;
+        width: 100% !important;
+        max-height: 34px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+        scrollbar-width: thin;
+        scrollbar-color: #0F766E transparent;
+    }
+
+    /* Ketika kosong: ul rendered disembunyikan agar tidak memakan ruang/mendorong placeholder ke kanan */
+    #reportFilterForm .select2-container--default .select2-selection--multiple .select2-selection__rendered:empty {
+        display: none !important;
+        width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Webkit Scrollbar Halus */
+    #reportFilterForm .select2-container--default .select2-selection--multiple .select2-selection__rendered::-webkit-scrollbar {
+        width: 3px;
+    }
+    #reportFilterForm .select2-container--default .select2-selection--multiple .select2-selection__rendered::-webkit-scrollbar-thumb {
+        background-color: #0F766E;
+        border-radius: 9999px;
+    }
+
+    /* Chips Badge */
+    #reportFilterForm .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        float: none !important;
         display: inline-flex !important;
         align-items: center !important;
         background-color: #E6FFFA !important;
         border: 1px solid #99F6E4 !important;
         color: #0F766E !important;
-        font-size: 11px !important;
+        font-size: 10.5px !important;
         font-weight: 600 !important;
         border-radius: 9999px !important;
-        padding: 2px 8px 2px 4px !important;
-        margin: 2px 2px 2px 0 !important;
-        line-height: 1.3 !important;
-        gap: 4px !important;
+        padding: 1px 6px 1px 4px !important;
+        margin: 1px !important;
+        line-height: 1.2 !important;
+        gap: 3px !important;
     }
-
-    /* Tombol silang (remove) chip yang rapi, bulat, presisi dan nyaman diklik */
-    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    #reportFilterForm .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
         position: static !important;
         float: none !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        width: 16px !important;
-        height: 16px !important;
-        min-width: 16px !important;
-        padding: 0 !important;
-        margin: 0 !important;
+        width: 14px !important;
+        height: 14px !important;
         border: none !important;
         border-radius: 9999px !important;
         background-color: #CCFBF1 !important;
         color: #0F766E !important;
-        font-size: 13px !important;
+        font-size: 12px !important;
         font-weight: bold !important;
-        line-height: 1 !important;
         cursor: pointer !important;
         transition: all 0.15s ease-in-out !important;
     }
-    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    #reportFilterForm .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
         background-color: #FEE2E2 !important;
         color: #EF4444 !important;
-        transform: scale(1.15) !important;
     }
-    .select2-container--default .select2-selection--multiple .select2-selection__choice__display {
-        padding: 0 4px 0 2px !important;
-        font-size: 11px !important;
-        font-weight: 600 !important;
+
+    /* ── Penanganan Field (Tidak Terbagi Dua & Placeholder Rapi di Kiri) ── */
+    /* Ketika sudah ada pilihan (choice), sembunyikan input inline sepenuhnya agar field TIDAK TERBAGI DUA */
+    #reportFilterForm .select2-container--default .select2-selection--multiple .select2-selection__rendered:not(:empty) + .select2-search--inline,
+    #reportFilterForm .select2-container--default .select2-selection--multiple:has(.select2-selection__choice) .select2-search--inline {
+        display: none !important;
+    }
+
+    /* Ketika belum ada pilihan: Tampilkan placeholder penuh di sebelah kiri secara presisi */
+    #reportFilterForm .select2-container--default .select2-selection--multiple .select2-selection__rendered:empty + .select2-search--inline,
+    #reportFilterForm .select2-container--default .select2-selection--multiple:not(:has(.select2-selection__choice)) .select2-search--inline {
+        display: flex !important;
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+    #reportFilterForm .select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
+        height: 34px !important;
+        line-height: 34px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 0.75rem !important;
+        font-family: inherit !important;
+        color: #1F2937 !important;
+        font-weight: 500 !important;
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        outline: none !important;
+        cursor: pointer !important;
+        caret-color: transparent !important; /* Hilangkan kursor ketik di dalam field */
+        text-align: left !important;
+    }
+    #reportFilterForm .select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field::placeholder {
+        color: #1F2937 !important;
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+        text-align: left !important;
+    }
+
+    /* Tanda centang pada opsi yang sedang aktif/terpilih di dalam dropdown */
+    .select2-container--default .select2-results__option[aria-selected=true]::after {
+        content: '✓';
+        float: right;
+        color: #0F766E;
+        font-weight: bold;
+    }
+
+    /* Flatpickr Calendar Styling Theme */
+    .flatpickr-calendar {
+        border-radius: 12px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        border: 1px solid #D9E4E2;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 12px;
+    }
+    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange,
+    .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange {
+        background: #0F766E !important;
+        border-color: #0F766E !important;
+        color: #ffffff !important;
+    }
+    .flatpickr-day.inRange {
+        background: #CCFBF1 !important;
+        border-color: #CCFBF1 !important;
         color: #0F766E !important;
     }
-
-    .select2-container--default .select2-selection--multiple .select2-search__field {
-        font-size: 0.75rem;
-        font-family: inherit;
-        color: #1F2937;
-        margin-top: 2px;
+    .flatpickr-months .flatpickr-month {
+        background: #0F766E;
+        color: #fff;
+        fill: #fff;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
     }
-
-    .select2-container--default .select2-selection--single {
-        height: 40px !important;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 38px !important;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 38px !important;
+    span.flatpickr-weekday {
+        background: #0F766E;
+        color: #CCFBF1;
     }
 
     /* ── Tampilan Lembar Kertas Asli (A4 Landscape Paper Sheet) ───── */
@@ -104,7 +261,7 @@
         margin: 0 auto;
         width: 100%;
         max-width: 1180px; /* A4 Landscape Proportional Width */
-        padding: 32px 36px 40px 36px;
+        padding: 2.54cm; /* Margin 2.54 cm pada seluruh sisi */
         box-sizing: border-box;
     }
 
@@ -112,7 +269,8 @@
     .kib-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 9.5px;
+        table-layout: fixed;
+        font-size: 9px;
         line-height: 1.3;
     }
     .kib-table th, .kib-table td {
@@ -135,11 +293,11 @@
         padding: 2px;
     }
 
-    /* ── Print Stylesheet (Landscape, Tanpa URL 127 & Title Header/Footer Browser) ─ */
+    /* ── Print Stylesheet (Landscape, Margin 2.54 cm, Tanpa Header Berulang) ─ */
     @media print {
         @page {
             size: A4 landscape;
-            margin: 0; /* Menghilangkan URL 127.0.0.1... dan title bawaan header/footer cetak browser */
+            margin: 2.54cm 2.54cm 2.54cm 2.54cm; /* Margin 2.54 cm pada seluruh 4 sisi */
         }
         html, body {
             background-color: #ffffff !important;
@@ -161,17 +319,17 @@
         .kib-paper-sheet {
             box-shadow: none !important;
             border: none !important;
-            padding: 10mm 12mm !important; /* Margin fisik dalam kertas A4 Landscape */
+            padding: 0 !important; /* Margin fisik diatur sepenuhnya oleh @page */
             margin: 0 !important;
             width: 100% !important;
             max-width: 100% !important;
         }
         .kib-table {
-            font-size: 8pt !important;
+            font-size: 7.5pt !important;
             page-break-inside: auto;
         }
         .kib-table thead {
-            display: table-header-group;
+            display: table-row-group !important; /* Mencegah judul kolom diulang saat ganti halaman */
         }
         .kib-table tr {
             page-break-inside: avoid;
@@ -213,7 +371,7 @@
                     <label for="filter_format" class="block text-xs font-semibold text-[#374151] mb-1 truncate" title="Format Dokumen Laporan">
                         Format Dokumen Laporan
                     </label>
-                    <select name="format" id="filter_format" class="select2-single w-full" onchange="updateDownloadButtonState()">
+                    <select name="format" id="filter_format" class="select2-laporan w-full" onchange="updateDownloadButtonState()">
                         @foreach($formats as $fKey => $fVal)
                             <option value="{{ $fKey }}" {{ request('format', 'pdf') === $fKey ? 'selected' : '' }}>
                                 {{ $fVal['label'] }} (.{{ $fVal['ext'] }})
@@ -222,37 +380,41 @@
                     </select>
                 </div>
 
-                <!-- 2. Kategori Barang -->
+                <!-- 2. Kategori Barang (Multi-Select Select2) -->
                 <div>
+                    @php
+                        $selectedCategories = (array) request('category_id', []);
+                    @endphp
                     <label for="filter_kategori" class="block text-xs font-semibold text-[#374151] mb-1 truncate">
                         Kategori Barang
                     </label>
-                    <select name="category_id" id="filter_kategori" class="select2-single w-full">
-                        <option value="">Semua Kategori</option>
+                    <select name="category_id[]" id="filter_kategori" class="select2-multiple-filter select2-kategori-multiple w-full" multiple="multiple" data-placeholder="Semua Kategori">
                         @foreach($categories as $category)
-                            <option value="{{ $category->id }}" {{ (string)request('category_id') === (string)$category->id ? 'selected' : '' }}>
+                            <option value="{{ $category->id }}" {{ in_array((string)$category->id, array_map('strval', $selectedCategories)) ? 'selected' : '' }}>
                                 {{ $category->nama_kategori }}
                             </option>
                         @endforeach
                     </select>
                 </div>
 
-                <!-- 3. Lokasi Ruangan -->
+                <!-- 3. Lokasi Ruangan (Multi-Select Select2) -->
                 <div>
+                    @php
+                        $selectedRooms = (array) request('room_id', []);
+                    @endphp
                     <label for="filter_ruangan" class="block text-xs font-semibold text-[#374151] mb-1 truncate">
                         Lokasi Ruangan
                     </label>
-                    <select name="room_id" id="filter_ruangan" class="select2-single w-full">
-                        <option value="">Semua Ruangan</option>
+                    <select name="room_id[]" id="filter_ruangan" class="select2-multiple-filter select2-ruangan-multiple w-full" multiple="multiple" data-placeholder="Semua Ruangan">
                         @foreach($rooms as $room)
-                            <option value="{{ $room->id }}" {{ (string)request('room_id') === (string)$room->id ? 'selected' : '' }}>
+                            <option value="{{ $room->id }}" {{ in_array((string)$room->id, array_map('strval', $selectedRooms)) ? 'selected' : '' }}>
                                 {{ $room->nama_ruangan }}
                             </option>
                         @endforeach
                     </select>
                 </div>
 
-                <!-- 4. Kondisi / Status Unit (Multi-select) -->
+                <!-- 4. Kondisi Barang (Multi-Select Select2 Searchable) -->
                 <div>
                     @php
                         $selectedStatuses = (array) request('status', []);
@@ -260,7 +422,7 @@
                     <label for="filter_status" class="block text-xs font-semibold text-[#374151] mb-1 truncate">
                         Kondisi Barang
                     </label>
-                    <select name="status[]" id="filter_status" class="select2-multiple w-full" multiple="multiple" data-placeholder="Semua Kondisi">
+                    <select name="status[]" id="filter_status" class="select2-multiple-filter select2-kondisi-multiple w-full" multiple="multiple" data-placeholder="Semua Kondisi">
                         <option value="baik" {{ in_array('baik', $selectedStatuses) ? 'selected' : '' }}>Baik</option>
                         <option value="rusak" {{ in_array('rusak', $selectedStatuses) ? 'selected' : '' }}>Rusak</option>
                         <option value="perlu perbaikan" {{ in_array('perlu perbaikan', $selectedStatuses) ? 'selected' : '' }}>Perlu Perbaikan</option>
@@ -268,167 +430,33 @@
                     </select>
                 </div>
 
-                <!-- 5. Tahun Perolehan (Year Picker Popover) -->
+                <!-- 5. Rentang Periode (Flatpickr Daterangepicker) -->
                 <div>
-                    <label for="filter_tahun" class="block text-xs font-semibold text-[#374151] mb-1 truncate">
-                        Tahun Perolehan
+                    <label for="filter_periode" class="block text-xs font-semibold text-[#374151] mb-1 truncate">
+                        Rentang Periode
                     </label>
-                    <div class="relative w-full"
-                         x-data="{
-                             open: false,
-                             inputValue: '{{ request('tahun', '') }}',
-                             todayYear: {{ date('Y') }},
-                             decadeStart: Math.floor(({{ request('tahun') ? (int)substr(request('tahun'), 0, 4) : date('Y') }}) / 10) * 10,
-                             startYear: {{ request('tahun') && preg_match('/^(\d{4})/', request('tahun'), $m) ? $m[1] : 'null' }},
-                             endYear: {{ request('tahun') && preg_match('/(\d{4})$/', request('tahun'), $m2) ? $m2[1] : 'null' }},
-                             hoverYear: null,
-                             pickingStep: 1,
-
-                             get decadeEnd() { return this.decadeStart + 9; },
-                             get activeStart() {
-                                 if (this.startYear && this.endYear) return Math.min(this.startYear, this.endYear);
-                                 if (this.startYear && !this.endYear && this.hoverYear) return Math.min(this.startYear, this.hoverYear);
-                                 return this.startYear;
-                             },
-                             get activeEnd() {
-                                 if (this.startYear && this.endYear) return Math.max(this.startYear, this.endYear);
-                                 if (this.startYear && !this.endYear && this.hoverYear) return Math.max(this.startYear, this.hoverYear);
-                                 return this.endYear;
-                             },
-                             get years() {
-                                 const list = [];
-                                 for (let i = -1; i <= 10; i++) {
-                                     const y = this.decadeStart + i;
-                                     const aStart = this.activeStart;
-                                     const aEnd = this.activeEnd;
-                                     const isStart = aStart !== null && y === aStart;
-                                     const isEnd = aEnd !== null && y === aEnd;
-                                     const isInRange = aStart !== null && aEnd !== null && y > aStart && y < aEnd;
-                                     const isSingle = aStart !== null && aStart === aEnd && y === aStart;
-                                     list.push({
-                                         year: y,
-                                         isCurrentDecade: i >= 0 && i <= 9,
-                                         isToday: y === this.todayYear,
-                                         isStart: isStart,
-                                         isEnd: isEnd,
-                                         isInRange: isInRange,
-                                         isSingle: isSingle,
-                                         isSelected: isStart || isEnd || isInRange
-                                     });
-                                 }
-                                 return list;
-                             },
-                             prevDecade() { this.decadeStart -= 10; },
-                             nextDecade() { this.decadeStart += 10; },
-                             onYearClick(y) {
-                                 if (this.pickingStep === 1 || !this.startYear || (this.startYear && this.endYear && this.pickingStep !== 2)) {
-                                     this.startYear = y;
-                                     this.endYear = null;
-                                     this.hoverYear = y;
-                                     this.pickingStep = 2;
-                                 } else if (this.pickingStep === 2) {
-                                     const finalStart = Math.min(this.startYear, y);
-                                     const finalEnd = Math.max(this.startYear, y);
-                                     this.startYear = finalStart;
-                                     this.endYear = finalEnd;
-                                     this.pickingStep = 1;
-                                     this.hoverYear = null;
-                                     const val = (finalStart === finalEnd) ? String(finalStart) : `${finalStart} - ${finalEnd}`;
-                                     this.inputValue = val;
-                                     this.open = false;
-                                     this.$refs.yearInput.value = val;
-                                 }
-                             },
-                             onYearHover(y) {
-                                 if (this.pickingStep === 2) { this.hoverYear = y; }
-                             },
-                             selectToday() {
-                                 this.startYear = this.todayYear;
-                                 this.endYear = this.todayYear;
-                                 this.pickingStep = 1;
-                                 this.hoverYear = null;
-                                 this.inputValue = String(this.todayYear);
-                                 this.open = false;
-                                 this.$refs.yearInput.value = this.todayYear;
-                             },
-                             resetYear() {
-                                 this.startYear = null;
-                                 this.endYear = null;
-                                 this.hoverYear = null;
-                                 this.pickingStep = 1;
-                                 this.inputValue = '';
-                                 this.$refs.yearInput.value = '';
-                             }
-                         }"
-                         @click.outside="open = false; hoverYear = null"
-                         @keydown.escape.window="open = false; hoverYear = null">
-
-                        <div class="relative w-full">
-                            <input type="text"
-                                   x-ref="yearInput"
-                                   name="tahun"
-                                   id="filter_tahun"
-                                   :value="inputValue"
-                                   placeholder="Semua Tahun"
-                                   readonly
-                                   @click="open = !open"
-                                   class="w-full h-10 pl-3 pr-8 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] placeholder-[#6B7280] border border-[#D9E4E2] focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all cursor-pointer font-medium select-none truncate">
-
-                            <!-- Icon Kalender / Clear -->
-                            <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center">
-                                <button type="button"
-                                        x-show="inputValue"
-                                        @click.stop="resetYear()"
-                                        class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
-                                        title="Hapus filter tahun">
-                                    <span class="material-symbols-outlined text-[15px]">cancel</span>
-                                </button>
-                                <span x-show="!inputValue" class="material-symbols-outlined text-[17px] text-[#6B7280] pointer-events-none">calendar_today</span>
-                            </div>
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#6B7280]">
+                            <span class="material-symbols-outlined text-[18px]">calendar_today</span>
                         </div>
-
-                        <!-- Year Picker Popover Dropdown -->
-                        <div x-show="open"
-                             x-transition:enter="transition ease-out duration-150"
-                             x-transition:enter-start="opacity-0 translate-y-1 scale-95"
-                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                             class="absolute z-50 left-0 lg:left-auto lg:right-0 top-full mt-1.5 w-72 bg-white rounded-xl shadow-xl border border-[#D9E4E2] p-3 select-none"
-                             style="display: none;">
-                            <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#D9E4E2]">
-                                <button type="button" @click="prevDecade()" class="w-7 h-7 flex items-center justify-center rounded-lg text-[#374151] hover:bg-[#F3F7F6]">
-                                    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-                                </button>
-                                <span class="text-xs font-bold text-[#1F2937]" x-text="`${decadeStart} - ${decadeEnd}`"></span>
-                                <button type="button" @click="nextDecade()" class="w-7 h-7 flex items-center justify-center rounded-lg text-[#374151] hover:bg-[#F3F7F6]">
-                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                                </button>
+                        <input type="text"
+                               id="filter_periode"
+                               name="periode"
+                               value="{{ request('periode', request('tahun')) }}"
+                               placeholder="Pilih rentang periode..."
+                               readonly
+                               class="w-full h-10 pl-9 pr-8 bg-[#F3F7F6] text-xs text-[#1F2937] rounded-lg border border-[#D9E4E2] focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 cursor-pointer placeholder-[#6B7280] truncate">
+                        @if(request('periode') || request('tahun'))
+                            <a href="{{ route('admin.laporan.index', request()->except(['periode', 'tahun'])) }}"
+                               class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-[#6B7280] hover:text-[#DC2626] transition-colors"
+                               title="Hapus filter rentang periode">
+                                <span class="material-symbols-outlined text-[16px]">cancel</span>
+                            </a>
+                        @else
+                            <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-[#6B7280]">
+                                <span class="material-symbols-outlined text-[18px]">expand_more</span>
                             </div>
-
-                            <div class="grid grid-cols-4 gap-1.5 text-center mb-2">
-                                <template x-for="item in years" :key="item.year">
-                                    <button type="button"
-                                            @click="onYearClick(item.year)"
-                                            @mouseenter="onYearHover(item.year)"
-                                            :class="{
-                                                'bg-[#0F766E] text-white font-bold shadow-xs': item.isStart || item.isEnd || item.isSingle,
-                                                'bg-[#CCFBF1] text-[#0F766E] font-semibold': item.isInRange,
-                                                'text-[#9CA3AF] opacity-50': !item.isCurrentDecade && !item.isSelected,
-                                                'text-[#0F766E] font-bold border border-[#0F766E]/40': item.isToday && !item.isSelected,
-                                                'text-[#1F2937] hover:bg-[#F0FDFA] hover:text-[#0F766E]': !item.isSelected && item.isCurrentDecade
-                                            }"
-                                            class="h-8 rounded-lg text-xs flex items-center justify-center transition-all cursor-pointer">
-                                        <span x-text="item.year"></span>
-                                    </button>
-                                </template>
-                            </div>
-
-                            <div class="pt-2 border-t border-[#D9E4E2] flex items-center justify-between">
-                                <button type="button" @click="selectToday()" class="text-[11px] font-semibold text-[#0F766E] hover:underline">
-                                    Tahun Ini ({{ date('Y') }})
-                                </button>
-                                <span class="text-[10px] text-gray-400" x-text="pickingStep === 2 ? 'Pilih akhir' : 'Pilih awal'"></span>
-                            </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
 
@@ -459,7 +487,7 @@
             <div>
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-[#0F766E] text-[20px]">description</span>
-                    <h2 class="text-sm font-bold text-[#1F2937]">Pratinjau Lembar Kerja KIB B (A4 Landscape)</h2>
+                    <h2 class="text-sm font-bold text-[#1F2937]">Pratinjau Lembar Kerja KIB B</h2>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#CCFBF1] text-[#0F766E]">
                         {{ number_format($filteredTotalCount) }} Barang
                     </span>
@@ -469,14 +497,24 @@
                 </p>
             </div>
 
-            <!-- Tombol Cetak / Unduh di Atas Tabel -->
+            <!-- Tombol Cetak & Unduh Dokumen Asli di Atas Tabel -->
             <div class="flex items-center gap-2 shrink-0">
+                <!-- Tombol Unduh Dokumen Asli Resmi (PDF / Excel / Word) -->
                 <button type="button"
-                        id="btnCetakUnduh"
-                        onclick="executePrintOrDownload()"
+                        id="btnUnduhDokumen"
+                        onclick="downloadOfficialDocument()"
                         class="h-9 px-4 bg-[#0F766E] hover:bg-[#115E59] text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer">
-                    <span class="material-symbols-outlined text-[18px]" id="btnIcon">print</span>
-                    <span id="btnText">Cetak / Unduh Dokumen</span>
+                    <span class="material-symbols-outlined text-[18px]" id="btnIcon">picture_as_pdf</span>
+                    <span id="btnText">Unduh Dokumen (.pdf)</span>
+                </button>
+
+                <!-- Tombol Cetak Pratinjau Kertas Langsung -->
+                <button type="button"
+                        onclick="printDocument()"
+                        class="h-9 px-3 bg-white hover:bg-gray-50 border border-[#D9E4E2] text-[#374151] rounded-lg text-xs font-semibold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                        title="Cetak pratinjau lembar kerja langsung ke printer">
+                    <span class="material-symbols-outlined text-[16px] text-[#0F766E]">print</span>
+                    <span class="hidden sm:inline">Cetak</span>
                 </button>
             </div>
         </div>
@@ -488,7 +526,7 @@
             <div id="printableDocument" class="kib-paper-sheet">
 
                 <!-- KOP SURAT (Logo di kiri, 3 Baris Judul Ditengah, Identitas vertikal menyatu) -->
-                <div class="border-b-2 border-black pb-3 mb-4">
+                <div class="border-b-4 border-double border-black pb-3 mb-4">
                     <div class="relative flex items-center justify-center min-h-[72px] mb-2">
                         <!-- Logo Instansi Tetap di Sebelah Kiri -->
                         @php
@@ -560,28 +598,28 @@
                 <div class="overflow-x-auto">
                     <table class="kib-table">
                         <thead>
-                            <!-- Header Baris 1 -->
+                            <!-- Header Baris 1: Proposi 100% Sesuai PDF Asli -->
                             <tr>
-                                <th rowspan="2" class="w-6">No.</th>
-                                <th rowspan="2" class="w-20">Kode Barang</th>
-                                <th rowspan="2">Jenis Barang / Nama Barang</th>
-                                <th rowspan="2" class="w-16">Nomor Registrasi</th>
-                                <th rowspan="2" class="w-24">Merk / Type</th>
-                                <th rowspan="2" class="w-16">Ukuran / CC</th>
-                                <th rowspan="2" class="w-16">Bahan</th>
-                                <th rowspan="2" class="w-12">Tahun Pembelian</th>
-                                <th colspan="5" class="py-0.5">Nomor</th>
-                                <th rowspan="2" class="w-20">Asal Usul Cara Perolehan</th>
-                                <th rowspan="2" class="w-24">Harga (Ribuan Rp)</th>
-                                <th rowspan="2" class="w-20">Keterangan</th>
+                                <th rowspan="2" style="width: 3%;">No.</th>
+                                <th rowspan="2" style="width: 8%;">Kode Barang</th>
+                                <th rowspan="2" style="width: 18%;">Jenis Barang / Nama Barang</th>
+                                <th rowspan="2" style="width: 4.5%;">Nomor Registrasi</th>
+                                <th rowspan="2" style="width: 8%;">Merk / Type</th>
+                                <th rowspan="2" style="width: 4.5%;">Ukuran / CC</th>
+                                <th rowspan="2" style="width: 4.5%;">Bahan</th>
+                                <th rowspan="2" style="width: 4.5%;">Tahun Pembelian</th>
+                                <th colspan="5" class="py-0.5" style="width: 20%;">Nomor</th>
+                                <th rowspan="2" style="width: 7%;">Asal Usul Cara Perolehan</th>
+                                <th rowspan="2" style="width: 9%;">Harga (Rp)</th>
+                                <th rowspan="2" style="width: 9%;">Keterangan</th>
                             </tr>
                             <!-- Header Baris 2: Sub-kolom Nomor -->
                             <tr>
-                                <th class="w-12">Pabrik</th>
-                                <th class="w-12">Rangka</th>
-                                <th class="w-12">Mesin</th>
-                                <th class="w-12">Polisi</th>
-                                <th class="w-12">BPKB</th>
+                                <th style="width: 4%;">Pabrik</th>
+                                <th style="width: 4%;">Rangka</th>
+                                <th style="width: 4%;">Mesin</th>
+                                <th style="width: 4%;">Polisi</th>
+                                <th style="width: 4%;">BPKB</th>
                             </tr>
                             <!-- Header Baris 3: Angka Kolom [1] s/d [16] -->
                             <tr class="col-numbers">
@@ -691,29 +729,81 @@
 </div>
 
 @push('scripts')
-<!-- html2canvas untuk unduh gambar langsung di sisi browser -->
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
 <script>
     $(document).ready(function() {
-        // Inisialisasi Select2 Single
-        $('.select2-single').select2({
+        // Inisialisasi Select2 Single dengan fitur pencarian (search) aktif agar pengguna bisa mengetik
+        $('.select2-laporan').select2({
             width: '100%',
-            dropdownParent: $('body')
+            dropdownAutoWidth: false,
+            minimumResultsForSearch: 0 // Pastikan fitur pencarian selalu aktif agar bisa ngetik
         });
 
-        // Inisialisasi Select2 Multiple untuk Kondisi Unit
-        $('.select2-multiple').select2({
-            width: '100%',
-            dropdownParent: $('body'),
-            closeOnSelect: false
+        // Inisialisasi Select2 Multiple untuk Kategori, Ruangan, dan Kondisi Barang
+        // dengan Kotak Ketik Pencarian di dalam Dropdown (seperti format dropdown profesional)
+        if (typeof $.fn.select2 !== 'undefined' && typeof $.fn.select2.amd !== 'undefined') {
+            $.fn.select2.amd.require([
+                'select2/dropdown',
+                'select2/dropdown/search',
+                'select2/dropdown/attachBody',
+                'select2/utils'
+            ], function (Dropdown, DropdownSearch, AttachBody, Utils) {
+                var customDropdownAdapter = Utils.Decorate(
+                    Utils.Decorate(Dropdown, DropdownSearch),
+                    AttachBody
+                );
+
+                $('.select2-multiple-filter').each(function() {
+                    var ph = $(this).data('placeholder') || 'Pilih...';
+                    $(this).select2({
+                        width: '100%',
+                        dropdownAdapter: customDropdownAdapter,
+                        placeholder: ph,
+                        closeOnSelect: false
+                    });
+                });
+            });
+        } else {
+            $('.select2-multiple-filter').each(function() {
+                var ph = $(this).data('placeholder') || 'Pilih...';
+                $(this).select2({
+                    width: '100%',
+                    placeholder: ph,
+                    closeOnSelect: false
+                });
+            });
+        }
+
+        // Auto-focus input pencarian di dropdown saat dibuka (baik single maupun multiple)
+        $(document).on('select2:open', function() {
+            setTimeout(function() {
+                const searchField = document.querySelector('.select2-dropdown .select2-search__field, .select2-container--open .select2-search__field');
+                if (searchField) {
+                    searchField.focus();
+                    if (!searchField.getAttribute('placeholder')) {
+                        searchField.setAttribute('placeholder', 'Ketik untuk mencari...');
+                    }
+                }
+            }, 50);
+        });
+
+        // Inisialisasi Flatpickr Daterange Picker untuk Periode Perolehan
+        flatpickr("#filter_periode", {
+            mode: "range",
+            dateFormat: "d/m/Y",
+            conjunction: " — ",
+            locale: "id",
+            allowInput: false,
+            defaultDate: @json(request('periode') ? preg_split('/\s*(?:—|-|to)\s*/u', request('periode')) : (request('tahun') ? preg_split('/\s*(?:—|-|to)\s*/u', request('tahun')) : [])),
         });
 
         // Perbarui label tombol saat halaman dimuat
         updateDownloadButtonState();
     });
 
-    // Memperbarui teks dan ikon tombol aksi sesuai format dokumen yang dipilih
+    // Memperbarui teks dan ikon tombol aksi sesuai format dokumen yang dipilih (Hanya PDF, Excel, dan Word)
     function updateDownloadButtonState() {
         const formatSelect = document.getElementById('filter_format');
         const format = formatSelect ? formatSelect.value : 'pdf';
@@ -723,91 +813,37 @@
         if (!btnText || !btnIcon) return;
 
         if (format === 'pdf') {
-            btnText.textContent = 'Cetak / Unduh PDF';
-            btnIcon.textContent = 'print';
+            btnText.textContent = 'Unduh Dokumen (.pdf)';
+            btnIcon.textContent = 'picture_as_pdf';
         } else if (format === 'xlsx') {
             btnText.textContent = 'Unduh Excel (.xlsx)';
             btnIcon.textContent = 'table_view';
         } else if (format === 'docx') {
             btnText.textContent = 'Unduh Word (.docx)';
             btnIcon.textContent = 'description';
-        } else if (['png', 'jpg', 'jpeg', 'webp'].includes(format)) {
-            btnText.textContent = `Unduh Gambar (.${format.toUpperCase()})`;
-            btnIcon.textContent = 'image';
         }
     }
 
-    // Mengunduh langsung dokumen pratinjau sebagai gambar (PNG, JPG, JPEG, WebP) via html2canvas
-    function downloadDocumentAsImage(format) {
-        const docElem = document.getElementById('printableDocument');
-        if (!docElem) return;
-
-        const btn = document.getElementById('btnCetakUnduh');
-        const origHtml = btn ? btn.innerHTML : '';
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Mengunduh .${format.toUpperCase()}...</span>`;
-        }
-
-        const mimeType = (format === 'png') ? 'image/png' :
-                         (format === 'webp') ? 'image/webp' : 'image/jpeg';
-        const ext = (format === 'jpeg') ? 'jpg' : format;
-
-        html2canvas(docElem, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            windowWidth: docElem.scrollWidth
-        }).then(function(canvas) {
-            const dataUrl = canvas.toDataURL(mimeType, 0.95);
-            const link = document.createElement('a');
-            const now = new Date();
-            const timestamp = now.getFullYear() +
-                String(now.getMonth() + 1).padStart(2, '0') +
-                String(now.getDate()).padStart(2, '0') + '_' +
-                String(now.getHours()).padStart(2, '0') +
-                String(now.getMinutes()).padStart(2, '0') +
-                String(now.getSeconds()).padStart(2, '0');
-            link.download = `Laporan_Inventaris_KIB_B_${timestamp}.${ext}`;
-            link.href = dataUrl;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }).catch(function(err) {
-            console.error('Error generating image:', err);
-            alert('Gagal memproses gambar. Silakan coba kembali.');
-        }).finally(function() {
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = origHtml;
-            }
-        });
+    // Mengunduh dokumen asli resmi langsung dari backend sesuai format pilihan (PDF Asli, Excel, Word)
+    function downloadOfficialDocument() {
+        const form = document.getElementById('reportFilterForm');
+        const url = "{{ route('admin.laporan.download') }}?" + new URLSearchParams(new FormData(form)).toString();
+        window.location.href = url;
     }
 
-    // Menjalankan Cetak / Unduh Dokumen sesuai format yang dipilih
+    // Menjalankan cetak pratinjau lembar kerja langsung ke printer
+    function printDocument() {
+        const oldTitle = document.title;
+        document.title = ' ';
+        window.print();
+        setTimeout(function() {
+            document.title = oldTitle;
+        }, 1000);
+    }
+
+    // Kompatibilitas alias bila terpanggil
     function executePrintOrDownload() {
-        const formatSelect = document.getElementById('filter_format');
-        const format = formatSelect ? formatSelect.value : 'pdf';
-
-        if (format === 'xlsx' || format === 'docx') {
-            // Langsung unduh file Excel atau Word dari backend
-            const form = document.getElementById('reportFilterForm');
-            const url = "{{ route('admin.laporan.download') }}?" + new URLSearchParams(new FormData(form)).toString();
-            window.location.href = url;
-        } else if (['png', 'jpg', 'jpeg', 'webp'].includes(format)) {
-            // Langsung unduh gambar di browser tanpa perlu berpindah halaman
-            downloadDocumentAsImage(format);
-        } else {
-            // Default PDF / Cetak: Langsung buka window.print()
-            // Kosongkan title sementara agar header default browser tidak mencetak judul halaman atau URL 127
-            const oldTitle = document.title;
-            document.title = ' ';
-            window.print();
-            setTimeout(function() {
-                document.title = oldTitle;
-            }, 1000);
-        }
+        downloadOfficialDocument();
     }
 </script>
 @endpush

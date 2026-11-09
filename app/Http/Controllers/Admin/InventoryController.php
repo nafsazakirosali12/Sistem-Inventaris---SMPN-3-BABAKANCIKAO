@@ -32,14 +32,20 @@ class InventoryController extends Controller
         // 2. Query inventories with category, room, and active loans
         $query = Inventory::with(['category', 'room', 'loans']);
 
-        // Search: Kode Barang, Nama Barang, Nomor Register, Merek
+        // Search: Kode Barang, Nama Barang, Nomor Register, Merek, Kategori, Ruangan
         if ($request->filled('search')) {
             $search = trim($request->input('search'));
             $query->where(function ($q) use ($search) {
                 $q->where('kode_barang', 'like', "%{$search}%")
                   ->orWhere('nama_barang', 'like', "%{$search}%")
                   ->orWhere('nomor_register', 'like', "%{$search}%")
-                  ->orWhere('merk_type', 'like', "%{$search}%");
+                  ->orWhere('merk_type', 'like', "%{$search}%")
+                  ->orWhereHas('category', function ($cq) use ($search) {
+                      $cq->where('nama_kategori', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('room', function ($rq) use ($search) {
+                      $rq->where('nama_ruangan', 'like', "%{$search}%");
+                  });
             });
         }
 

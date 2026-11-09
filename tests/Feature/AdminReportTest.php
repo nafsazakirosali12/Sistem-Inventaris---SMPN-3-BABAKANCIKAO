@@ -109,7 +109,7 @@ class AdminReportTest extends TestCase
         $response->assertSee('PDF Document (.pdf)');
         $response->assertSee('Microsoft Excel (.xlsx)');
         $response->assertSee('Microsoft Word (.docx)');
-        $response->assertSee('Gambar PNG (.png)');
+        $response->assertDontSee('Gambar PNG (.png)');
         $response->assertSee('REKAPITULASI INVENTARIS BARANG (KIB) B');
         $response->assertSee('PERALATAN DAN MESIN');
         $response->assertSee('Laptop ASUS ExpertBook');
@@ -239,14 +239,121 @@ class AdminReportTest extends TestCase
         $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     }
 
-    public function test_admin_downloading_image_format_redirects_to_preview_with_auto_download(): void
+    public function test_admin_downloading_unknown_or_image_format_defaults_to_pdf(): void
     {
         $response = $this->actingAs($this->admin)->get(route('admin.laporan.download', ['format' => 'png']));
 
-        $response->assertRedirect();
-        $response->assertRedirectContains(route('admin.laporan.preview'));
-        $response->assertRedirectContains('auto_download=1');
-        $response->assertRedirectContains('format=png');
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/pdf');
+    }
+
+    public function test_admin_report_index_has_searchable_select2_status_filter(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.laporan.index'));
+
+        $response->assertStatus(200);
+        $response->assertSee('select2-kondisi-multiple');
+        $response->assertSee('name="status[]"', false);
+        $response->assertSee('name="category_id[]"', false);
+        $response->assertSee('name="room_id[]"', false);
+        $response->assertSee('multiple="multiple"', false);
+        $response->assertSee('Semua Kondisi');
+        $response->assertSee('Semua Kategori');
+        $response->assertSee('Semua Ruangan');
+        $response->assertSee('downloadOfficialDocument()', false);
+        $response->assertSee('Unduh Dokumen Asli (.pdf)');
+    }
+
+    public function test_admin_can_filter_by_multiple_categories_and_rooms(): void
+    {
+        $cat2 = \App\Models\Category::create(['nama_kategori' => 'Kategori Lain', 'kode_kategori' => 'KAT2']);
+        $room2 = \App\Models\Room::create(['nama_ruangan' => 'Ruangan Lain', 'kode_ruangan' => 'R2']);
+
+        $inv2 = \App\Models\Inventory::create([
+            'kode_barang' => 'BRG-002',
+            'nama_barang' => 'Barang Kategori Dua',
+            'category_id' => $cat2->id,
+            'room_id' => $room2->id,
+            'status' => 'baik',
+            'tahun_pengadaan' => 2024,
+            'harga' => 3000000,
+        ]);
+
+        // Filter both categories
+        $response = $this->actingAs($this->admin)->get(route('admin.laporan.preview', [
+            'format' => 'pdf',
+            'category_id' => [$this->category->id, $cat2->id],
+            'room_id' => [$this->room->id, $room2->id],
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertSee('Laptop ASUS ExpertBook');
+        $response->assertSee('Barang Kategori Dua');
+    }
+
+    public function test_admin_pdf_view_has_landscape_a4_margins_254_and_no_repeating_thead(): void
+    {
+        $view = view('admin.laporan.pdf', [
+            'schoolProfile' => $this->schoolProfile,
+            'inventories'   => [$this->inventory],
+            'totalItems'    => 1,
+            'totalHarga'    => 8500000,
+            'generatedDate' => '09 November 2026',
+            'logoBase64'    => null,
+        ])->render();
+
+        $this->assertStringContainsString('size: a4 landscape', $view);
+        $this->assertStringContainsString('margin: 2.54cm 2.54cm 2.54cm 2.54cm', $view);
+        $this->assertStringContainsString('display: table-row-group !important', $view);
+        $this->assertStringContainsString('width: 18%;', $view); // Kolom Nama Barang lebar
+
+        // Assert identitas instansi tersusun vertikal memanjang ke bawah (satu baris per entitas, bukan dua kolom)
+        $this->assertStringContainsString('PROVINSI', $view);
+        $this->assertStringContainsString('KAB./KOTA', $view);
+        $this->assertStringContainsString('BIDANG', $view);
+        $this->assertStringContainsString('UNIT ORGANISASI', $view);
+        $this->assertStringContainsString('SUB UNIT ORGANISASI', $view);
+        $this->assertStringContainsString('UPB', $view);
+        $this->assertStringContainsString('NO. KODE LOKASI', $view);
+    }
+
+    public function test_admin_word_export_is_strictly_landscape_a4(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.laporan.download', ['format' => 'docx']));
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+        $content = $response->streamedContent();
+        $tempFile = tempnam(sys_get_temp_dir(), 'word_test_') . '.docx';
+        file_put_contents($tempFile, $content);
+
+        $zip = new \ZipArchive();
+        $this->assertTrue($zip->open($tempFile) === true);
+        $documentXml = $zip->getFromName('word/document.xml');
+        $zip->close();
+        @unlink($tempFile);
+
+        $this->assertStringContainsString('w:orient="landscape"', $documentXml);
+        $this->assertMatchesRegularExpression('/w:w="1683[0-9]/', $documentXml);
+        $this->assertMatchesRegularExpression('/w:h="1190[0-9]/', $documentXml);
+    }
+
+    public function test_admin_can_filter_index_with_single_condition_string(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.laporan.index', [
+            'status' => 'baik',
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertSee('Laptop ASUS ExpertBook');
+
+        $responseRusak = $this->actingAs($this->admin)->get(route('admin.laporan.index', [
+            'status' => 'rusak',
+        ]));
+
+        $responseRusak->assertStatus(200);
+        $responseRusak->assertDontSee('Laptop ASUS ExpertBook');
     }
 }
 

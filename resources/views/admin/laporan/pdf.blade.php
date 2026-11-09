@@ -5,13 +5,13 @@
     <title>Laporan Inventaris Barang KIB B</title>
     <style>
         @page {
-            size: A4 landscape;
-            margin: 8mm 8mm 8mm 8mm;
+            size: a4 landscape;
+            margin: 2.54cm 2.54cm 2.54cm 2.54cm; /* Margin 2.54 cm pada seluruh sisi */
         }
 
         body {
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 7.5pt;
+            font-size: 7pt;
             color: #000000;
             line-height: 1.25;
             margin: 0;
@@ -58,23 +58,23 @@
         .identity-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 4px;
-            margin-bottom: 6px;
+            margin-top: 3px;
+            margin-bottom: 5px;
             font-size: 6.5pt;
         }
 
         .identity-table td {
-            padding: 1px 0;
+            padding: 0.8px 0;
             vertical-align: top;
         }
 
         .label-id {
-            width: 120px;
+            width: 130px;
             font-weight: bold;
         }
 
         .sep-id {
-            width: 8px;
+            width: 10px;
             font-weight: bold;
         }
 
@@ -82,6 +82,7 @@
         .kib-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
             font-size: 6pt;
         }
 
@@ -90,6 +91,15 @@
             padding: 2px 2px;
             vertical-align: middle;
             word-break: break-word;
+        }
+
+        /* Mencegah pengulangan judul kolom saat berpindah halaman pada format PDF */
+        .kib-table thead {
+            display: table-row-group !important;
+        }
+
+        .kib-table tr {
+            page-break-inside: avoid;
         }
 
         .kib-table th {
@@ -161,28 +171,34 @@
         </tr>
     </table>
 
-    <!-- Profil Identitas Organisasi (nomor kode lokasi menyatu) -->
+    <!-- Profil Identitas Organisasi (Majang ke Bawah, Satu Kolom Rapi) -->
     <table class="identity-table">
         <tr>
             <td class="label-id">PROVINSI</td>
             <td class="sep-id">:</td>
-            <td style="width: 35%;">{{ strtoupper($schoolProfile->provinsi ?: '-') }}</td>
-            <td class="label-id">UNIT ORGANISASI</td>
-            <td class="sep-id">:</td>
-            <td>{{ strtoupper($schoolProfile->unit_organisasi ?: '-') }}</td>
+            <td>{{ strtoupper($schoolProfile->provinsi ?: '-') }}</td>
         </tr>
         <tr>
             <td class="label-id">KAB./KOTA</td>
             <td class="sep-id">:</td>
             <td>{{ strtoupper($schoolProfile->kabupaten_kota ?: '-') }}</td>
-            <td class="label-id">SUB UNIT ORGANISASI</td>
-            <td class="sep-id">:</td>
-            <td>{{ strtoupper($schoolProfile->sub_unit_organisasi ?: '-') }}</td>
         </tr>
         <tr>
             <td class="label-id">BIDANG</td>
             <td class="sep-id">:</td>
             <td>{{ strtoupper($schoolProfile->bidang ?: '-') }}</td>
+        </tr>
+        <tr>
+            <td class="label-id">UNIT ORGANISASI</td>
+            <td class="sep-id">:</td>
+            <td>{{ strtoupper($schoolProfile->unit_organisasi ?: '-') }}</td>
+        </tr>
+        <tr>
+            <td class="label-id">SUB UNIT ORGANISASI</td>
+            <td class="sep-id">:</td>
+            <td>{{ strtoupper($schoolProfile->sub_unit_organisasi ?: '-') }}</td>
+        </tr>
+        <tr>
             <td class="label-id">UPB</td>
             <td class="sep-id">:</td>
             <td>{{ strtoupper($schoolProfile->upb ?: '-') }}</td>
@@ -190,7 +206,7 @@
         <tr>
             <td class="label-id">NO. KODE LOKASI</td>
             <td class="sep-id">:</td>
-            <td colspan="4"><b>{{ $schoolProfile->no_kode_lokasi ?: '-' }}</b></td>
+            <td><b>{{ $schoolProfile->no_kode_lokasi ?: '-' }}</b></td>
         </tr>
     </table>
 
@@ -198,25 +214,25 @@
     <table class="kib-table">
         <thead>
             <tr>
-                <th rowspan="2" style="width: 14px;">No.</th>
-                <th rowspan="2" style="width: 44px;">Kode Barang</th>
-                <th rowspan="2" style="width: 85px;">Jenis Barang / Nama Barang</th>
-                <th rowspan="2" style="width: 30px;">Nomor Registrasi</th>
-                <th rowspan="2" style="width: 48px;">Merk / Type</th>
-                <th rowspan="2" style="width: 28px;">Ukuran / CC</th>
-                <th rowspan="2" style="width: 28px;">Bahan</th>
-                <th rowspan="2" style="width: 24px;">Tahun Pembelian</th>
-                <th colspan="5" style="padding: 1px;">Nomor</th>
-                <th rowspan="2" style="width: 40px;">Asal Usul Cara Perolehan</th>
-                <th rowspan="2" style="width: 48px;">Harga (Ribuan Rp)</th>
-                <th rowspan="2" style="width: 38px;">Keterangan</th>
+                <th rowspan="2" style="width: 3%;">No.</th>
+                <th rowspan="2" style="width: 8%;">Kode Barang</th>
+                <th rowspan="2" style="width: 18%;">Jenis Barang / Nama Barang</th>
+                <th rowspan="2" style="width: 4.5%;">Nomor Registrasi</th>
+                <th rowspan="2" style="width: 8%;">Merk / Type</th>
+                <th rowspan="2" style="width: 4.5%;">Ukuran / CC</th>
+                <th rowspan="2" style="width: 4.5%;">Bahan</th>
+                <th rowspan="2" style="width: 4.5%;">Tahun Pembelian</th>
+                <th colspan="5" style="padding: 1px; width: 20%;">Nomor</th>
+                <th rowspan="2" style="width: 7%;">Asal Usul Cara Perolehan</th>
+                <th rowspan="2" style="width: 9%;">Harga (Ribuan Rp)</th>
+                <th rowspan="2" style="width: 9%;">Keterangan</th>
             </tr>
             <tr>
-                <th style="width: 24px;">Pabrik</th>
-                <th style="width: 24px;">Rangka</th>
-                <th style="width: 24px;">Mesin</th>
-                <th style="width: 24px;">Polisi</th>
-                <th style="width: 24px;">BPKB</th>
+                <th style="width: 4%;">Pabrik</th>
+                <th style="width: 4%;">Rangka</th>
+                <th style="width: 4%;">Mesin</th>
+                <th style="width: 4%;">Polisi</th>
+                <th style="width: 4%;">BPKB</th>
             </tr>
             <tr class="col-num">
                 @for($col = 1; $col <= 16; $col++)

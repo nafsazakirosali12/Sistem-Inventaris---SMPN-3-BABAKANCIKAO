@@ -27,17 +27,21 @@
         <!-- Card Header: Search & Filter Toolbar -->
         <div class="p-4 sm:p-5 border-b border-[#D9E4E2] bg-white">
             <form action="{{ route('admin.inventaris.index') }}" method="GET" class="flex flex-col gap-3">
+                <button type="submit" class="hidden"></button>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
                     
                     <!-- Search Input: Kode Barang, Nama Barang, Nomor Register (lg: 3 cols) -->
                     <div class="relative lg:col-span-3">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#6B7280]">
+                        <button type="submit"
+                                class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-[#6B7280] hover:text-[#0F766E] transition-colors cursor-pointer"
+                                title="Klik untuk mencari">
                             <span class="material-symbols-outlined text-[20px] leading-none select-none">search</span>
-                        </div>
+                        </button>
                         <input type="text"
                                name="search"
                                value="{{ request('search') }}"
                                placeholder="Cari kode, nama, no regist..."
+                               onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.form.submit(); }"
                                class="w-full h-10 pl-10 pr-10 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] placeholder-[#6B7280] border border-[#D9E4E2] focus:outline-none focus:bg-white focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
                         @if(request('search'))
                             <a href="{{ route('admin.inventaris.index', request()->except('search')) }}"

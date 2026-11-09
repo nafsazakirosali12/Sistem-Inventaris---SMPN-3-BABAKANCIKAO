@@ -47,13 +47,15 @@ class LoanController extends Controller
                   })
                   ->orWhereHas('inventory', function ($iq) use ($search) {
                       $iq->where('kode_barang', 'like', "%{$search}%")
-                         ->orWhere('nama_barang', 'like', "%{$search}%");
+                         ->orWhere('nama_barang', 'like', "%{$search}%")
+                         ->orWhereHas('room', fn($rq) => $rq->where('nama_ruangan', 'like', "%{$search}%"));
                   })
                   ->orWhereHas('details', function ($dq) use ($search) {
                       $dq->where('kode_barang', 'like', "%{$search}%")
                          ->orWhereHas('inventory', function ($diq) use ($search) {
                              $diq->where('nama_barang', 'like', "%{$search}%")
-                                 ->orWhereHas('category', fn($dcq) => $dcq->where('nama_kategori', 'like', "%{$search}%"));
+                                 ->orWhereHas('category', fn($dcq) => $dcq->where('nama_kategori', 'like', "%{$search}%"))
+                                 ->orWhereHas('room', fn($drq) => $drq->where('nama_ruangan', 'like', "%{$search}%"));
                          });
                   });
             });
