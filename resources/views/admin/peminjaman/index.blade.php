@@ -168,6 +168,7 @@
                         <th class="py-3.5 px-4 text-center w-12">No</th>
                         <th class="py-3.5 px-4 w-36">Kode Pinjam</th>
                         <th class="py-3.5 px-4 min-w-[150px]">Peminjam</th>
+                        <th class="py-3.5 px-4 text-center w-20">Gambar</th>
                         <th class="py-3.5 px-4 min-w-[240px]">Rincian Barang</th>
                         <th class="py-3.5 px-4 min-w-[170px]">Jadwal Peminjaman</th>
                         <th class="py-3.5 px-4 text-center w-32">Status</th>
@@ -224,6 +225,25 @@
                                         @endif
                                     </td>
                                 @endif
+
+                                <!-- Gambar Barang (Sesuai Rincian Barang di Database) -->
+                                <td class="py-3 px-4 align-middle text-center w-20">
+                                    @php
+                                        $inv = $isDetail ? $item->inventory : $loan->inventory;
+                                        $fotoUrl = $inv?->foto_url;
+                                    @endphp
+                                    @if ($fotoUrl)
+                                        <img src="{{ $fotoUrl }}"
+                                             alt="{{ $itemName }}"
+                                             class="w-12 h-12 object-cover rounded-xl border border-[#D9E4E2] mx-auto shadow-2xs hover:scale-105 transition-transform"
+                                             title="{{ $itemName }}">
+                                    @else
+                                        <div class="w-12 h-12 rounded-xl bg-[#F3F7F6] border border-dashed border-[#D9E4E2] flex items-center justify-center mx-auto text-[#9CA3AF]"
+                                             title="Foto tidak tersedia">
+                                            <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+                                        </div>
+                                    @endif
+                                </td>
 
                                 <!-- Rincian Barang (HANYA keterangan barang-barangnya saja) -->
                                 <td class="py-3 px-4 align-middle">
@@ -329,7 +349,7 @@
                         @endforeach
                     @empty
                         <tr>
-                            <td colspan="7" class="py-12 text-center">
+                            <td colspan="8" class="py-12 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <div class="w-14 h-14 rounded-full bg-[#F3F7F6] flex items-center justify-center text-[#6B7280] mb-3">
                                         <span class="material-symbols-outlined text-[28px]">assignment_late</span>

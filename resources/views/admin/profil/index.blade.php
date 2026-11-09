@@ -62,7 +62,7 @@
 
         <div x-show="isEditing" class="p-4 rounded-xl bg-[#F0FDFA] border border-[#CCFBF1] shadow-xs flex items-center gap-3 text-xs text-[#0F766E]">
             <span class="material-symbols-outlined text-[20px]">edit_note</span>
-            <span><strong>Mode Edit Aktif:</strong> Anda dapat mengubah data identitas, mengunggah logo/foto/denah baru, dan menyesuaikan atribut KIB.</span>
+            <span><strong>Mode Ubah Aktif:</strong> Anda dapat mengubah data identitas, mengunggah logo/foto/denah baru, dan menyesuaikan atribut KIB.</span>
         </div>
 
         <!-- 1. SECTION: GAMBAR & DOKUMEN (Logo, Foto, Denah Sekolah) -->

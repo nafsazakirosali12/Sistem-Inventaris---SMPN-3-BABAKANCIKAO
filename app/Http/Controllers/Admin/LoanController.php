@@ -117,8 +117,8 @@ class LoanController extends Controller
             }
         }
 
-        // 5. Pagination (15 items per page per flow.md 5 & DESIGN.md 6.8)
-        $loans = $query->paginate(15)->withQueryString();
+        // 5. Pagination: 10 item per halaman jika data lebih dari 10
+        $loans = $query->paginate(10)->withQueryString();
 
         // 6. Highlighted Transaction from notification
         $highlightId = $request->input('highlight');
@@ -145,14 +145,13 @@ class LoanController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_peminjam' => 'required|string|min:3|max:150',
+            'nama_peminjam' => 'required|string|max:150',
             'category_id' => 'required|exists:categories,id',
             'tanggal_pinjam' => 'required|date',
             'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
             'alasan_tujuan' => 'required|string|min:3|max:500',
         ], [
             'nama_peminjam.required' => 'Nama peminjam wajib diisi.',
-            'nama_peminjam.min' => 'Nama peminjam minimal 3 karakter.',
             'category_id.required' => 'Kategori barang wajib dipilih.',
             'tanggal_pinjam.required' => 'Tanggal pinjam wajib diisi.',
             'tanggal_kembali.required' => 'Tanggal kembali wajib diisi.',

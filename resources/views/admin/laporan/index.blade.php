@@ -505,7 +505,7 @@
                         onclick="downloadOfficialDocument()"
                         class="h-9 px-4 bg-[#0F766E] hover:bg-[#115E59] text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer">
                     <span class="material-symbols-outlined text-[18px]" id="btnIcon">picture_as_pdf</span>
-                    <span id="btnText">Unduh Dokumen Asli (.pdf)</span>
+                    <span id="btnText">Unduh Dokumen (.pdf)</span>
                 </button>
 
                 <!-- Tombol Cetak Pratinjau Kertas Langsung -->
@@ -813,7 +813,7 @@
         if (!btnText || !btnIcon) return;
 
         if (format === 'pdf') {
-            btnText.textContent = 'Unduh Dokumen Asli (.pdf)';
+            btnText.textContent = 'Unduh Dokumen (.pdf)';
             btnIcon.textContent = 'picture_as_pdf';
         } else if (format === 'xlsx') {
             btnText.textContent = 'Unduh Excel (.xlsx)';

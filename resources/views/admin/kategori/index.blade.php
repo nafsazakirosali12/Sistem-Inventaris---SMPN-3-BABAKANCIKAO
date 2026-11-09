@@ -197,7 +197,7 @@
         </div>
 
         <!-- Modal Form -->
-        <form id="formStoreCategory" action="{{ route('admin.kategori.store') }}" method="POST" onsubmit="return handleStoreCategorySubmit(event)" class="p-6 flex flex-col gap-4">
+        <form id="formStoreCategory" action="{{ route('admin.kategori.store') }}" method="POST" onsubmit="return handleStoreCategorySubmit(event)" novalidate class="p-6 flex flex-col gap-4">
             @csrf
 
             <!-- Kode Kategori -->
@@ -208,7 +208,7 @@
                 <input type="text"
                        id="add_kode_kategori"
                        name="kode_kategori"
-                       value="{{ old('kode_kategori', $nextCode) }}"
+                       value="{{ old('kode_kategori') }}"
                        placeholder="mis. KAT-ELEK"
                        required
                        class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg font-mono text-xs uppercase font-bold text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
@@ -276,7 +276,7 @@
         </div>
 
         <!-- Modal Form -->
-        <form id="formEditKategori" method="POST" class="p-6 flex flex-col gap-4">
+        <form id="formEditKategori" method="POST" onsubmit="event.preventDefault(); promptSaveEditCategory();" novalidate class="p-6 flex flex-col gap-4">
             @csrf
             @method('PUT')
 
@@ -344,8 +344,13 @@
     function openAddCategoryModal() {
         document.getElementById('modalTambahKategori').classList.remove('hidden');
         setTimeout(() => {
-            const input = document.getElementById('add_nama_kategori');
-            if (input) input.focus();
+            const codeInput = document.getElementById('add_kode_kategori');
+            const nameInput = document.getElementById('add_nama_kategori');
+            if (codeInput && !codeInput.value) {
+                codeInput.focus();
+            } else if (nameInput) {
+                nameInput.focus();
+            }
         }, 100);
     }
 
@@ -363,17 +368,22 @@
         const code = document.getElementById('add_kode_kategori').value.trim();
         const name = document.getElementById('add_nama_kategori').value.trim();
 
-        if (!code || !name) {
+        const missingFields = [];
+        if (!code) missingFields.push('Kode Kategori');
+        if (!name) missingFields.push('Nama Kategori');
+
+        if (missingFields.length > 0) {
             Swal.fire({
                 title: 'Form Belum Lengkap',
-                text: 'Kode kategori dan nama kategori wajib diisi.',
+                text: `${missingFields.join(' dan ')} wajib diisi.`,
                 confirmButtonColor: '#0F766E',
+                confirmButtonText: 'Tutup',
                 width: '22rem',
                 customClass: {
                     popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                     title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
                     htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
-                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                 }
             });
             return false;
@@ -427,17 +437,25 @@
         const nameInput = document.getElementById('edit_nama_kategori');
         const codeInput = document.getElementById('edit_kode_kategori');
 
-        if (!nameInput.value.trim() || !codeInput.value.trim()) {
+        const code = codeInput ? codeInput.value.trim() : '';
+        const name = nameInput ? nameInput.value.trim() : '';
+
+        const missingFields = [];
+        if (!code) missingFields.push('Kode Kategori');
+        if (!name) missingFields.push('Nama Kategori');
+
+        if (missingFields.length > 0) {
             Swal.fire({
                 title: 'Form Belum Lengkap',
-                text: 'Kode kategori dan nama kategori wajib diisi.',
+                text: `${missingFields.join(' dan ')} wajib diisi.`,
                 confirmButtonColor: '#0F766E',
+                confirmButtonText: 'Tutup',
                 width: '22rem',
                 customClass: {
                     popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                     title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
                     htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
-                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                 }
             });
             return;

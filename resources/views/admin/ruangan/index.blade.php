@@ -208,7 +208,7 @@
         </div>
 
         <!-- Modal Form -->
-        <form id="formStoreRoom" action="{{ route('admin.ruangan.store') }}" method="POST" onsubmit="return handleStoreRoomSubmit(event)" class="p-6 flex flex-col gap-4">
+        <form id="formStoreRoom" action="{{ route('admin.ruangan.store') }}" method="POST" onsubmit="return handleStoreRoomSubmit(event)" novalidate class="p-6 flex flex-col gap-4">
             @csrf
 
             <!-- Kode Ruangan -->
@@ -219,7 +219,7 @@
                 <input type="text"
                        id="add_kode_ruangan"
                        name="kode_ruangan"
-                       value="{{ old('kode_ruangan', $nextCode) }}"
+                       value="{{ old('kode_ruangan') }}"
                        placeholder="mis. RUG-LAB-IPA"
                        required
                        class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg font-mono text-xs uppercase font-bold text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
@@ -301,7 +301,7 @@
         </div>
 
         <!-- Modal Form -->
-        <form id="formEditRuangan" method="POST" class="p-6 flex flex-col gap-4">
+        <form id="formEditRuangan" method="POST" onsubmit="event.preventDefault(); promptSaveEditRoom();" novalidate class="p-6 flex flex-col gap-4">
             @csrf
             @method('PUT')
 
@@ -376,8 +376,13 @@
     function openAddRoomModal() {
         document.getElementById('modalTambahRuangan').classList.remove('hidden');
         setTimeout(() => {
-            const input = document.getElementById('add_nama_ruangan');
-            if (input) input.focus();
+            const codeInput = document.getElementById('add_kode_ruangan');
+            const nameInput = document.getElementById('add_nama_ruangan');
+            if (codeInput && !codeInput.value) {
+                codeInput.focus();
+            } else if (nameInput) {
+                nameInput.focus();
+            }
         }, 100);
     }
 
@@ -396,17 +401,23 @@
         const name = document.getElementById('add_nama_ruangan').value.trim();
         const pj = document.getElementById('add_penanggung_jawab').value.trim();
 
-        if (!code || !name || !pj) {
+        const missingFields = [];
+        if (!code) missingFields.push('Kode Ruangan');
+        if (!name) missingFields.push('Nama Ruangan');
+        if (!pj) missingFields.push('Penanggung Jawab');
+
+        if (missingFields.length > 0) {
             Swal.fire({
-                title: 'Formulir Belum Lengkap',
-                text: 'Kode ruangan, nama ruangan, dan penanggung jawab wajib diisi.',
+                title: 'Form Belum Lengkap',
+                text: `${missingFields.join(', ')} wajib diisi.`,
                 confirmButtonColor: '#0F766E',
+                confirmButtonText: 'Tutup',
                 width: '22rem',
                 customClass: {
                     popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                     title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
                     htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
-                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                 }
             });
             return false;
@@ -462,17 +473,27 @@
         const codeInput = document.getElementById('edit_kode_ruangan');
         const pjInput = document.getElementById('edit_penanggung_jawab');
 
-        if (!nameInput.value.trim() || !codeInput.value.trim() || !pjInput.value.trim()) {
+        const code = codeInput ? codeInput.value.trim() : '';
+        const name = nameInput ? nameInput.value.trim() : '';
+        const pj = pjInput ? pjInput.value.trim() : '';
+
+        const missingFields = [];
+        if (!code) missingFields.push('Kode Ruangan');
+        if (!name) missingFields.push('Nama Ruangan');
+        if (!pj) missingFields.push('Penanggung Jawab');
+
+        if (missingFields.length > 0) {
             Swal.fire({
-                title: 'Formulir Belum Lengkap',
-                text: 'Kode ruangan, nama ruangan, dan penanggung jawab wajib diisi.',
+                title: 'Form Belum Lengkap',
+                text: `${missingFields.join(', ')} wajib diisi.`,
                 confirmButtonColor: '#0F766E',
+                confirmButtonText: 'Tutup',
                 width: '22rem',
                 customClass: {
                     popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                     title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
                     htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
-                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] text-white'
+                    confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                 }
             });
             return;

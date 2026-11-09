@@ -682,6 +682,24 @@ class PeminjamLoanTest extends TestCase
         ]);
     }
 
+    public function test_can_borrow_with_short_nama_peminjam_no_minimum_length(): void
+    {
+        $response = $this->actingAs($this->peminjam)->post(route('peminjam.peminjaman.store'), [
+            'category_id' => $this->category->id,
+            'nama_peminjam' => 'Ed', // Hanya 2 karakter, valid tanpa min:3
+            'jumlah' => 1,
+            'tanggal_pinjam' => Carbon::now()->addMinutes(10)->format('Y-m-d H:i:s'),
+            'tanggal_kembali' => Carbon::now()->addHours(2)->format('Y-m-d H:i:s'),
+            'alasan_tujuan' => 'Keperluan mengajar di kelas',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('loans', [
+            'nama_peminjam' => 'Ed',
+            'status' => 'dipinjam',
+        ]);
+    }
+
     public function test_catalog_paginates_at_eight_categories_per_page(): void
     {
         // $this->category already has 1 category with 3 'baik' items in setUp
