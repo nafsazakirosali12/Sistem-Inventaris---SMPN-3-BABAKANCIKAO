@@ -204,6 +204,7 @@ class PeminjamLoanTest extends TestCase
             'jumlah' => 5,
             'tanggal_pinjam' => Carbon::now()->format('Y-m-d H:i:s'),
             'tanggal_kembali' => Carbon::now()->addDay()->format('Y-m-d H:i:s'),
+            'alasan_tujuan' => 'Keperluan Rapat Guru',
         ]);
 
         $response->assertRedirect();
@@ -237,6 +238,7 @@ class PeminjamLoanTest extends TestCase
             'jumlah' => 1,
             'tanggal_pinjam' => Carbon::now()->format('Y-m-d H:i:s'),
             'tanggal_kembali' => Carbon::now()->addDay()->format('Y-m-d H:i:s'),
+            'alasan_tujuan' => 'Mengajar Kelas 7B',
         ]);
 
         $loan = Loan::where('nama_peminjam', 'Siti Aminah')->first();
@@ -587,6 +589,7 @@ class PeminjamLoanTest extends TestCase
             'nama_peminjam' => 'Guru Testing',
             'tanggal_pinjam' => Carbon::now()->addHour()->format('Y-m-d H:i:s'),
             'tanggal_kembali' => Carbon::now()->addDays(2)->format('Y-m-d H:i:s'),
+            'alasan_tujuan' => 'Uji Coba Sistem',
             'items' => [
                 ['category_id' => $this->category->id, 'jumlah' => 1],
                 ['category_id' => $catProyektor->id, 'jumlah' => 2], // Exceeds available stock!
@@ -613,6 +616,7 @@ class PeminjamLoanTest extends TestCase
             'jumlah' => 1,
             'tanggal_pinjam' => $pastTime->format('Y-m-d H:i:s'),
             'tanggal_kembali' => $returnTime->format('Y-m-d H:i:s'),
+            'alasan_tujuan' => 'Keperluan Masa Lalu',
         ]);
 
         $response->assertSessionHasErrors('tanggal_pinjam');
@@ -631,6 +635,7 @@ class PeminjamLoanTest extends TestCase
             'jumlah' => 1,
             'tanggal_pinjam' => $pinjamTime->format('Y-m-d H:i:s'),
             'tanggal_kembali' => $kembaliTime->format('Y-m-d H:i:s'),
+            'alasan_tujuan' => 'Keperluan Presentasi',
         ]);
 
         $response->assertSessionHasErrors('tanggal_kembali');
@@ -649,6 +654,7 @@ class PeminjamLoanTest extends TestCase
             'jumlah' => 1,
             'tanggal_pinjam' => $pinjamTime->format('Y-m-d H:i:s'),
             'tanggal_kembali' => $kembaliTime->format('Y-m-d H:i:s'),
+            'alasan_tujuan' => 'Pelajaran Matematika',
         ]);
 
         $response->assertSessionHasNoErrors();
@@ -656,6 +662,23 @@ class PeminjamLoanTest extends TestCase
         $this->assertDatabaseHas('loans', [
             'nama_peminjam' => 'Ibu Guru Matematika',
             'status' => 'dipinjam',
+        ]);
+    }
+
+    public function test_cannot_borrow_without_alasan_tujuan(): void
+    {
+        $response = $this->actingAs($this->peminjam)->post(route('peminjam.peminjaman.store'), [
+            'category_id' => $this->category->id,
+            'nama_peminjam' => 'Guru Tanpa Alasan',
+            'jumlah' => 1,
+            'tanggal_pinjam' => Carbon::now()->addMinutes(10)->format('Y-m-d H:i:s'),
+            'tanggal_kembali' => Carbon::now()->addHours(2)->format('Y-m-d H:i:s'),
+            'alasan_tujuan' => '', // Blank reason
+        ]);
+
+        $response->assertSessionHasErrors('alasan_tujuan');
+        $this->assertDatabaseMissing('loans', [
+            'nama_peminjam' => 'Guru Tanpa Alasan',
         ]);
     }
 

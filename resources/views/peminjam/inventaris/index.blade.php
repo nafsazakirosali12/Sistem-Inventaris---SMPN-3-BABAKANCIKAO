@@ -27,7 +27,7 @@
             <!-- Quick Action Links -->
             <div class="flex items-center gap-2 shrink-0">
                 <button type="button"
-                        @click="loanModalOpen = true"
+                        @click="openLoanModal()"
                         class="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-[#0F766E] hover:bg-[#115E59] text-white text-xs font-bold transition-all shadow-xs cursor-pointer">
                     <span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
                     <span>Pinjam Barang</span>
@@ -59,6 +59,19 @@
                 <div class="flex-1">
                     <h4 class="font-bold text-sm text-[#991B1B]">Perhatian</h4>
                     <p class="text-xs mt-0.5 text-[#B91C1C] leading-relaxed">{{ session('error') }}</p>
+                </div>
+            </div>
+        @endif
+        @if($errors->any())
+            <div class="mt-6 p-4 rounded-2xl bg-[#FEF2F2] border border-[#FECACA] text-[#991B1B] flex items-start gap-3 shadow-sm">
+                <span class="material-symbols-outlined text-[24px] text-[#EF4444] shrink-0 mt-0.5">error</span>
+                <div class="flex-1">
+                    <h4 class="font-bold text-sm text-[#991B1B]">Pengajuan Peminjaman Belum Berhasil</h4>
+                    <ul class="text-xs mt-1 text-[#B91C1C] list-disc list-inside space-y-0.5">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
         @endif
@@ -465,7 +478,7 @@
         <div class="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl border border-[#D9E4E2] transform transition-all">
 
             <!-- Form Multi-Kategori -->
-            <form x-ref="loanForm" method="POST" action="{{ route('peminjam.peminjaman.store') }}">
+            <form x-ref="loanForm" method="POST" action="{{ route('peminjam.peminjaman.store') }}" @submit.prevent="submitLoanForm()">
                 @csrf
 
                 <!-- Modal Header -->
@@ -740,15 +753,17 @@
                             </div>
                         </div>
 
-                        <!-- Keperluan / Alasan Peminjaman -->
+                        <!-- Keperluan / Alasan Peminjaman (Wajib Diisi) -->
                         <div>
                             <label class="block text-xs font-semibold text-[#1F2937] mb-1">
-                                Keperluan / Alasan Peminjaman
+                                Keperluan / Alasan Peminjaman <span class="text-red-500">*</span>
                             </label>
                             <textarea name="alasan_tujuan"
+                                      x-ref="alasanTujuanInput"
                                       x-model="alasanTujuan"
                                       rows="2"
-                                      placeholder="Contoh: Pembelajaran Presentasi di Kelas 8A, Ujian Praktik IPA..."
+                                      required
+                                      placeholder="Wajib diisi: contoh Pembelajaran Presentasi di Kelas 8A, Ujian Praktik IPA..."
                                       class="w-full p-3 bg-[#F3F7F6] rounded-xl text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all font-medium"></textarea>
                         </div>
                     </div>
@@ -791,7 +806,7 @@
             detailModalOpen: false,
             loanModalOpen: false,
             selectedDetailCategory: null,
-            borrowerName: '', // Dikosongkan secara default, wajib diisi manual oleh peminjam
+            borrowerName: '{{ addslashes(auth()->user()->name ?? "") }}', // Default nama akun yang login, bisa disesuaikan jika perlu
             tanggalPinjam: '',
             tanggalKembali: '',
             minPinjamDatetime: '',
@@ -800,6 +815,15 @@
             selectedCategories: [], // Array of { category_id: int, qty: int }
             selectedAddCategoryId: '',
             isSubmitting: false,
+
+            openLoanModal() {
+                this.updateRealtimeClock(false);
+                const now = new Date();
+                this.tanggalPinjam = this.formatDatetime(now);
+                const later = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+                this.tanggalKembali = this.formatDatetime(later);
+                this.loanModalOpen = true;
+            },
 
             submitLoanForm() {
                 if (this.totalBorrowedCount === 0) {
@@ -853,6 +877,38 @@
                         this.loanModalOpen = true;
                         if (this.$refs.borrowerNameInput) {
                             this.$refs.borrowerNameInput.focus();
+                        }
+                    }
+                    return;
+                }
+
+                if (!this.alasanTujuan || !this.alasanTujuan.trim()) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Alasan Peminjaman Wajib Diisi',
+                            text: 'Silakan masukkan keperluan atau alasan peminjaman terlebih dahulu.',
+                            confirmButtonColor: '#0F766E',
+                            confirmButtonText: 'Mengerti',
+                            width: '22rem',
+                            customClass: {
+                                popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                                title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                                htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                                confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
+                            }
+                        }).then(() => {
+                            this.loanModalOpen = true;
+                            setTimeout(() => {
+                                if (this.$refs.alasanTujuanInput) {
+                                    this.$refs.alasanTujuanInput.focus();
+                                }
+                            }, 50);
+                        });
+                    } else {
+                        alert('Silakan masukkan keperluan atau alasan peminjaman terlebih dahulu.');
+                        this.loanModalOpen = true;
+                        if (this.$refs.alasanTujuanInput) {
+                            this.$refs.alasanTujuanInput.focus();
                         }
                     }
                     return;
@@ -948,8 +1004,9 @@
             },
 
             handleCancelLoan() {
+                const defaultBorrower = '{{ addslashes(auth()->user()->name ?? "") }}';
                 const hasData = (this.selectedCategories && this.selectedCategories.length > 0) ||
-                                (this.borrowerName && this.borrowerName.trim().length > 0) ||
+                                (this.borrowerName && this.borrowerName.trim() !== defaultBorrower && this.borrowerName.trim().length > 0) ||
                                 (this.alasanTujuan && this.alasanTujuan.trim().length > 0);
 
                 if (!hasData) {
@@ -1004,7 +1061,7 @@
 
             resetLoanFormData() {
                 this.selectedCategories = [];
-                this.borrowerName = '';
+                this.borrowerName = '{{ addslashes(auth()->user()->name ?? "") }}';
                 this.alasanTujuan = '';
                 this.selectedAddCategoryId = '';
                 this.updateRealtimeClock(true);
@@ -1046,12 +1103,9 @@
             openLoanModalWithCategory(categoryId) {
                 this.updateRealtimeClock(false);
                 const now = new Date();
-                // Jika tanggalPinjam belum ada atau sudah tertinggal di masa lampau, set ke waktu saat ini
-                if (!this.tanggalPinjam || new Date(this.tanggalPinjam).getTime() < now.getTime() - 60000) {
-                    this.tanggalPinjam = this.formatDatetime(now);
-                    const later = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-                    this.tanggalKembali = this.formatDatetime(later);
-                }
+                this.tanggalPinjam = this.formatDatetime(now);
+                const later = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+                this.tanggalKembali = this.formatDatetime(later);
                 this.addCategory(categoryId);
                 this.loanModalOpen = true;
             },
@@ -1096,8 +1150,8 @@
             get isPinjamInPast() {
                 if (!this.tanggalPinjam) return false;
                 const pinjamTime = new Date(this.tanggalPinjam).getTime();
-                // Toleransi 5 menit agar waktu pengisian form & menit berjalan tidak dianggap masa lampau
-                const nowTime = new Date().getTime() - (5 * 60 * 1000);
+                // Toleransi 15 menit agar waktu pengisian form & menit berjalan tidak dianggap masa lampau
+                const nowTime = new Date().getTime() - (15 * 60 * 1000);
                 return pinjamTime < nowTime;
             },
 

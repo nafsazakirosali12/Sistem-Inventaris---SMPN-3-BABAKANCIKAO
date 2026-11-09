@@ -303,6 +303,24 @@
                     });
                 }
             @endif
+
+            @if ($errors->any())
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Perhatian',
+                        html: '{!! implode("<br>", array_map(function($msg) { return "• " . e($msg); }, $errors->all())) !!}',
+                        confirmButtonColor: '#0F766E',
+                        confirmButtonText: 'Tutup',
+                        width: '26rem',
+                        customClass: {
+                            popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                            title: 'text-sm font-bold text-[#DC2626] m-0 mb-2',
+                            htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed text-left',
+                            confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
+                        }
+                    });
+                }
+            @endif
         });
     </script>
 

@@ -202,15 +202,15 @@ class PeminjamInventoryController extends Controller
                 'required',
                 'date',
                 function ($attribute, $value, $fail) {
-                    // Buffer toleransi 5 menit untuk pengisian form & latensi jaringan
+                    // Buffer toleransi 15 menit untuk pengisian form & latensi jaringan
                     $pinjamTime = Carbon::parse($value);
-                    if ($pinjamTime->lt(Carbon::now()->subMinutes(5))) {
+                    if ($pinjamTime->lt(Carbon::now()->subMinutes(15))) {
                         $fail('Tanggal dan jam peminjaman tidak boleh di waktu yang sudah lewat.');
                     }
                 },
             ],
             'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
-            'alasan_tujuan' => 'nullable|string|max:500',
+            'alasan_tujuan' => 'required|string|min:3|max:500',
             'items' => 'nullable|array',
             'items.*.category_id' => 'required_with:items|exists:categories,id',
             'items.*.jumlah' => 'required_with:items|integer|min:1|max:100',
@@ -222,6 +222,8 @@ class PeminjamInventoryController extends Controller
             'tanggal_pinjam.required' => 'Tanggal & jam peminjaman wajib diisi.',
             'tanggal_kembali.required' => 'Batas tanggal & jam pengembalian wajib diisi.',
             'tanggal_kembali.after_or_equal' => 'Batas tanggal dan jam pengembalian tidak boleh sebelum waktu peminjaman.',
+            'alasan_tujuan.required' => 'Keperluan atau alasan peminjaman wajib diisi.',
+            'alasan_tujuan.min' => 'Keperluan atau alasan peminjaman minimal 3 karakter.',
         ]);
 
         // Standardize requested items into [category_id => qty]

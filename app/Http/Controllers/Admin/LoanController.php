@@ -149,7 +149,16 @@ class LoanController extends Controller
             'category_id' => 'required|exists:categories,id',
             'tanggal_pinjam' => 'required|date',
             'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
-            'alasan_tujuan' => 'nullable|string|max:500',
+            'alasan_tujuan' => 'required|string|min:3|max:500',
+        ], [
+            'nama_peminjam.required' => 'Nama peminjam wajib diisi.',
+            'nama_peminjam.min' => 'Nama peminjam minimal 3 karakter.',
+            'category_id.required' => 'Kategori barang wajib dipilih.',
+            'tanggal_pinjam.required' => 'Tanggal pinjam wajib diisi.',
+            'tanggal_kembali.required' => 'Tanggal kembali wajib diisi.',
+            'tanggal_kembali.after_or_equal' => 'Tanggal kembali tidak boleh sebelum tanggal pinjam.',
+            'alasan_tujuan.required' => 'Keperluan atau alasan peminjaman wajib diisi.',
+            'alasan_tujuan.min' => 'Keperluan atau alasan peminjaman minimal 3 karakter.',
         ]);
 
         return DB::transaction(function () use ($validated, $request) {
