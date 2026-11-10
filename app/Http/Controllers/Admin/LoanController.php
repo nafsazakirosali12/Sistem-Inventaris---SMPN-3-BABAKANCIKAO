@@ -80,37 +80,24 @@ class LoanController extends Controller
             });
         }
 
-        // 4. Date Range Filter (Max Date: Today WIB)
+        // 4. Date Range Filter
         if ($request->filled('date_range')) {
             $dateRange = $request->input('date_range');
             $dates = preg_split('/\s*(?:—|-|to)\s*/u', $dateRange);
-            $today = Carbon::now('Asia/Jakarta')->endOfDay();
 
             if (count($dates) === 2) {
                 try {
                     $startDate = Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
                     $endDate = Carbon::createFromFormat('d/m/Y', trim($dates[1]))->endOfDay();
 
-                    // Backend rule: Cannot query dates beyond today
-                    if ($startDate->isAfter($today)) {
-                        $query->whereRaw('1 = 0');
-                    } else {
-                        if ($endDate->isAfter($today)) {
-                            $endDate = $today;
-                        }
-                        $query->whereBetween('tanggal_pinjam', [$startDate, $endDate]);
-                    }
+                    $query->whereBetween('tanggal_pinjam', [$startDate, $endDate]);
                 } catch (\Exception $e) {
                     // Ignore date parsing errors gracefully
                 }
             } elseif (count($dates) === 1 && !empty(trim($dates[0]))) {
                 try {
                     $singleDate = Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
-                    if ($singleDate->isAfter($today)) {
-                        $query->whereRaw('1 = 0');
-                    } else {
-                        $query->whereDate('tanggal_pinjam', $singleDate);
-                    }
+                    $query->whereDate('tanggal_pinjam', $singleDate);
                 } catch (\Exception $e) {
                     // Ignore
                 }

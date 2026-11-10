@@ -65,45 +65,45 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 3. Categories (Nama jenis/kelompok barang secara umum)
+        // 3. Categories (Nama jenis/kelompok barang secara umum, e.g. Laptop, Proyektor, dll)
         $catLaptop = Category::updateOrCreate(
             ['kode_kategori' => 'KAT-LAPTOP'],
-            ['nama_kategori' => 'Laptop', 'keterangan' => 'Perangkat laptop, notebook, dan mobile workstation']
+            ['nama_kategori' => 'Laptop', 'keterangan' => 'Perangkat laptop dan notebook untuk pembelajaran dan operasional sekolah']
         );
 
         $catProyektor = Category::updateOrCreate(
             ['kode_kategori' => 'KAT-PROYEKTOR'],
-            ['nama_kategori' => 'Proyektor', 'keterangan' => 'Proyektor LCD, laser projector, dan perlengkapan presentasi']
+            ['nama_kategori' => 'Proyektor', 'keterangan' => 'Perangkat proyektor LCD dan perlengkapan presentasi visual']
         );
 
         $catMatras = Category::updateOrCreate(
             ['kode_kategori' => 'KAT-MATRAS'],
-            ['nama_kategori' => 'Matras', 'keterangan' => 'Matras senam lantai, matras yoga, dan perlengkapan senam']
+            ['nama_kategori' => 'Matras', 'keterangan' => 'Matras senam lantai dan perlengkapan olahraga siswa']
         );
 
         $catSpeaker = Category::updateOrCreate(
             ['kode_kategori' => 'KAT-SPEAKER'],
-            ['nama_kategori' => 'Speaker', 'keterangan' => 'Pengeras suara, portable PA system, speaker kolom, dan audio']
+            ['nama_kategori' => 'Speaker', 'keterangan' => 'Pengeras suara, portable sound system, dan audio aula']
         );
 
-        $catMonitor = Category::updateOrCreate(
-            ['kode_kategori' => 'KAT-MONITOR'],
-            ['nama_kategori' => 'Monitor', 'keterangan' => 'Monitor LCD/LED display dan layar komputer']
+        $catKomputer = Category::updateOrCreate(
+            ['kode_kategori' => 'KAT-KOMPUTER'],
+            ['nama_kategori' => 'Komputer', 'keterangan' => 'Perangkat komputer desktop PC dan All-in-One laboratorium']
         );
 
         $catMikroskop = Category::updateOrCreate(
             ['kode_kategori' => 'KAT-MIKROSKOP'],
-            ['nama_kategori' => 'Mikroskop', 'keterangan' => 'Mikroskop binokuler, monokuler, dan alat laboratorium IPA']
+            ['nama_kategori' => 'Mikroskop', 'keterangan' => 'Peralatan mikroskop laboratorium IPA untuk praktikum siswa']
         );
 
         $catKamera = Category::updateOrCreate(
             ['kode_kategori' => 'KAT-KAMERA'],
-            ['nama_kategori' => 'Kamera', 'keterangan' => 'Kamera digital DSLR, mirrorless, dan perlengkapan dokumentasi']
+            ['nama_kategori' => 'Kamera', 'keterangan' => 'Kamera digital untuk dokumentasi kegiatan dan publikasi sekolah']
         );
 
         $catPrinter = Category::updateOrCreate(
             ['kode_kategori' => 'KAT-PRINTER'],
-            ['nama_kategori' => 'Printer', 'keterangan' => 'Printer inkjet, laserjet, dan scanner dokumen']
+            ['nama_kategori' => 'Printer', 'keterangan' => 'Printer dan scanner untuk pencetakan dokumen administrasi sekolah']
         );
 
         $catMikrofon = Category::updateOrCreate(
@@ -172,12 +172,12 @@ class DatabaseSeeder extends Seeder
             ['nama_ruangan' => 'Gudang Olahraga', 'penanggung_jawab' => 'Guru PJOK', 'keterangan' => 'Area Lapangan']
         );
 
-        // 5. Inventories (Nama barang hanya berisi merek atau tipe/model barang)
+        // 5. Inventories (Data inventaris = unit fisik spesifik, e.g. Laptop Asus Vivobook A11, Proyektor Epson EB-X500)
         // 5.1 Kategori: Proyektor
         $inv1 = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-LAB-042'],
             [
-                'nama_barang' => 'Epson EB-X500',
+                'nama_barang' => 'Proyektor Epson EB-X500',
                 'category_id' => $catProyektor->id,
                 'room_id' => $roomLabKom1->id,
                 'status' => 'baik',
@@ -195,7 +195,7 @@ class DatabaseSeeder extends Seeder
         $invProyektor2 = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-LAB-043'],
             [
-                'nama_barang' => 'BenQ MX560',
+                'nama_barang' => 'Proyektor BenQ MX560',
                 'category_id' => $catProyektor->id,
                 'room_id' => $roomLabKom1->id,
                 'status' => 'baik',
@@ -214,7 +214,7 @@ class DatabaseSeeder extends Seeder
         $inv2 = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-IPA-015'],
             [
-                'nama_barang' => 'Olympus CX23',
+                'nama_barang' => 'Mikroskop Olympus CX23',
                 'category_id' => $catMikroskop->id,
                 'room_id' => $roomLabIpa->id,
                 'status' => 'baik',
@@ -233,12 +233,12 @@ class DatabaseSeeder extends Seeder
         $inv3 = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-RGU-108'],
             [
-                'nama_barang' => 'ASUS Vivobook 14',
+                'nama_barang' => 'Laptop Asus Vivobook A11',
                 'category_id' => $catLaptop->id,
                 'room_id' => $roomRuangGuru->id,
                 'status' => 'baik',
                 'nomor_register' => 'REG-2023-045',
-                'merk_type' => 'ASUS Vivobook 14 A1400EA',
+                'merk_type' => 'Asus Vivobook A11',
                 'ukuran_cc' => 'Core i5 14 Inch',
                 'bahan' => 'Alumunium Plastik',
                 'tahun_pembelian' => '2023',
@@ -251,12 +251,12 @@ class DatabaseSeeder extends Seeder
         $invLaptop2 = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-RGU-109'],
             [
-                'nama_barang' => 'Lenovo ThinkPad E14',
+                'nama_barang' => 'Laptop Lenovo ThinkPad E14',
                 'category_id' => $catLaptop->id,
                 'room_id' => $roomRuangGuru->id,
                 'status' => 'baik',
                 'nomor_register' => 'REG-2023-046',
-                'merk_type' => 'ThinkPad E14 Gen 4',
+                'merk_type' => 'Lenovo ThinkPad E14 Gen 4',
                 'ukuran_cc' => 'Core i5 14 Inch',
                 'bahan' => 'Alumunium Plastik',
                 'tahun_pembelian' => '2023',
@@ -269,12 +269,12 @@ class DatabaseSeeder extends Seeder
         $invLaptop3 = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-RGU-110'],
             [
-                'nama_barang' => 'Acer Aspire 5',
+                'nama_barang' => 'Laptop Acer Aspire 5',
                 'category_id' => $catLaptop->id,
                 'room_id' => $roomRuangGuru->id,
                 'status' => 'baik',
                 'nomor_register' => 'REG-2024-051',
-                'merk_type' => 'Aspire 5 A514-55G',
+                'merk_type' => 'Acer Aspire 5 A514-55G',
                 'ukuran_cc' => 'Core i5 14 Inch',
                 'bahan' => 'Plastik Komposit',
                 'tahun_pembelian' => '2024',
@@ -288,12 +288,12 @@ class DatabaseSeeder extends Seeder
         $inv4 = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-OLA-004'],
             [
-                'nama_barang' => 'Speeds Senam Lantai 2x1m',
+                'nama_barang' => 'Matras Senam Lantai Speeds 2x1m',
                 'category_id' => $catMatras->id,
                 'room_id' => $roomGudang->id,
                 'status' => 'baik',
                 'nomor_register' => 'REG-2021-088',
-                'merk_type' => 'Speeds Matras Senam',
+                'merk_type' => 'Speeds Matras Senam 2x1m',
                 'ukuran_cc' => '200x100x15 cm',
                 'bahan' => 'Busa Rebonded / Oscar',
                 'tahun_pembelian' => '2021',
@@ -306,12 +306,12 @@ class DatabaseSeeder extends Seeder
         $invMatras2 = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-OLA-005'],
             [
-                'nama_barang' => 'Kettler Yoga 6mm',
+                'nama_barang' => 'Matras Yoga Kettler 6mm',
                 'category_id' => $catMatras->id,
                 'room_id' => $roomGudang->id,
                 'status' => 'baik',
                 'nomor_register' => 'REG-2022-090',
-                'merk_type' => 'Kettler Yoga Mat',
+                'merk_type' => 'Kettler Yoga Mat 6mm',
                 'ukuran_cc' => '173x61x0.6 cm',
                 'bahan' => 'TPE Eco-Friendly',
                 'tahun_pembelian' => '2022',
@@ -325,7 +325,7 @@ class DatabaseSeeder extends Seeder
         $inv5 = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-AUL-021'],
             [
-                'nama_barang' => 'TOA ZS-202C',
+                'nama_barang' => 'Speaker Column TOA ZS-202C',
                 'category_id' => $catSpeaker->id,
                 'room_id' => $roomAula->id,
                 'status' => 'baik',
@@ -340,16 +340,16 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 5.6 Kategori: Monitor
+        // 5.6 Kategori: Komputer
         $inv6 = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-LAB-019'],
             [
-                'nama_barang' => 'HP 24-df0012d',
-                'category_id' => $catMonitor->id,
+                'nama_barang' => 'Komputer All-in-One HP 24-df0012d',
+                'category_id' => $catKomputer->id,
                 'room_id' => $roomLabKom1->id,
                 'status' => 'rusak',
                 'nomor_register' => 'REG-2021-004',
-                'merk_type' => 'HP 24-df0012d',
+                'merk_type' => 'HP All-in-One 24-df0012d',
                 'ukuran_cc' => '23.8 inch IPS Core i3',
                 'bahan' => 'Plastik Komposisi',
                 'tahun_pembelian' => '2021',
@@ -359,21 +359,21 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $invMonitor2 = Inventory::updateOrCreate(
+        $invKomputer2 = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-LAB-020'],
             [
-                'nama_barang' => 'LG 24MP400',
-                'category_id' => $catMonitor->id,
+                'nama_barang' => 'Komputer Desktop Lenovo IdeaCentre 3',
+                'category_id' => $catKomputer->id,
                 'room_id' => $roomLabKom1->id,
                 'status' => 'baik',
                 'nomor_register' => 'REG-2024-015',
-                'merk_type' => 'LG 24MP400-B IPS 75Hz',
-                'ukuran_cc' => '24 Inch FHD IPS',
+                'merk_type' => 'Lenovo IdeaCentre 3 07IAB7',
+                'ukuran_cc' => 'Core i3 Desktop PC',
                 'bahan' => 'Plastik Matte',
                 'tahun_pembelian' => '2024',
                 'asal_usul' => 'BOS Kinerja',
-                'harga' => 1450000,
-                'keterangan' => 'Layar jernih, kabel HDMI dan adaptor original lengkap',
+                'harga' => 7800000,
+                'keterangan' => 'Set lengkap CPU, monitor, keyboard, dan mouse',
             ]
         );
 
@@ -381,7 +381,7 @@ class DatabaseSeeder extends Seeder
         $invKamera = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-AUL-011'],
             [
-                'nama_barang' => 'Canon EOS 1500D',
+                'nama_barang' => 'Kamera Canon EOS 1500D',
                 'category_id' => $catKamera->id,
                 'room_id' => $roomAula->id,
                 'status' => 'baik',
@@ -400,7 +400,7 @@ class DatabaseSeeder extends Seeder
         $invPrinter = Inventory::updateOrCreate(
             ['kode_barang' => 'INV-RGU-022'],
             [
-                'nama_barang' => 'Epson L3210',
+                'nama_barang' => 'Printer Epson EcoTank L3210',
                 'category_id' => $catPrinter->id,
                 'room_id' => $roomRuangGuru->id,
                 'status' => 'baik',

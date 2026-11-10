@@ -196,6 +196,26 @@ class PeminjamInventoryController extends Controller
      */
     public function store(Request $request)
     {
+        $validateSarprasHours = function ($attribute, $value, $fail) {
+            try {
+                $dt = Carbon::parse($value)->timezone('Asia/Jakarta');
+                $label = $attribute === 'tanggal_pinjam' ? 'peminjaman' : 'pengembalian';
+
+                if ($dt->isWeekend()) {
+                    $fail("Kantor Sarpras tutup pada akhir pekan (Sabtu & Minggu). Jadwal {$label} harus pada hari kerja (Senin s.d. Jumat).");
+                    return;
+                }
+
+                $timeStr = $dt->format('H:i');
+                if ($timeStr < '07:00' || $timeStr > '13:00') {
+                    $fail("Jam {$label} ({$timeStr} WIB) berada di luar jam operasional Sarpras (07:00 – 13:00 WIB).");
+                    return;
+                }
+            } catch (\Exception $e) {
+                $fail('Format tanggal atau jam tidak valid.');
+            }
+        };
+
         $validated = $request->validate([
             'nama_peminjam' => 'required|string|max:150',
             'tanggal_pinjam' => [
@@ -208,8 +228,14 @@ class PeminjamInventoryController extends Controller
                         $fail('Tanggal dan jam peminjaman tidak boleh di waktu yang sudah lewat.');
                     }
                 },
+                $validateSarprasHours,
             ],
-            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
+            'tanggal_kembali' => [
+                'required',
+                'date',
+                'after_or_equal:tanggal_pinjam',
+                $validateSarprasHours,
+            ],
             'alasan_tujuan' => 'required|string|min:3|max:500',
             'items' => 'nullable|array',
             'items.*.category_id' => 'required_with:items|exists:categories,id',
@@ -406,32 +432,20 @@ class PeminjamInventoryController extends Controller
         if ($request->filled('date_range')) {
             $dateRange = $request->input('date_range');
             $dates = preg_split('/\s*(?:—|-|to)\s*/u', $dateRange);
-            $today = Carbon::now('Asia/Jakarta')->endOfDay();
 
             if (count($dates) === 2) {
                 try {
                     $startDate = Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
                     $endDate = Carbon::createFromFormat('d/m/Y', trim($dates[1]))->endOfDay();
 
-                    if ($startDate->isAfter($today)) {
-                        $query->whereRaw('1 = 0');
-                    } else {
-                        if ($endDate->isAfter($today)) {
-                            $endDate = $today;
-                        }
-                        $query->whereBetween('tanggal_pinjam', [$startDate, $endDate]);
-                    }
+                    $query->whereBetween('tanggal_pinjam', [$startDate, $endDate]);
                 } catch (\Exception $e) {
                     // Ignore date parsing errors gracefully
                 }
             } elseif (count($dates) === 1 && !empty(trim($dates[0]))) {
                 try {
                     $singleDate = Carbon::createFromFormat('d/m/Y', trim($dates[0]))->startOfDay();
-                    if ($singleDate->isAfter($today)) {
-                        $query->whereRaw('1 = 0');
-                    } else {
-                        $query->whereDate('tanggal_pinjam', $singleDate);
-                    }
+                    $query->whereDate('tanggal_pinjam', $singleDate);
                 } catch (\Exception $e) {
                     // Ignore
                 }

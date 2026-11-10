@@ -409,7 +409,6 @@
             conjunction: " — ",
             locale: "id",
             allowInput: false,
-            maxDate: "{{ \Carbon\Carbon::now('Asia/Jakarta')->format('d/m/Y') }}",
             defaultDate: @json(request('date_range') ? preg_split('/\s*(?:—|-|to)\s*/u', request('date_range')) : []),
             onClose: function(selectedDates, dateStr, instance) {
                 if (selectedDates.length === 2) {
