@@ -83,7 +83,7 @@ class Loan extends Model
     }
 
     /**
-     * Get summary text of categories in this loan, e.g. "Laptop (2), Proyektor (1), Matras (3)"
+     * Get summary text of categories in this loan, e.g. "Laptop (2 Unit), Proyektor (1 Unit)"
      */
     public function getCategorySummaryAttribute(): string
     {
@@ -98,13 +98,40 @@ class Loan extends Model
             if (!empty($counts)) {
                 $parts = [];
                 foreach ($counts as $name => $count) {
-                    $parts[] = "{$name} ({$count})";
+                    $parts[] = "{$name} ({$count} Unit)";
                 }
                 return implode(', ', $parts);
             }
         }
 
-        return $this->category->nama_kategori ?? '-';
+        $catName = $this->category?->nama_kategori ?? ($this->inventory?->category?->nama_kategori ?? 'Inventaris');
+        $qty = $this->jumlah_barang;
+        return "{$catName} ({$qty} Unit)";
+    }
+
+    /**
+     * Get unique list of category names in this loan (comma-separated), e.g. "Laptop, Proyektor"
+     */
+    public function getAllCategoriesStringAttribute(): string
+    {
+        $categories = collect();
+
+        if ($this->relationLoaded('details') ? $this->details->isNotEmpty() : $this->details()->exists()) {
+            $details = $this->relationLoaded('details') ? $this->details : $this->details()->with('inventory.category')->get();
+            $categories = $details->map(function ($d) {
+                return $d->inventory?->category?->nama_kategori;
+            })->filter()->unique()->values();
+        }
+
+        if ($categories->isEmpty()) {
+            if ($this->category?->nama_kategori) {
+                $categories->push($this->category->nama_kategori);
+            } elseif ($this->inventory?->category?->nama_kategori) {
+                $categories->push($this->inventory->category->nama_kategori);
+            }
+        }
+
+        return $categories->isNotEmpty() ? $categories->implode(', ') : ($this->category->nama_kategori ?? 'Barang');
     }
 
     /**

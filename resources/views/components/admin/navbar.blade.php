@@ -95,7 +95,7 @@
                                             {{ $notif->nama_peminjam }}
                                         </p>
                                         <p class="text-[11px] text-[#4B5563] mt-0.5 leading-snug">
-                                            Mengajukan peminjaman <span class="font-medium text-[#1F2937]">{{ $notif->category->nama_kategori ?? 'Barang' }}</span>
+                                            Mengajukan peminjaman <span class="font-medium text-[#1F2937]">{{ $notif->all_categories_string }}</span>
                                         </p>
                                         <div class="flex items-center gap-1 text-[10px] text-[#6B7280] mt-1.5">
                                             <span class="material-symbols-outlined text-[12px] text-[#9CA3AF]">schedule</span>

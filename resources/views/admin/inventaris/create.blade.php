@@ -118,18 +118,19 @@
                     @enderror
                 </div>
 
-                <!-- Nama Barang -->
+                <!-- Nama Barang / Unit -->
                 <div class="flex flex-col gap-1.5">
                     <label for="nama_barang" class="text-xs font-semibold text-[#1F2937]">
-                        Nama Barang <span class="text-[#DC2626]">*</span>
+                        Nama Barang / Unit <span class="text-[#DC2626]">*</span>
                     </label>
                     <input type="text"
                            id="nama_barang"
                            name="nama_barang"
                            value="{{ old('nama_barang') }}"
-                           placeholder="mis. Laptop ASUS Vivobook 14"
+                           placeholder="mis. Laptop Asus Vivobook A11"
                            required
                            class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] border {{ $errors->has('nama_barang') ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]/20' : 'border-[#D9E4E2] focus:border-[#0F766E] focus:ring-[#0F766E]/20' }} focus:bg-white focus:outline-none focus:ring-2 transition-all">
+                    <span class="text-[11px] text-[#6B7280]">Nama spesifik unit barang fisik (contoh: Laptop Asus Vivobook A11, Proyektor Epson EB-X500).</span>
                     @error('nama_barang')
                         <p class="text-xs text-[#DC2626] mt-0.5 flex items-center gap-1">
                             <span class="material-symbols-outlined text-[14px]">error</span>
@@ -144,7 +145,7 @@
                 <!-- Dropdown Kategori (Select2) -->
                 <div class="flex flex-col gap-1.5">
                     <label for="category_id" class="text-xs font-semibold text-[#1F2937]">
-                        Kategori Barang <span class="text-[#DC2626]">*</span>
+                        Kategori (Nama Barang) <span class="text-[#DC2626]">*</span>
                     </label>
                     <select id="category_id"
                             name="category_id"
@@ -157,6 +158,7 @@
                             </option>
                         @endforeach
                     </select>
+                    <span class="text-[11px] text-[#6B7280]">Pilih nama jenis barang (contoh: Laptop, Proyektor, Kamera, dll).</span>
                     @error('category_id')
                         <p class="text-xs text-[#DC2626] mt-0.5">{{ $message }}</p>
                     @enderror
@@ -192,7 +194,8 @@
                             name="status"
                             required
                             class="select2-form w-full">
-                        <option value="baik" {{ old('status', 'baik') == 'baik' ? 'selected' : '' }}>Baik</option>
+                        <option value="" {{ old('status') ? '' : 'selected' }} disabled>-- Pilih Status Unit --</option>
+                        <option value="baik" {{ old('status') == 'baik' ? 'selected' : '' }}>Baik</option>
                         <option value="rusak" {{ old('status') == 'rusak' ? 'selected' : '' }}>Rusak</option>
                         <option value="perlu_perbaikan" {{ old('status') == 'perlu_perbaikan' ? 'selected' : '' }}>Perlu Perbaikan</option>
                         <option value="hilang" {{ old('status') == 'hilang' ? 'selected' : '' }}>Hilang</option>
@@ -351,7 +354,7 @@
                     <input type="text"
                            id="tahun_pembelian"
                            name="tahun_pembelian"
-                           value="{{ old('tahun_pembelian', date('Y')) }}"
+                           value="{{ old('tahun_pembelian') }}"
                            placeholder="mis. 2024"
                            class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] border {{ $errors->has('tahun_pembelian') ? 'border-[#DC2626]' : 'border-[#D9E4E2]' }} focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
                     @error('tahun_pembelian')

@@ -238,7 +238,7 @@
                                    name="tahun"
                                    id="filter_tahun"
                                    :value="inputValue"
-                                   placeholder="Select Year"
+                                   placeholder="Pilih Tahun"
                                    readonly
                                    @click="open = !open"
                                    class="w-full h-10 pl-3 pr-10 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] placeholder-[#6B7280] border border-[#D9E4E2] focus:bg-white focus:outline-none focus:border-[#0F766E] focus:ring-2 focus:ring-[#0F766E]/20 transition-all cursor-pointer font-medium select-none truncate">
@@ -333,7 +333,7 @@
                                         @click.stop="selectToday()"
                                         class="w-full py-1.5 px-3 rounded-lg text-xs font-semibold text-[#0F766E] bg-[#F0FDFA] hover:bg-[#CCFBF1]/50 border border-[#CCFBF1] transition-colors text-center cursor-pointer"
                                         title="Pilih tahun saat ini">
-                                    Today ({{ date('Y') }})
+                                    Tahun Ini ({{ date('Y') }})
                                 </button>
                             </div>
 
@@ -352,8 +352,8 @@
                         <th class="py-3.5 px-4 text-center w-12">No</th>
                         <th class="py-3.5 px-4 w-36">Kode Barang</th>
                         <th class="py-3.5 px-4 w-16 text-center">Foto</th>
-                        <th class="py-3.5 px-4 min-w-[200px]">Nama Barang</th>
-                        <th class="py-3.5 px-4 min-w-[140px]">Kategori</th>
+                        <th class="py-3.5 px-4 min-w-[200px]">Nama Barang (Unit)</th>
+                        <th class="py-3.5 px-4 min-w-[140px]">Kategori (Nama Barang)</th>
                         <th class="py-3.5 px-4 min-w-[140px]">Ruangan</th>
                         <th class="py-3.5 px-4 text-center w-36">Status Unit</th>
                         <th class="py-3.5 px-4 text-center w-28">Aksi</th>

@@ -108,7 +108,7 @@
                                             onclick="openEditAccountModal({{ $acc->id }}, '{{ addslashes($acc->username) }}')"
                                             class="w-8 h-8 rounded-lg hover:bg-[#CCFBF1] text-[#0F766E] flex items-center justify-center transition-colors focus:outline-none"
                                             title="Ubah Nama Pengguna / Kata Sandi">
-                                        <span class="material-symbols-outlined text-[18px]">Ubah</span>
+                                        <span class="material-symbols-outlined text-[18px]">edit</span>
                                     </button>
 
                                     <!-- Tombol Hapus -->

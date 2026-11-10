@@ -17,6 +17,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Settings;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -438,15 +439,37 @@ class ReportController extends Controller
     }
 
     /**
+     * Clean and prepare text for Word XML export, ensuring valid XML structure and character encoding.
+     */
+    protected function cleanWordText($text): string
+    {
+        if ($text === null || $text === '') {
+            return '';
+        }
+        $str = html_entity_decode((string) $text, ENT_QUOTES | ENT_XML1, 'UTF-8');
+        // Remove characters that are illegal in XML 1.0 (except \t, \n, \r)
+        $clean = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $str);
+        if ($clean === null) {
+            $clean = mb_convert_encoding($str, 'UTF-8', 'UTF-8');
+            $clean = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $clean);
+        }
+        return $clean ?? '';
+    }
+
+    /**
      * Export report to Word (.docx) format.
      */
     protected function exportWord($schoolProfile, $inventories, $totalItems, $totalHarga, $generatedDate, $baseName)
     {
+        // Pastikan XML output escaping aktif agar karakter seperti &, <, >, dan tanda petik di-escape dengan benar
+        Settings::setOutputEscapingEnabled(true);
+
         $phpWord = new PhpWord();
 
         // Document styles & properties
+        $creator = $this->cleanWordText($schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao');
         $phpWord->getDocInfo()
-            ->setCreator($schoolProfile->nama_sekolah ?? 'SMPN 3 Babakancikao')
+            ->setCreator($creator)
             ->setTitle('Kartu Inventaris Barang (KIB) B - Peralatan dan Mesin');
 
         // Landscape A4 Page with 1440 twips margins (1 inch = 2.54 cm on all 4 sides)
@@ -490,7 +513,7 @@ class ReportController extends Controller
         }
         $cellTitle = $kopTable->addCell(14000);
         $cellTitle->addText(
-            'PEMERINTAH ' . strtoupper($schoolProfile->kabupaten_kota ?: 'KABUPATEN PURWAKARTA'),
+            'PEMERINTAH ' . strtoupper($this->cleanWordText($schoolProfile->kabupaten_kota ?: 'KABUPATEN PURWAKARTA')),
             ['bold' => true, 'size' => 11, 'name' => 'Arial'],
             ['alignment' => Jc::CENTER, 'spaceAfter' => 20]
         );
@@ -515,13 +538,13 @@ class ReportController extends Controller
         ]);
 
         $infoItems = [
-            'PROVINSI'            => $schoolProfile->provinsi ?: '-',
-            'KAB./KOTA'           => $schoolProfile->kabupaten_kota ?: '-',
-            'BIDANG'              => $schoolProfile->bidang ?: '-',
-            'UNIT ORGANISASI'     => $schoolProfile->unit_organisasi ?: '-',
-            'SUB UNIT ORGANISASI' => $schoolProfile->sub_unit_organisasi ?: '-',
-            'UPB'                 => $schoolProfile->upb ?: '-',
-            'NO. KODE LOKASI'     => $schoolProfile->no_kode_lokasi ?: '-',
+            'PROVINSI'            => $this->cleanWordText($schoolProfile->provinsi ?: '-'),
+            'KAB./KOTA'           => $this->cleanWordText($schoolProfile->kabupaten_kota ?: '-'),
+            'BIDANG'              => $this->cleanWordText($schoolProfile->bidang ?: '-'),
+            'UNIT ORGANISASI'     => $this->cleanWordText($schoolProfile->unit_organisasi ?: '-'),
+            'SUB UNIT ORGANISASI' => $this->cleanWordText($schoolProfile->sub_unit_organisasi ?: '-'),
+            'UPB'                 => $this->cleanWordText($schoolProfile->upb ?: '-'),
+            'NO. KODE LOKASI'     => $this->cleanWordText($schoolProfile->no_kode_lokasi ?: '-'),
         ];
 
         foreach ($infoItems as $label => $val) {
@@ -602,27 +625,27 @@ class ReportController extends Controller
         foreach ($inventories as $inv) {
             $table->addRow();
             $table->addCell(420)->addText((string)$no, $numStyle, ['alignment' => Jc::CENTER]);
-            $table->addCell(1120)->addText($inv->kode_barang ?: '-', $bodyStyle);
+            $table->addCell(1120)->addText($this->cleanWordText($inv->kode_barang ?: '-'), $bodyStyle);
             $namaCell = $table->addCell(2520);
-            $namaCell->addText($inv->nama_barang ?: '-', $bodyStyle);
+            $namaCell->addText($this->cleanWordText($inv->nama_barang ?: '-'), $bodyStyle);
             if ($inv->category) {
-                $namaCell->addText('(' . $inv->category->nama_kategori . ')', ['size' => 6.5, 'color' => '666666', 'name' => 'Arial']);
+                $namaCell->addText('(' . $this->cleanWordText($inv->category->nama_kategori) . ')', ['size' => 6.5, 'color' => '666666', 'name' => 'Arial']);
             }
-            $table->addCell(630)->addText($inv->nomor_register ?: '-', $bodyStyle, ['alignment' => Jc::CENTER]);
-            $table->addCell(1120)->addText($inv->merk_type ?: '-', $bodyStyle);
-            $table->addCell(630)->addText($inv->ukuran_cc ?: '-', $bodyStyle);
-            $table->addCell(630)->addText($inv->bahan ?: '-', $bodyStyle);
-            $table->addCell(630)->addText($inv->tahun_pembelian ?: '-', $bodyStyle, ['alignment' => Jc::CENTER]);
+            $table->addCell(630)->addText($this->cleanWordText($inv->nomor_register ?: '-'), $bodyStyle, ['alignment' => Jc::CENTER]);
+            $table->addCell(1120)->addText($this->cleanWordText($inv->merk_type ?: '-'), $bodyStyle);
+            $table->addCell(630)->addText($this->cleanWordText($inv->ukuran_cc ?: '-'), $bodyStyle);
+            $table->addCell(630)->addText($this->cleanWordText($inv->bahan ?: '-'), $bodyStyle);
+            $table->addCell(630)->addText($this->cleanWordText($inv->tahun_pembelian ?: '-'), $bodyStyle, ['alignment' => Jc::CENTER]);
 
-            $table->addCell(560)->addText($inv->nomor_pabrik ?: '-', $bodyStyle);
-            $table->addCell(560)->addText($inv->nomor_rangka ?: '-', $bodyStyle);
-            $table->addCell(560)->addText($inv->nomor_mesin ?: '-', $bodyStyle);
-            $table->addCell(560)->addText($inv->nomor_polisi ?: '-', $bodyStyle);
-            $table->addCell(560)->addText($inv->nomor_bpkb ?: '-', $bodyStyle);
+            $table->addCell(560)->addText($this->cleanWordText($inv->nomor_pabrik ?: '-'), $bodyStyle);
+            $table->addCell(560)->addText($this->cleanWordText($inv->nomor_rangka ?: '-'), $bodyStyle);
+            $table->addCell(560)->addText($this->cleanWordText($inv->nomor_mesin ?: '-'), $bodyStyle);
+            $table->addCell(560)->addText($this->cleanWordText($inv->nomor_polisi ?: '-'), $bodyStyle);
+            $table->addCell(560)->addText($this->cleanWordText($inv->nomor_bpkb ?: '-'), $bodyStyle);
 
-            $table->addCell(980)->addText($inv->asal_usul ?: '-', $bodyStyle);
+            $table->addCell(980)->addText($this->cleanWordText($inv->asal_usul ?: '-'), $bodyStyle);
             $table->addCell(1260)->addText('Rp ' . number_format($inv->harga ?? 0, 0, ',', '.'), $bodyStyle, ['alignment' => Jc::RIGHT]);
-            $table->addCell(1260)->addText($inv->keterangan ?? $inv->deskripsi ?? '-', $bodyStyle);
+            $table->addCell(1260)->addText($this->cleanWordText($inv->keterangan ?? $inv->deskripsi ?? '-'), $bodyStyle);
 
             $no++;
         }
@@ -652,19 +675,19 @@ class ReportController extends Controller
         $signLeft->addText('Mengetahui,', ['size' => 9, 'name' => 'Arial']);
         $signLeft->addText('Kepala Sekolah', ['size' => 9, 'name' => 'Arial']);
         $signLeft->addTextBreak(3);
-        $namaKepsek = $schoolProfile->nama_kepala_sekolah ?: 'Drs. H. Ahmad Dahlan, M.Pd';
-        $nipKepsek = $schoolProfile->nip_kepala_sekolah ?: '19720315 199802 1 002';
+        $namaKepsek = $this->cleanWordText($schoolProfile->nama_kepala_sekolah ?: 'Drs. H. Ahmad Dahlan, M.Pd');
+        $nipKepsek = $this->cleanWordText($schoolProfile->nip_kepala_sekolah ?: '19720315 199802 1 002');
         $signLeft->addText('(' . $namaKepsek . ')', ['size' => 9, 'name' => 'Arial', 'bold' => true]);
         $signLeft->addText('NIP. ' . $nipKepsek, ['size' => 9, 'name' => 'Arial']);
 
         // Right Signatory: Pembuat Laporan
         $kabKotaClean = $schoolProfile->kabupaten_kota ? str_replace(['Kabupaten ', 'Kota '], '', $schoolProfile->kabupaten_kota) : 'Babakancikao';
         $signRight = $signTable->addCell(7500);
-        $signRight->addText($kabKotaClean . ', ' . $generatedDate, ['size' => 9, 'name' => 'Arial']);
+        $signRight->addText($this->cleanWordText($kabKotaClean) . ', ' . $this->cleanWordText($generatedDate), ['size' => 9, 'name' => 'Arial']);
         $signRight->addText('Pembuat Laporan', ['size' => 9, 'name' => 'Arial']);
         $signRight->addTextBreak(3);
-        $namaPembuat = $schoolProfile->nama_pembuat ?: 'Admin Sarpras';
-        $nipPembuat = $schoolProfile->nip_pembuat ?: '19800101 200501 1 001';
+        $namaPembuat = $this->cleanWordText($schoolProfile->nama_pembuat ?: 'Admin Sarpras');
+        $nipPembuat = $this->cleanWordText($schoolProfile->nip_pembuat ?: '19800101 200501 1 001');
         $signRight->addText('(' . $namaPembuat . ')', ['size' => 9, 'name' => 'Arial', 'bold' => true]);
         $signRight->addText('NIP. ' . $nipPembuat, ['size' => 9, 'name' => 'Arial']);
 

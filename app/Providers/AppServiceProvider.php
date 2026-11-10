@@ -56,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
                 if (Schema::hasTable('loans')) {
                     $pendingLoansCount = Loan::where('status', 'dipinjam')->count();
                     $pendingLoansNotifications = Loan::where('status', 'dipinjam')
-                        ->with(['category', 'inventory'])
+                        ->with(['category', 'inventory.category', 'details.inventory.category'])
                         ->latest()
                         ->take(5)
                         ->get();

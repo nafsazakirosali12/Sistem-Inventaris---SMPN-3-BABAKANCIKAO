@@ -7,6 +7,7 @@ use App\Models\SchoolProfile;
 use App\Models\Category;
 use App\Models\Inventory;
 use App\Models\Loan;
+use App\Models\LoanDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,12 +23,31 @@ class DashboardController extends Controller
         $totalKategori  = Category::count();
         $totalPeminjaman = Loan::count();
 
-        // ── Ketersediaan Barang (dari Data Peminjaman & Data Inventaris) ─────
-        $sedangDipinjam = Loan::where('status', 'dipinjam')->count();
+        // ── Ketersediaan Barang (Real-time dari Data Peminjaman Aktif & Data Inventaris) ─────
+        $activeBorrowedDetailIds = LoanDetail::where(function ($q) {
+                $q->where('status', 'dipinjam')
+                  ->orWhere(function ($sub) {
+                      $sub->whereNull('status')
+                          ->whereHas('loan', fn($lq) => $lq->where('status', 'dipinjam'));
+                  });
+            })
+            ->pluck('inventory_id')
+            ->filter()
+            ->unique()
+            ->all();
+
+        $directBorrowedIds = Loan::where('status', 'dipinjam')
+            ->whereNotNull('inventory_id')
+            ->pluck('inventory_id')
+            ->filter()
+            ->unique()
+            ->all();
+
+        $allActiveBorrowedIds = array_unique(array_merge($activeBorrowedDetailIds, $directBorrowedIds));
+        $sedangDipinjam = count($allActiveBorrowedIds);
         $tersedia       = Inventory::where('status', 'baik')
-            ->whereDoesntHave('loans', function ($q) {
-                $q->where('status', 'dipinjam');
-            })->count();
+            ->whereNotIn('id', $allActiveBorrowedIds)
+            ->count();
 
         // ── Kondisi Inventaris (4 kondisi barang: Baik, Rusak, Perlu Perbaikan, Hilang) ─
         $baikCount           = Inventory::where('status', 'baik')->count();

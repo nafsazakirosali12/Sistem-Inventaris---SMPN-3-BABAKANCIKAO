@@ -232,7 +232,7 @@
                     $isHighlighted = (string)$loan->id === (string)$highlightId;
                     $isOverdue = $loan->is_terlambat;
                     $totalUnits = $loan->jumlah_barang;
-                    $catTitle = $loan->category->nama_kategori ?? ($loan->category_summary ?: ($loan->inventory->category->nama_kategori ?? 'Inventaris'));
+                    $catTitle = $loan->category_summary;
                 @endphp
 
                 <div id="loan-card-{{ $loan->id }}"
@@ -347,6 +347,7 @@
                                     'kode' => $loan->kode_peminjaman,
                                     'peminjam' => $loan->nama_peminjam,
                                     'kategori' => $catTitle,
+                                    'kategori_breakdown' => $loan->category_summary,
                                     'jumlah' => $totalUnits,
                                     'status' => $loan->status,
                                     'is_terlambat' => $isOverdue,
@@ -362,6 +363,8 @@
                                                 'nama' => $d->inventory->nama_barang ?? '-',
                                                 'kategori' => $d->inventory->category->nama_kategori ?? '-',
                                                 'ruangan' => $d->inventory->room->nama_ruangan ?? '-',
+                                                'status' => $d->status ?? 'dipinjam',
+                                                'tanggal_kembali_aktual' => $d->tanggal_kembali_aktual ? $d->tanggal_kembali_aktual->format('d/m/Y H:i') . ' WIB' : null,
                                             ];
                                         })->values()->all()
                                         : ($loan->inventory ? [[
@@ -369,6 +372,8 @@
                                             'nama' => $loan->inventory->nama_barang ?? '-',
                                             'kategori' => $loan->inventory->category->nama_kategori ?? '-',
                                             'ruangan' => $loan->inventory->room->nama_ruangan ?? '-',
+                                            'status' => $loan->status ?? 'dipinjam',
+                                            'tanggal_kembali_aktual' => $loan->tanggal_kembali_aktual ? $loan->tanggal_kembali_aktual->format('d/m/Y H:i') . ' WIB' : null,
                                         ]] : [])
                                 ]) }})"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-[#D9E4E2] text-[#0F766E] hover:bg-[#F0FDFA] hover:border-[#0F766E] text-xs font-semibold transition-all shadow-2xs cursor-pointer">
@@ -430,7 +435,7 @@
                             <span class="material-symbols-outlined text-[18px] sm:text-[20px]">receipt_long</span>
                         </div>
                         <div>
-                            <h3 class="text-sm sm:text-base font-bold text-[#1F2937]">Rincian Transaksi Peminjaman</h3>
+                            <h3 class="text-sm sm:text-base font-bold text-[#1F2937]">Rincian Peminjaman</h3>
                             <p class="text-[11px] text-[#0F766E] font-mono font-semibold" x-text="'#' + (activeLoan?.kode || '')"></p>
                         </div>
                     </div>
@@ -444,14 +449,14 @@
                     </button>
                 </div>
 
-                <!-- Modal Body -->
-                <div class="p-4 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                <!-- Modal Body (Mobile Friendly) -->
+                <div class="p-3.5 sm:p-6 space-y-3.5 sm:space-y-4 max-h-[75vh] overflow-y-auto">
 
                     <!-- Info Ringkas Peminjam & Status (Tanpa Akun Guru) -->
                     <div class="grid grid-cols-2 gap-3 p-3 sm:p-3.5 rounded-xl bg-[#F8FBFA] border border-[#E5EBEA] text-xs">
                         <div>
                             <span class="text-[10px] text-[#6B7280] uppercase font-bold tracking-wider block">Peminjam</span>
-                            <span class="font-bold text-[#1F2937] text-xs sm:text-sm block mt-0.5" x-text="activeLoan?.peminjam"></span>
+                            <span class="font-bold text-[#1F2937] text-xs sm:text-sm block mt-0.5 truncate" x-text="activeLoan?.peminjam"></span>
                         </div>
 
                         <div>
@@ -480,12 +485,10 @@
                     </div>
 
                     <!-- Kategori & Jadwal Waktu -->
-                    <div class="p-3.5 rounded-xl border border-[#D9E4E2] bg-white space-y-2 text-xs">
-                        <div class="flex justify-between py-1 border-b border-[#F3F7F6]">
-                            <span class="text-[#6B7280]">Kategori Barang</span>
-                            <span class="font-bold text-[#1F2937]">
-                                <span x-text="activeLoan?.kategori"></span> (<span x-text="activeLoan?.jumlah"></span> Unit)
-                            </span>
+                    <div class="p-3 sm:p-3.5 rounded-xl border border-[#D9E4E2] bg-white space-y-2 text-xs">
+                        <div class="flex justify-between items-start py-1 border-b border-[#F3F7F6] gap-3">
+                            <span class="text-[#6B7280] shrink-0">Kategori Barang</span>
+                            <span class="font-bold text-[#1F2937] text-right" x-text="activeLoan?.kategori_breakdown || activeLoan?.kategori"></span>
                         </div>
 
                         <div class="flex justify-between py-1 border-b border-[#F3F7F6]">
@@ -516,20 +519,78 @@
                         </div>
                     </div>
 
-                    <!-- Unit Barang Fisik yang Terambil (Khusus di Dalam Detail) -->
+                    <!-- Unit Barang Fisik yang Terambil (Khusus di Dalam Detail - Responsive Mobile) -->
                     <div>
                         <span class="text-[10px] uppercase font-bold text-[#6B7280] tracking-wider block mb-1.5">
                             Daftar Unit Barang yang Terambil
                         </span>
 
-                        <div class="border border-[#D9E4E2] rounded-xl overflow-x-auto">
-                            <table class="w-full text-left text-xs min-w-[320px]">
+                        <!-- Mobile Card List View (sm:hidden) -->
+                        <div class="sm:hidden space-y-2">
+                            <template x-for="(unit, idx) in (activeLoan?.units || [])" :key="idx">
+                                <div class="p-3 rounded-xl border border-[#D9E4E2] bg-[#F8FBFA] flex flex-col gap-2">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="flex items-center gap-1.5 min-w-0">
+                                            <span class="w-5 h-5 rounded-full bg-[#E5EBEA] text-[#4B5563] text-[10px] font-bold flex items-center justify-center shrink-0" x-text="idx + 1"></span>
+                                            <span class="font-mono font-bold text-[#0F766E] text-xs truncate" x-text="unit.kode"></span>
+                                        </div>
+                                        <!-- Status Badge: 3 status baku (Selesai, Terlambat, Dipinjam) -->
+                                        <div class="shrink-0">
+                                            <template x-if="unit.status === 'selesai'">
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]">
+                                                    <span class="material-symbols-outlined text-[12px]">check</span>
+                                                    <span>Selesai</span>
+                                                </span>
+                                            </template>
+                                            <template x-if="unit.status !== 'selesai' && activeLoan?.is_terlambat">
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]">
+                                                    <span class="material-symbols-outlined text-[12px]">warning</span>
+                                                    <span>Terlambat</span>
+                                                </span>
+                                            </template>
+                                            <template x-if="unit.status !== 'selesai' && !activeLoan?.is_terlambat">
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#1E40AF] border border-[#BFDBFE]">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#2563EB]"></span>
+                                                    <span>Dipinjam</span>
+                                                </span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-1.5 border-t border-[#E5EBEA] flex flex-col gap-0.5 text-xs">
+                                        <p class="font-bold text-[#1F2937]" x-text="unit.nama"></p>
+                                        <div class="flex items-center justify-between text-[11px] text-[#6B7280]">
+                                            <span>Kategori: <strong class="text-[#374151]" x-text="unit.kategori"></strong></span>
+                                            <span>Ruangan: <strong class="text-[#374151]" x-text="unit.ruangan"></strong></span>
+                                        </div>
+                                    </div>
+
+                                    <template x-if="unit.status === 'selesai' && unit.tanggal_kembali_aktual">
+                                        <p class="text-[10px] text-[#065F46] font-medium flex items-center gap-1 pt-1 border-t border-[#E5EBEA]/60">
+                                            <span class="material-symbols-outlined text-[12px]">event_available</span>
+                                            <span>Dikembalikan: <span x-text="unit.tanggal_kembali_aktual"></span></span>
+                                        </p>
+                                    </template>
+                                </div>
+                            </template>
+                            <template x-if="!activeLoan?.units || activeLoan?.units.length === 0">
+                                <div class="p-4 rounded-xl border border-[#D9E4E2] bg-white text-center text-gray-400 italic text-xs">
+                                    Tidak ada unit fisik teralokasi.
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Tablet & Desktop Table View (hidden sm:block) -->
+                        <div class="hidden sm:block border border-[#D9E4E2] rounded-xl overflow-x-auto">
+                            <table class="w-full text-left text-xs min-w-[520px]">
                                 <thead class="bg-[#F8FBFA] text-[#6B7280] border-b border-[#D9E4E2] text-[11px] font-semibold">
                                     <tr>
                                         <th class="py-2.5 px-3 w-8 text-center">No</th>
                                         <th class="py-2.5 px-3">Kode Barang</th>
                                         <th class="py-2.5 px-3">Nama Barang</th>
+                                        <th class="py-2.5 px-3">Kategori</th>
                                         <th class="py-2.5 px-3">Ruangan</th>
+                                        <th class="py-2.5 px-3 text-center">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-[#F3F7F6]">
@@ -538,12 +599,34 @@
                                             <td class="py-2 px-3 text-center text-[#9CA3AF] text-[11px]" x-text="idx + 1"></td>
                                             <td class="py-2 px-3 font-mono font-bold text-[#0F766E]" x-text="unit.kode"></td>
                                             <td class="py-2 px-3 text-[#1F2937]" x-text="unit.nama"></td>
+                                            <td class="py-2 px-3 text-[#4B5563]" x-text="unit.kategori"></td>
                                             <td class="py-2 px-3 text-[#6B7280]" x-text="unit.ruangan"></td>
+                                            <td class="py-2 px-3 text-center">
+                                                <template x-if="unit.status === 'selesai'">
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]"
+                                                          :title="unit.tanggal_kembali_aktual ? 'Dikembalikan: ' + unit.tanggal_kembali_aktual : ''">
+                                                        <span class="material-symbols-outlined text-[12px]">check</span>
+                                                        <span>Selesai</span>
+                                                    </span>
+                                                </template>
+                                                <template x-if="unit.status !== 'selesai' && activeLoan?.is_terlambat">
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]">
+                                                        <span class="material-symbols-outlined text-[12px]">warning</span>
+                                                        <span>Terlambat</span>
+                                                    </span>
+                                                </template>
+                                                <template x-if="unit.status !== 'selesai' && !activeLoan?.is_terlambat">
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#1E40AF] border border-[#BFDBFE]">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-[#2563EB]"></span>
+                                                        <span>Dipinjam</span>
+                                                    </span>
+                                                </template>
+                                            </td>
                                         </tr>
                                     </template>
                                     <template x-if="!activeLoan?.units || activeLoan?.units.length === 0">
                                         <tr>
-                                            <td colspan="4" class="py-3 px-3 text-center text-gray-400 italic text-[11px]">
+                                            <td colspan="6" class="py-3 px-3 text-center text-gray-400 italic text-[11px]">
                                                 Tidak ada unit fisik teralokasi.
                                             </td>
                                         </tr>
@@ -586,7 +669,6 @@
                 conjunction: " — ",
                 locale: "id",
                 allowInput: false,
-                maxDate: "{{ \Carbon\Carbon::now('Asia/Jakarta')->format('d/m/Y') }}",
                 defaultDate: @json(request('date_range') ? preg_split('/\s*(?:—|-|to)\s*/u', request('date_range')) : []),
                 onClose: function(selectedDates, dateStr, instance) {
                     if (selectedDates.length === 2) {

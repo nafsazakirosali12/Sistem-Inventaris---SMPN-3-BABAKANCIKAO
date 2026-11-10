@@ -209,7 +209,7 @@
                        id="add_kode_kategori"
                        name="kode_kategori"
                        value="{{ old('kode_kategori') }}"
-                       placeholder="mis. KAT-ELEK"
+                       placeholder="mis. KAT-LAPTOP"
                        required
                        class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg font-mono text-xs uppercase font-bold text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
                 <span class="text-[11px] text-[#6B7280]">Kode unik singkat untuk identifikasi kategori aset (huruf kapital).</span>
@@ -224,9 +224,10 @@
                        id="add_nama_kategori"
                        name="nama_kategori"
                        value="{{ old('nama_kategori') }}"
-                       placeholder="mis. Peralatan Musik Tradisional"
+                       placeholder="mis. Laptop, Proyektor, Kamera, Speaker"
                        required
                        class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
+                <span class="text-[11px] text-[#6B7280]">Nama kelompok/jenis barang secara umum (misal: Laptop, Proyektor). Unit spesifik (misal: Laptop Asus Vivobook A11) didaftarkan pada Data Inventaris.</span>
             </div>
 
             <!-- Keterangan -->
@@ -300,13 +301,15 @@
             <!-- Nama Kategori -->
             <div class="flex flex-col gap-1.5">
                 <label for="edit_nama_kategori" class="text-xs font-semibold text-[#1F2937]">
-                    Nama Kategori <span class="text-[#DC2626]">*</span>
+                    Nama Kategori (Jenis Barang) <span class="text-[#DC2626]">*</span>
                 </label>
                 <input type="text"
                        id="edit_nama_kategori"
                        name="nama_kategori"
+                       placeholder="mis. Laptop, Proyektor, Kamera, Speaker"
                        required
                        class="w-full h-10 px-3 bg-[#F3F7F6] rounded-lg text-xs text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
+                <span class="text-[11px] text-[#6B7280]">Nama kelompok/jenis barang secara umum (misal: Laptop, Proyektor).</span>
             </div>
 
             <!-- Keterangan -->
