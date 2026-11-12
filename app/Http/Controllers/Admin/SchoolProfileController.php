@@ -73,6 +73,11 @@ class SchoolProfileController extends Controller
             'nip_kepala_sekolah' => 'nullable|string|max:255',
             'nama_pembuat' => 'nullable|string|max:255',
             'nip_pembuat' => 'nullable|string|max:255',
+            'hari_layanan' => 'nullable|string|max:100',
+            'jam_buka' => 'nullable|string|max:10',
+            'jam_tutup' => 'nullable|string|max:10',
+            'hari_operasional' => 'nullable|array',
+            'hari_operasional.*' => 'integer|min:1|max:7',
         ], [
             'nama_sekolah.required' => 'Nama sekolah wajib diisi.',
             'npsn.required' => 'NPSN wajib diisi.',
@@ -127,6 +132,21 @@ class SchoolProfileController extends Controller
             $denahName = 'denah_' . time() . '.' . $denahFile->getClientOriginalExtension();
             $denahFile->move($uploadDir, $denahName);
             $validated['denah'] = 'uploads/profile/' . $denahName;
+        }
+
+        // 4. Handle Jadwal Layanan Kantor Sarpras
+        if ($request->has('hari_layanan')) {
+            $validated['hari_layanan'] = trim($request->input('hari_layanan')) ?: 'Senin s.d. Jumat';
+            $ops = $request->input('hari_operasional');
+            $validated['hari_operasional'] = (!empty($ops) && is_array($ops))
+                ? array_values(array_map('intval', $ops))
+                : [1, 2, 3, 4, 5];
+        }
+        if ($request->has('jam_buka')) {
+            $validated['jam_buka'] = substr($request->input('jam_buka'), 0, 5) ?: '07:00';
+        }
+        if ($request->has('jam_tutup')) {
+            $validated['jam_tutup'] = substr($request->input('jam_tutup'), 0, 5) ?: '13:00';
         }
 
         // Filter only columns that exist in the database table to prevent SQLSTATE[42S22] errors

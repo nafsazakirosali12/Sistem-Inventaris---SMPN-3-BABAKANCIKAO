@@ -292,10 +292,11 @@
                             </div>
                         </div>
 
-                        <!-- 2. Kategori Barang & Jumlah Unit -->
-                        <div class="mt-2.5 py-1.5 px-2.5 rounded-lg bg-[#F8FBFA] flex items-center justify-between text-xs">
-                            <span class="font-medium text-[#374151] truncate max-w-[170px]" title="{{ $catTitle }}">
-                                {{ $catTitle }}
+                        <!-- 2. Total Unit Dipinjam -->
+                        <div class="mt-2.5 py-2 px-2.5 rounded-lg bg-[#F8FBFA] flex items-center justify-between text-xs">
+                            <span class="text-[#6B7280] font-medium flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[15px] text-[#0F766E]">inventory_2</span>
+                                <span>Total Unit Dipinjam</span>
                             </span>
                             <span class="font-bold text-[#0F766E] shrink-0">
                                 {{ $totalUnits }} Unit
@@ -426,7 +427,7 @@
                  x-transition:leave-start="opacity-100 scale-100"
                  x-transition:leave-end="opacity-0 scale-95"
                  @click.away="detailModalOpen = false"
-                 class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all my-4 sm:my-8 w-full max-w-xl border border-[#D9E4E2]">
+                 class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all my-4 sm:my-8 w-full max-w-2xl border border-[#D9E4E2]">
 
                 <!-- Modal Header dengan Tombol Silang 'X' -->
                 <div class="px-4 sm:px-6 py-3.5 sm:py-4 bg-[#F0FDFA] border-b border-[#D9E4E2] flex items-center justify-between">
@@ -484,11 +485,11 @@
                         </div>
                     </div>
 
-                    <!-- Kategori & Jadwal Waktu -->
+                    <!-- Total Unit & Jadwal Waktu -->
                     <div class="p-3 sm:p-3.5 rounded-xl border border-[#D9E4E2] bg-white space-y-2 text-xs">
-                        <div class="flex justify-between items-start py-1 border-b border-[#F3F7F6] gap-3">
-                            <span class="text-[#6B7280] shrink-0">Kategori Barang</span>
-                            <span class="font-bold text-[#1F2937] text-right" x-text="activeLoan?.kategori_breakdown || activeLoan?.kategori"></span>
+                        <div class="flex justify-between items-center py-1 border-b border-[#F3F7F6] gap-3">
+                            <span class="text-[#6B7280] shrink-0">Total Unit Dipinjam</span>
+                            <span class="font-bold text-[#0F766E] text-right" x-text="(activeLoan?.jumlah || (activeLoan?.units ? activeLoan.units.length : 0)) + ' Unit'"></span>
                         </div>
 
                         <div class="flex justify-between py-1 border-b border-[#F3F7F6]">
@@ -582,41 +583,41 @@
 
                         <!-- Tablet & Desktop Table View (hidden sm:block) -->
                         <div class="hidden sm:block border border-[#D9E4E2] rounded-xl overflow-x-auto">
-                            <table class="w-full text-left text-xs min-w-[520px]">
+                            <table class="w-full text-left text-xs min-w-[560px]">
                                 <thead class="bg-[#F8FBFA] text-[#6B7280] border-b border-[#D9E4E2] text-[11px] font-semibold">
                                     <tr>
-                                        <th class="py-2.5 px-3 w-8 text-center">No</th>
-                                        <th class="py-2.5 px-3">Kode Barang</th>
-                                        <th class="py-2.5 px-3">Nama Barang</th>
-                                        <th class="py-2.5 px-3">Kategori</th>
-                                        <th class="py-2.5 px-3">Ruangan</th>
-                                        <th class="py-2.5 px-3 text-center">Status</th>
+                                        <th class="py-2.5 px-3 w-10 text-center">No</th>
+                                        <th class="py-2.5 px-3 w-28">Kode Barang</th>
+                                        <th class="py-2.5 px-3 min-w-[140px]">Nama Barang</th>
+                                        <th class="py-2.5 px-3 w-24">Kategori</th>
+                                        <th class="py-2.5 px-3 w-28">Ruangan</th>
+                                        <th class="py-2.5 px-3 w-32 text-center">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-[#F3F7F6]">
                                     <template x-for="(unit, idx) in (activeLoan?.units || [])" :key="idx">
                                         <tr class="hover:bg-[#FAFDFD]">
-                                            <td class="py-2 px-3 text-center text-[#9CA3AF] text-[11px]" x-text="idx + 1"></td>
-                                            <td class="py-2 px-3 font-mono font-bold text-[#0F766E]" x-text="unit.kode"></td>
-                                            <td class="py-2 px-3 text-[#1F2937]" x-text="unit.nama"></td>
-                                            <td class="py-2 px-3 text-[#4B5563]" x-text="unit.kategori"></td>
-                                            <td class="py-2 px-3 text-[#6B7280]" x-text="unit.ruangan"></td>
-                                            <td class="py-2 px-3 text-center">
+                                            <td class="py-2.5 px-3 text-center text-[#9CA3AF] text-[11px]" x-text="idx + 1"></td>
+                                            <td class="py-2.5 px-3 font-mono font-bold text-[#0F766E]" x-text="unit.kode"></td>
+                                            <td class="py-2.5 px-3 text-[#1F2937] font-medium" x-text="unit.nama"></td>
+                                            <td class="py-2.5 px-3 text-[#4B5563]" x-text="unit.kategori"></td>
+                                            <td class="py-2.5 px-3 text-[#6B7280]" x-text="unit.ruangan"></td>
+                                            <td class="py-2.5 px-3 text-center whitespace-nowrap">
                                                 <template x-if="unit.status === 'selesai'">
-                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]"
+                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0]"
                                                           :title="unit.tanggal_kembali_aktual ? 'Dikembalikan: ' + unit.tanggal_kembali_aktual : ''">
-                                                        <span class="material-symbols-outlined text-[12px]">check</span>
+                                                        <span class="material-symbols-outlined text-[13px]">check</span>
                                                         <span>Selesai</span>
                                                     </span>
                                                 </template>
                                                 <template x-if="unit.status !== 'selesai' && activeLoan?.is_terlambat">
-                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]">
-                                                        <span class="material-symbols-outlined text-[12px]">warning</span>
+                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA]">
+                                                        <span class="material-symbols-outlined text-[13px]">warning</span>
                                                         <span>Terlambat</span>
                                                     </span>
                                                 </template>
                                                 <template x-if="unit.status !== 'selesai' && !activeLoan?.is_terlambat">
-                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#1E40AF] border border-[#BFDBFE]">
+                                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#EFF6FF] text-[#1E40AF] border border-[#BFDBFE]">
                                                         <span class="w-1.5 h-1.5 rounded-full bg-[#2563EB]"></span>
                                                         <span>Dipinjam</span>
                                                     </span>

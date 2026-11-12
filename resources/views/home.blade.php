@@ -242,7 +242,9 @@
                             <span class="material-symbols-outlined text-[20px] text-[#0F766E] shrink-0">schedule</span>
                             <div class="space-y-0.5 min-w-0">
                                 <p class="text-xs font-semibold text-[#1F2937]">Jam Layanan Kantor Sarpras</p>
-                                <p class="text-xs text-[#6B7280]">Senin s.d. Jumat, Pukul 07.00 – 13.00 WIB</p>
+                                <p class="text-xs text-[#6B7280]">
+                                    {{ $schoolProfile->hari_layanan ?? 'Senin s.d. Jumat' }}, Pukul {{ $schoolProfile->jam_buka ? str_replace(':', '.', substr($schoolProfile->jam_buka, 0, 5)) : '07.00' }} – {{ $schoolProfile->jam_tutup ? str_replace(':', '.', substr($schoolProfile->jam_tutup, 0, 5)) : '13.00' }} WIB
+                                </p>
                             </div>
                         </div>
                     </div>
