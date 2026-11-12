@@ -257,7 +257,92 @@
             </div>
         </div>
 
-        <!-- 3. SECTION: MEDIA SOSIAL RESMI -->
+        <!-- 3. SECTION: JADWAL & JAM LAYANAN KANTOR SARPRAS -->
+        <div class="bg-white rounded-xl shadow-sm border border-[#D9E4E2] p-5 sm:p-6 flex flex-col gap-5">
+            <div class="flex items-center gap-2.5 pb-3 border-b border-[#D9E4E2]">
+                <span class="material-symbols-outlined text-[#0F766E] text-[22px]">schedule</span>
+                <h2 class="text-sm font-bold text-[#1F2937] uppercase tracking-wider">Jadwal & Jam Layanan Kantor Sarpras</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <!-- Hari Layanan (Teks Tampilan) -->
+                <div class="flex flex-col gap-1.5 md:col-span-1">
+                    <label for="hari_layanan" class="text-xs font-semibold text-[#1F2937]">
+                        Hari Layanan (Teks Tampilan) <span class="text-[#DC2626]">*</span>
+                    </label>
+                    <input type="text"
+                           id="hari_layanan"
+                           name="hari_layanan"
+                           x-model="hariLayanan"
+                           :disabled="!isEditing"
+                           required
+                           placeholder="Contoh: Senin s.d. Jumat"
+                           class="w-full h-10 px-3 bg-[#F3F7F6] disabled:bg-[#F3F7F6]/60 rounded-lg text-xs font-medium text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
+                </div>
+
+                <!-- Jam Buka Layanan -->
+                <div class="flex flex-col gap-1.5 md:col-span-1">
+                    <label for="jam_buka" class="text-xs font-semibold text-[#1F2937]">
+                        Jam Buka Operasional (WIB) <span class="text-[#DC2626]">*</span>
+                    </label>
+                    <input type="time"
+                           id="jam_buka"
+                           name="jam_buka"
+                           value="{{ old('jam_buka', $schoolProfile->jam_buka ? substr($schoolProfile->jam_buka, 0, 5) : '07:00') }}"
+                           :disabled="!isEditing"
+                           required
+                           class="w-full h-10 px-3 bg-[#F3F7F6] disabled:bg-[#F3F7F6]/60 rounded-lg text-xs font-medium text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
+                </div>
+
+                <!-- Jam Tutup Layanan -->
+                <div class="flex flex-col gap-1.5 md:col-span-1">
+                    <label for="jam_tutup" class="text-xs font-semibold text-[#1F2937]">
+                        Jam Tutup Operasional (WIB) <span class="text-[#DC2626]">*</span>
+                    </label>
+                    <input type="time"
+                           id="jam_tutup"
+                           name="jam_tutup"
+                           value="{{ old('jam_tutup', $schoolProfile->jam_tutup ? substr($schoolProfile->jam_tutup, 0, 5) : '13:00') }}"
+                           :disabled="!isEditing"
+                           required
+                           class="w-full h-10 px-3 bg-[#F3F7F6] disabled:bg-[#F3F7F6]/60 rounded-lg text-xs font-medium text-[#1F2937] border border-[#D9E4E2] focus:bg-white focus:border-[#0F766E] focus:outline-none focus:ring-2 focus:ring-[#0F766E]/20 transition-all">
+                </div>
+
+                <!-- Hari Buka / Operasional (Pilihan Hari Kerja) -->
+                @php
+                    $daysList = [
+                        1 => 'Senin',
+                        2 => 'Selasa',
+                        3 => 'Rabu',
+                        4 => 'Kamis',
+                        5 => 'Jumat',
+                        6 => 'Sabtu',
+                        7 => 'Minggu',
+                    ];
+                @endphp
+                <div class="flex flex-col gap-2 md:col-span-3 pt-2 border-t border-[#F3F7F6]">
+                    <label class="text-xs font-semibold text-[#1F2937]">
+                        Hari Operasional Layanan (Hari Kerja Sarpras)
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5">
+                        @foreach($daysList as $dayNum => $dayName)
+                            <label class="flex items-center gap-2 p-2.5 rounded-lg border border-[#D9E4E2] bg-[#F8FBFA] hover:bg-white cursor-pointer transition-colors text-xs text-[#1F2937] select-none">
+                                <input type="checkbox"
+                                       name="hari_operasional[]"
+                                       value="{{ $dayNum }}"
+                                       x-model="selectedDays"
+                                       @change="updateHariLayananFromDays()"
+                                       :disabled="!isEditing"
+                                       class="rounded text-[#0F766E] focus:ring-[#0F766E] w-4 h-4 border-[#D9E4E2]">
+                                <span class="font-medium">{{ $dayName }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. SECTION: MEDIA SOSIAL RESMI -->
         <div class="bg-white rounded-xl shadow-sm border border-[#D9E4E2] p-5 sm:p-6 flex flex-col gap-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#D9E4E2]">
                 <div class="flex items-center gap-2.5">
@@ -332,7 +417,7 @@
             </div>
         </div>
 
-        <!-- 4. SECTION: DATA TEMPLATE PADA LAPORAN INVENTARIS -->
+        <!-- 5. SECTION: DATA TEMPLATE PADA LAPORAN INVENTARIS -->
         <div class="bg-white rounded-xl shadow-sm border border-[#D9E4E2] p-5 sm:p-6 flex flex-col gap-5">
             <div class="flex items-center justify-between pb-3 border-b border-[#D9E4E2]">
                 <div class="flex items-center gap-2.5">
@@ -495,10 +580,73 @@
     </form>
 </div>
 
+@php
+    $initDays = old('hari_operasional', $schoolProfile->hari_operasional ?? [1, 2, 3, 4, 5]);
+    if (!is_array($initDays)) {
+        $initDays = json_decode($initDays, true) ?? [1, 2, 3, 4, 5];
+    }
+    $initDaysStrings = array_values(array_map('strval', (array)$initDays));
+    $initHariLayanan = old('hari_layanan', $schoolProfile->hari_layanan ?? 'Senin s.d. Jumat');
+@endphp
+
 <script>
     function schoolProfileApp() {
         return {
             isEditing: false,
+            hariLayanan: @json($initHariLayanan),
+            originalHariLayanan: @json($initHariLayanan),
+            selectedDays: @json($initDaysStrings),
+            originalDays: @json($initDaysStrings),
+
+            updateHariLayananFromDays() {
+                const dayMap = {
+                    1: 'Senin',
+                    2: 'Selasa',
+                    3: 'Rabu',
+                    4: 'Kamis',
+                    5: 'Jumat',
+                    6: 'Sabtu',
+                    7: 'Minggu'
+                };
+                const sorted = [...this.selectedDays].map(Number).sort((a, b) => a - b);
+                if (sorted.length === 0) {
+                    this.hariLayanan = '';
+                    return;
+                }
+                if (sorted.length === 7) {
+                    this.hariLayanan = 'Senin s.d. Minggu';
+                    return;
+                }
+                if (sorted.length === 1) {
+                    this.hariLayanan = dayMap[sorted[0]];
+                    return;
+                }
+
+                const ranges = [];
+                let start = sorted[0];
+                let prev = sorted[0];
+
+                for (let i = 1; i < sorted.length; i++) {
+                    if (sorted[i] === prev + 1) {
+                        prev = sorted[i];
+                    } else {
+                        ranges.push({ start, end: prev });
+                        start = sorted[i];
+                        prev = sorted[i];
+                    }
+                }
+                ranges.push({ start, end: prev });
+
+                this.hariLayanan = ranges.map(r => {
+                    if (r.start === r.end) {
+                        return dayMap[r.start];
+                    } else if (r.end === r.start + 1) {
+                        return `${dayMap[r.start]} & ${dayMap[r.end]}`;
+                    } else {
+                        return `${dayMap[r.start]} s.d. ${dayMap[r.end]}`;
+                    }
+                }).join(', ');
+            },
 
             enableEditMode() {
                 this.isEditing = true; 
@@ -526,6 +674,8 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         this.isEditing = false;
+                        this.hariLayanan = this.originalHariLayanan;
+                        this.selectedDays = [...this.originalDays];
                         document.getElementById('formProfilSekolah').reset();
                     }
                 });

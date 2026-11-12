@@ -32,5 +32,40 @@ class SchoolProfile extends Model
         'youtube',
         'facebook',
         'tiktok',
+        'hari_layanan',
+        'jam_buka',
+        'jam_tutup',
+        'hari_operasional',
     ];
+
+    protected $casts = [
+        'hari_operasional' => 'array',
+    ];
+
+    public function getHariLayananAttribute($value)
+    {
+        return $value ?: 'Senin s.d. Jumat';
+    }
+
+    public function getJamBukaAttribute($value)
+    {
+        return $value ? substr($value, 0, 5) : '07:00';
+    }
+
+    public function getJamTutupAttribute($value)
+    {
+        return $value ? substr($value, 0, 5) : '13:00';
+    }
+
+    public function getHariOperasionalAttribute($value)
+    {
+        if (empty($value)) {
+            return [1, 2, 3, 4, 5];
+        }
+        if (is_array($value)) {
+            return $value;
+        }
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : [1, 2, 3, 4, 5];
+    }
 }

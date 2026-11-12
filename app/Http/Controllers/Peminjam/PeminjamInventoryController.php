@@ -196,19 +196,26 @@ class PeminjamInventoryController extends Controller
      */
     public function store(Request $request)
     {
-        $validateSarprasHours = function ($attribute, $value, $fail) {
+        $schoolProfile = SchoolProfile::first();
+        $jamBuka = $schoolProfile ? substr($schoolProfile->jam_buka, 0, 5) : '07:00';
+        $jamTutup = $schoolProfile ? substr($schoolProfile->jam_tutup, 0, 5) : '13:00';
+        $hariLayanan = $schoolProfile ? ($schoolProfile->hari_layanan ?: 'Senin s.d. Jumat') : 'Senin s.d. Jumat';
+        $hariOperasional = $schoolProfile ? $schoolProfile->hari_operasional : [1, 2, 3, 4, 5];
+
+        $validateSarprasHours = function ($attribute, $value, $fail) use ($jamBuka, $jamTutup, $hariLayanan, $hariOperasional) {
             try {
                 $dt = Carbon::parse($value)->timezone('Asia/Jakarta');
                 $label = $attribute === 'tanggal_pinjam' ? 'peminjaman' : 'pengembalian';
 
-                if ($dt->isWeekend()) {
-                    $fail("Kantor Sarpras tutup pada akhir pekan (Sabtu & Minggu). Jadwal {$label} harus pada hari kerja (Senin s.d. Jumat).");
+                // dayOfWeekIso: 1 (Senin) .. 7 (Minggu)
+                if (!in_array($dt->dayOfWeekIso, (array)$hariOperasional)) {
+                    $fail("Kantor Sarpras tutup pada hari tersebut. Jadwal {$label} harus pada hari layanan ({$hariLayanan}).");
                     return;
                 }
 
                 $timeStr = $dt->format('H:i');
-                if ($timeStr < '07:00' || $timeStr > '13:00') {
-                    $fail("Jam {$label} ({$timeStr} WIB) berada di luar jam operasional Sarpras (07:00 – 13:00 WIB).");
+                if ($timeStr < $jamBuka || $timeStr > $jamTutup) {
+                    $fail("Jam {$label} ({$timeStr} WIB) berada di luar jam operasional Sarpras ({$jamBuka} – {$jamTutup} WIB).");
                     return;
                 }
             } catch (\Exception $e) {

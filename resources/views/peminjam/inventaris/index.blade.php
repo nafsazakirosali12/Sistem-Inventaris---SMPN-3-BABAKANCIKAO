@@ -5,7 +5,13 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
      x-data="peminjamKatalogApp({
-         categoriesData: {{ json_encode($categoriesDataMap) }}
+         categoriesData: {{ json_encode($categoriesDataMap) }},
+         sarprasSchedule: {
+             hariLayanan: {{ json_encode($schoolProfile->hari_layanan ?? 'Senin s.d. Jumat') }},
+             jamBuka: {{ json_encode($schoolProfile->jam_buka ? substr($schoolProfile->jam_buka, 0, 5) : '07:00') }},
+             jamTutup: {{ json_encode($schoolProfile->jam_tutup ? substr($schoolProfile->jam_tutup, 0, 5) : '13:00') }},
+             hariOperasional: {{ json_encode($schoolProfile->hari_operasional ? (is_array($schoolProfile->hari_operasional) ? $schoolProfile->hari_operasional : json_decode($schoolProfile->hari_operasional, true)) : [1, 2, 3, 4, 5]) }}
+         }
      })">
 
     <!-- ═══════════════════════════════════════════════════════════
@@ -679,6 +685,7 @@
                                            :min="minPinjamDatetime"
                                            @input="onPinjamChange()"
                                            @change="onPinjamChange()"
+                                           @blur="onPinjamChange()"
                                            required
                                            :class="isPinjamInPast ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-[#D9E4E2] focus:border-[#0F766E] focus:ring-[#0F766E]/20'"
                                            class="w-full h-10 px-3 bg-[#F3F7F6] rounded-xl text-xs text-[#1F2937] border focus:bg-white focus:outline-none focus:ring-2 transition-all font-medium">
@@ -693,7 +700,7 @@
                                     <template x-if="!isPinjamInPast">
                                         <p class="text-[10px] text-gray-500 mt-1 flex items-center gap-1">
                                             <span class="material-symbols-outlined text-[12px] text-[#0F766E]">schedule</span>
-                                            <span>Real-time aktif: min. <span class="font-mono text-gray-700" x-text="currentClockText"></span></span>
+                                            <span>Layanan: <span class="font-medium text-gray-700" x-text="`${sarprasSchedule.hariLayanan}, ${sarprasSchedule.jamBuka}–${sarprasSchedule.jamTutup} WIB`"></span></span>
                                         </p>
                                     </template>
                                 </div>
@@ -710,6 +717,9 @@
                                            name="tanggal_kembali"
                                            x-model="tanggalKembali"
                                            :min="minKembaliDatetime"
+                                           @input="onKembaliChange()"
+                                           @change="onKembaliChange()"
+                                           @blur="onKembaliChange()"
                                            required
                                            :class="isKembaliInvalid ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : 'border-[#D9E4E2] focus:border-[#0F766E] focus:ring-[#0F766E]/20'"
                                            class="w-full h-10 px-3 bg-[#F3F7F6] rounded-xl text-xs text-[#1F2937] border focus:bg-white focus:outline-none focus:ring-2 transition-all font-medium">
@@ -736,16 +746,16 @@
                                                 +4 Jam
                                             </button>
                                             <button type="button"
-                                                    @click="setQuickKembali(0, 8)"
+                                                    @click="setQuickKembali(0, getJamBukaHour())"
                                                     class="px-1.5 py-0.5 rounded bg-gray-100 hover:bg-[#CCFBF1] hover:text-[#0F766E] text-[10px] text-gray-600 font-semibold transition-colors cursor-pointer"
-                                                    title="Kembalikan besok pagi jam 08:00 WIB">
-                                                Besok 08:00
+                                                    :title="`Kembalikan besok jam ${sarprasSchedule.jamBuka} WIB`">
+                                                <span x-text="`Besok ${sarprasSchedule.jamBuka}`"></span>
                                             </button>
                                             <button type="button"
-                                                    @click="setQuickKembali(0, 14)"
+                                                    @click="setQuickKembali(0, getJamTutupHour())"
                                                     class="px-1.5 py-0.5 rounded bg-gray-100 hover:bg-[#CCFBF1] hover:text-[#0F766E] text-[10px] text-gray-600 font-semibold transition-colors cursor-pointer"
-                                                    title="Kembalikan besok siang jam 14:00 WIB">
-                                                Besok 14:00
+                                                    :title="`Kembalikan besok jam ${sarprasSchedule.jamTutup} WIB`">
+                                                <span x-text="`Besok ${sarprasSchedule.jamTutup}`"></span>
                                             </button>
                                         </div>
                                     </template>
@@ -803,6 +813,12 @@
     function peminjamKatalogApp(config) {
         return {
             categoriesData: config.categoriesData || {},
+            sarprasSchedule: config.sarprasSchedule || {
+                hariLayanan: 'Senin s.d. Jumat',
+                jamBuka: '07:00',
+                jamTutup: '13:00',
+                hariOperasional: [1, 2, 3, 4, 5]
+            },
             detailModalOpen: false,
             loanModalOpen: false,
             selectedDetailCategory: null,
@@ -816,12 +832,96 @@
             selectedAddCategoryId: '',
             isSubmitting: false,
 
+            getJamBukaHour() {
+                const parts = (this.sarprasSchedule?.jamBuka || '07:00').split(':');
+                return parseInt(parts[0], 10) || 7;
+            },
+
+            getJamBukaMinute() {
+                const parts = (this.sarprasSchedule?.jamBuka || '07:00').split(':');
+                return parseInt(parts[1], 10) || 0;
+            },
+
+            getJamTutupHour() {
+                const parts = (this.sarprasSchedule?.jamTutup || '13:00').split(':');
+                return parseInt(parts[0], 10) || 13;
+            },
+
+            getJamTutupMinute() {
+                const parts = (this.sarprasSchedule?.jamTutup || '13:00').split(':');
+                return parseInt(parts[1], 10) || 0;
+            },
+
+            isOperationalDay(d) {
+                if (!d || isNaN(d.getTime())) return true;
+                const jsDay = d.getDay(); // 0: Sun, 1: Mon, ..., 6: Sat
+                const isoDay = jsDay === 0 ? 7 : jsDay;
+                const allowed = Array.isArray(this.sarprasSchedule?.hariOperasional)
+                    ? this.sarprasSchedule.hariOperasional.map(Number)
+                    : [1, 2, 3, 4, 5];
+                return allowed.includes(isoDay);
+            },
+
+            getNextValidSarprasDate(baseDate = new Date()) {
+                let d = new Date(baseDate);
+                let count = 0;
+                while (!this.isOperationalDay(d) && count < 14) {
+                    d.setDate(d.getDate() + 1);
+                    count++;
+                }
+                return d;
+            },
+
+            getNextValidSarprasTime(baseDate = new Date()) {
+                let d = this.getNextValidSarprasDate(baseDate);
+                const curVal = d.getHours() * 60 + d.getMinutes();
+                const bukaVal = this.getJamBukaHour() * 60 + this.getJamBukaMinute();
+                const tutupVal = this.getJamTutupHour() * 60 + this.getJamTutupMinute();
+
+                if (curVal < bukaVal) {
+                    d.setHours(this.getJamBukaHour(), this.getJamBukaMinute(), 0, 0);
+                } else if (curVal >= tutupVal) {
+                    d.setDate(d.getDate() + 1);
+                    d = this.getNextValidSarprasDate(d);
+                    d.setHours(this.getJamBukaHour(), this.getJamBukaMinute(), 0, 0);
+                } else {
+                    d.setSeconds(0, 0);
+                }
+                return d;
+            },
+
+            _checkSarprasHours(datetimeStr, label = 'peminjaman') {
+                if (!datetimeStr) return null;
+                const d = new Date(datetimeStr);
+                if (isNaN(d.getTime())) return null;
+
+                if (!this.isOperationalDay(d)) {
+                    return `Kantor Sarpras tutup pada hari tersebut. Jadwal ${label} harus pada hari layanan (${this.sarprasSchedule.hariLayanan}).`;
+                }
+
+                const curVal = d.getHours() * 60 + d.getMinutes();
+                const bukaVal = this.getJamBukaHour() * 60 + this.getJamBukaMinute();
+                const tutupVal = this.getJamTutupHour() * 60 + this.getJamTutupMinute();
+
+                if (curVal < bukaVal || curVal > tutupVal) {
+                    const pad = (n) => String(n).padStart(2, '0');
+                    const timeStr = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                    return `Jam ${label} (${timeStr} WIB) berada di luar jam operasional Sarpras (${this.sarprasSchedule.jamBuka} – ${this.sarprasSchedule.jamTutup} WIB).`;
+                }
+                return null;
+            },
+
             openLoanModal() {
                 this.updateRealtimeClock(false);
-                const now = new Date();
-                this.tanggalPinjam = this.formatDatetime(now);
-                const later = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-                this.tanggalKembali = this.formatDatetime(later);
+                const validNow = this.getNextValidSarprasTime(new Date());
+                this.tanggalPinjam = this.formatDatetime(validNow);
+                let validKembali = new Date(validNow.getTime() + 2 * 60 * 60 * 1000);
+                const tutupVal = this.getJamTutupHour() * 60 + this.getJamTutupMinute();
+                const kembaliVal = validKembali.getHours() * 60 + validKembali.getMinutes();
+                if (validKembali.toDateString() === validNow.toDateString() && kembaliVal > tutupVal) {
+                    validKembali.setHours(this.getJamTutupHour(), this.getJamTutupMinute(), 0, 0);
+                }
+                this.tanggalKembali = this.formatDatetime(validKembali);
                 this.loanModalOpen = true;
             },
 
@@ -933,6 +1033,32 @@
                         });
                     } else {
                         alert('Tanggal atau jam peminjaman tidak boleh di waktu yang sudah lewat.');
+                        this.loanModalOpen = true;
+                    }
+                    return;
+                }
+
+                // Validasi jam operasional Sarpras (07:00 - 13:00 WIB, Senin - Jumat) pada submit
+                const sarprasError = this._checkSarprasHours(this.tanggalPinjam, 'peminjaman') || this._checkSarprasHours(this.tanggalKembali, 'pengembalian');
+                if (sarprasError) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Di Luar Jam Operasional',
+                            text: sarprasError,
+                            confirmButtonColor: '#0F766E',
+                            confirmButtonText: 'Sesuaikan Jam',
+                            width: '24rem',
+                            customClass: {
+                                popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                                title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                                htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                                confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
+                            }
+                        }).then(() => {
+                            this.loanModalOpen = true;
+                        });
+                    } else {
+                        alert(sarprasError);
                         this.loanModalOpen = true;
                     }
                     return;
@@ -1101,30 +1227,158 @@
 
             openLoanModalWithCategory(categoryId) {
                 this.updateRealtimeClock(false);
-                const now = new Date();
-                this.tanggalPinjam = this.formatDatetime(now);
-                const later = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-                this.tanggalKembali = this.formatDatetime(later);
+                const validNow = this.getNextValidSarprasTime(new Date());
+                this.tanggalPinjam = this.formatDatetime(validNow);
+                let validKembali = new Date(validNow.getTime() + 2 * 60 * 60 * 1000);
+                const tutupVal = this.getJamTutupHour() * 60 + this.getJamTutupMinute();
+                const kembaliVal = validKembali.getHours() * 60 + validKembali.getMinutes();
+                if (validKembali.toDateString() === validNow.toDateString() && kembaliVal > tutupVal) {
+                    validKembali.setHours(this.getJamTutupHour(), this.getJamTutupMinute(), 0, 0);
+                }
+                this.tanggalKembali = this.formatDatetime(validKembali);
                 this.addCategory(categoryId);
                 this.loanModalOpen = true;
             },
 
             onPinjamChange() {
                 if (!this.tanggalPinjam) return;
+
+                const pinjamDate = new Date(this.tanggalPinjam);
+                const curVal = pinjamDate.getHours() * 60 + pinjamDate.getMinutes();
+                const bukaVal = this.getJamBukaHour() * 60 + this.getJamBukaMinute();
+                const tutupVal = this.getJamTutupHour() * 60 + this.getJamTutupMinute();
+                const datePart = this.tanggalPinjam.split('T')[0];
+
+                if (curVal < bukaVal || curVal > tutupVal) {
+                    if (curVal < bukaVal) {
+                        this.tanggalPinjam = `${datePart}T${this.sarprasSchedule.jamBuka}`;
+                    } else {
+                        this.tanggalPinjam = `${datePart}T${this.sarprasSchedule.jamTutup}`;
+                    }
+
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Di Luar Jam Operasional',
+                            text: `Peminjaman hanya dapat dilakukan pada jam operasional Sarpras pukul ${this.sarprasSchedule.jamBuka} – ${this.sarprasSchedule.jamTutup} WIB (${this.sarprasSchedule.hariLayanan}). Jam telah disesuaikan otomatis.`,
+                            confirmButtonColor: '#0F766E',
+                            confirmButtonText: 'Mengerti',
+                            width: '24rem',
+                            customClass: {
+                                popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                                title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                                htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                                confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
+                            }
+                        }).then(() => {
+                            this.loanModalOpen = true;
+                        });
+                    } else {
+                        alert(`Peminjaman hanya dapat dilakukan pada jam operasional Sarpras pukul ${this.sarprasSchedule.jamBuka} – ${this.sarprasSchedule.jamTutup} WIB.`);
+                    }
+                }
+
+                if (!this.isOperationalDay(pinjamDate)) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Hari Tutup / Libur',
+                            text: `Kantor Sarpras tutup pada hari tersebut. Jadwal peminjaman harus pada hari layanan (${this.sarprasSchedule.hariLayanan}).`,
+                            confirmButtonColor: '#0F766E',
+                            confirmButtonText: 'Mengerti',
+                            width: '24rem',
+                            customClass: {
+                                popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                                title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                                htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                                confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
+                            }
+                        }).then(() => {
+                            this.loanModalOpen = true;
+                        });
+                    } else {
+                        alert(`Kantor Sarpras tutup pada hari tersebut. Silakan pilih hari layanan (${this.sarprasSchedule.hariLayanan}).`);
+                    }
+                }
+
                 const pinjamTime = new Date(this.tanggalPinjam).getTime();
                 const kembaliTime = this.tanggalKembali ? new Date(this.tanggalKembali).getTime() : 0;
 
-                // Jika batas kembali belum ada atau berada di bawah/sama dengan waktu pinjam, mundurkan otomatis +3 jam
+                // Jika batas kembali belum ada atau berada di bawah/sama dengan waktu pinjam, mundurkan otomatis +2 jam
                 if (!this.tanggalKembali || kembaliTime <= pinjamTime) {
-                    const newKembali = new Date(pinjamTime + 3 * 60 * 60 * 1000);
+                    let newKembali = new Date(pinjamTime + 2 * 60 * 60 * 1000);
+                    const newTutupVal = this.getJamTutupHour() * 60 + this.getJamTutupMinute();
+                    const newKembaliVal = newKembali.getHours() * 60 + newKembali.getMinutes();
+                    if (newKembali.toDateString() === pinjamDate.toDateString() && newKembaliVal > newTutupVal) {
+                        newKembali.setHours(this.getJamTutupHour(), this.getJamTutupMinute(), 0, 0);
+                    }
                     this.tanggalKembali = this.formatDatetime(newKembali);
+                }
+            },
+
+            onKembaliChange() {
+                if (!this.tanggalKembali) return;
+
+                const kembaliDate = new Date(this.tanggalKembali);
+                const curVal = kembaliDate.getHours() * 60 + kembaliDate.getMinutes();
+                const bukaVal = this.getJamBukaHour() * 60 + this.getJamBukaMinute();
+                const tutupVal = this.getJamTutupHour() * 60 + this.getJamTutupMinute();
+                const datePart = this.tanggalKembali.split('T')[0];
+
+                if (curVal < bukaVal || curVal > tutupVal) {
+                    if (curVal < bukaVal) {
+                        this.tanggalKembali = `${datePart}T${this.sarprasSchedule.jamBuka}`;
+                    } else {
+                        this.tanggalKembali = `${datePart}T${this.sarprasSchedule.jamTutup}`;
+                    }
+
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Di Luar Jam Operasional',
+                            text: `Pengembalian hanya dapat dilakukan pada jam operasional Sarpras pukul ${this.sarprasSchedule.jamBuka} – ${this.sarprasSchedule.jamTutup} WIB (${this.sarprasSchedule.hariLayanan}). Jam telah disesuaikan otomatis.`,
+                            confirmButtonColor: '#0F766E',
+                            confirmButtonText: 'Mengerti',
+                            width: '24rem',
+                            customClass: {
+                                popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                                title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                                htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                                confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
+                            }
+                        }).then(() => {
+                            this.loanModalOpen = true;
+                        });
+                    } else {
+                        alert(`Pengembalian hanya dapat dilakukan pada jam operasional Sarpras pukul ${this.sarprasSchedule.jamBuka} – ${this.sarprasSchedule.jamTutup} WIB.`);
+                    }
+                }
+
+                if (!this.isOperationalDay(kembaliDate)) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Hari Tutup / Libur',
+                            text: `Kantor Sarpras tutup pada hari tersebut. Jadwal pengembalian harus pada hari layanan (${this.sarprasSchedule.hariLayanan}).`,
+                            confirmButtonColor: '#0F766E',
+                            confirmButtonText: 'Mengerti',
+                            width: '24rem',
+                            customClass: {
+                                popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
+                                title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
+                                htmlContainer: 'text-xs text-[#4B5563] m-0 mb-4 leading-relaxed',
+                                confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
+                            }
+                        }).then(() => {
+                            this.loanModalOpen = true;
+                        });
+                    } else {
+                        alert(`Kantor Sarpras tutup pada hari tersebut. Silakan pilih hari layanan (${this.sarprasSchedule.hariLayanan}) untuk pengembalian.`);
+                    }
                 }
             },
 
             resetPinjamToNow() {
                 const now = new Date();
                 this.updateRealtimeClock(false);
-                this.tanggalPinjam = this.formatDatetime(now);
+                const validNow = this.getNextValidSarprasTime(now);
+                this.tanggalPinjam = this.formatDatetime(validNow);
                 this.onPinjamChange();
             },
 
@@ -1135,13 +1389,22 @@
                 const pinjamDate = new Date(this.tanggalPinjam);
 
                 if (targetNextDayHour !== null) {
-                    // Pilihan cepat besok hari pada jam tertentu (misal 08:00 WIB atau 14:00 WIB)
+                    // Pilihan cepat besok hari pada jam tertentu
                     const targetDate = new Date(pinjamDate);
                     targetDate.setDate(targetDate.getDate() + 1);
-                    targetDate.setHours(targetNextDayHour, 0, 0, 0);
-                    this.tanggalKembali = this.formatDatetime(targetDate);
+                    const nextValidDate = this.getNextValidSarprasDate(targetDate);
+                    const minute = (targetNextDayHour === this.getJamTutupHour()) ? this.getJamTutupMinute() : this.getJamBukaMinute();
+                    nextValidDate.setHours(targetNextDayHour, minute, 0, 0);
+                    this.tanggalKembali = this.formatDatetime(nextValidDate);
                 } else {
-                    const targetDate = new Date(pinjamDate.getTime() + hoursToAdd * 60 * 60 * 1000);
+                    let targetDate = new Date(pinjamDate.getTime() + hoursToAdd * 60 * 60 * 1000);
+                    const tutupVal = this.getJamTutupHour() * 60 + this.getJamTutupMinute();
+                    const targetVal = targetDate.getHours() * 60 + targetDate.getMinutes();
+
+                    // Jika masih hari yang sama tapi melebihi jam tutup, clamp ke jam tutup
+                    if (targetDate.toDateString() === pinjamDate.toDateString() && targetVal > tutupVal) {
+                        targetDate.setHours(this.getJamTutupHour(), this.getJamTutupMinute(), 0, 0);
+                    }
                     this.tanggalKembali = this.formatDatetime(targetDate);
                 }
             },
