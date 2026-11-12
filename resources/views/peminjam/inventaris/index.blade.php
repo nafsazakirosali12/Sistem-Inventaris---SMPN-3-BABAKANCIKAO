@@ -680,6 +680,7 @@
                                         </button>
                                     </div>
                                     <input type="datetime-local"
+                                           x-ref="tanggalPinjamInput"
                                            name="tanggal_pinjam"
                                            x-model="tanggalPinjam"
                                            :min="minPinjamDatetime"
@@ -714,6 +715,7 @@
                                         <span class="text-[10px] text-gray-500 font-medium"></span>
                                     </div>
                                     <input type="datetime-local"
+                                           x-ref="tanggalKembaliInput"
                                            name="tanggal_kembali"
                                            x-model="tanggalKembali"
                                            :min="minKembaliDatetime"
@@ -911,6 +913,38 @@
                 return null;
             },
 
+            dismissNativeCalendar() {
+                // 1. Lepaskan fokus dari elemen aktif saat ini
+                if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                    document.activeElement.blur();
+                }
+
+                const pinjamEl = this.$refs.tanggalPinjamInput || document.querySelector('input[name="tanggal_pinjam"]');
+                const kembaliEl = this.$refs.tanggalKembaliInput || document.querySelector('input[name="tanggal_kembali"]');
+
+                // 2. Type toggle trick untuk menutup paksa popup kalender native browser seketika
+                [pinjamEl, kembaliEl].forEach(el => {
+                    if (el) {
+                        try {
+                            if (typeof el.blur === 'function') el.blur();
+                            const curVal = el.value;
+                            el.type = 'text';
+                            el.type = 'datetime-local';
+                            if (curVal) el.value = curVal;
+                            if (typeof el.blur === 'function') el.blur();
+                        } catch (e) {
+                            if (typeof el.blur === 'function') el.blur();
+                        }
+                    }
+                });
+
+                setTimeout(() => {
+                    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                        document.activeElement.blur();
+                    }
+                }, 10);
+            },
+
             openLoanModal() {
                 this.updateRealtimeClock(false);
                 const validNow = this.getNextValidSarprasTime(new Date());
@@ -1041,6 +1075,7 @@
                 // Validasi jam operasional Sarpras (07:00 - 13:00 WIB, Senin - Jumat) pada submit
                 const sarprasError = this._checkSarprasHours(this.tanggalPinjam, 'peminjaman') || this._checkSarprasHours(this.tanggalKembali, 'pengembalian');
                 if (sarprasError) {
+                    this.dismissNativeCalendar();
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             title: 'Di Luar Jam Operasional',
@@ -1048,6 +1083,9 @@
                             confirmButtonColor: '#0F766E',
                             confirmButtonText: 'Sesuaikan Jam',
                             width: '24rem',
+                            willOpen: () => {
+                                this.dismissNativeCalendar();
+                            },
                             customClass: {
                                 popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                                 title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
@@ -1250,11 +1288,18 @@
                 const datePart = this.tanggalPinjam.split('T')[0];
 
                 if (curVal < bukaVal || curVal > tutupVal) {
+                    if (typeof Swal !== 'undefined' && Swal.isVisible()) {
+                        return;
+                    }
+
                     if (curVal < bukaVal) {
                         this.tanggalPinjam = `${datePart}T${this.sarprasSchedule.jamBuka}`;
                     } else {
                         this.tanggalPinjam = `${datePart}T${this.sarprasSchedule.jamTutup}`;
                     }
+
+                    // Tutup otomatis popup kalender browser agar tidak menutupi notifikasi
+                    this.dismissNativeCalendar();
 
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
@@ -1263,6 +1308,9 @@
                             confirmButtonColor: '#0F766E',
                             confirmButtonText: 'Mengerti',
                             width: '24rem',
+                            willOpen: () => {
+                                this.dismissNativeCalendar();
+                            },
                             customClass: {
                                 popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                                 title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
@@ -1270,6 +1318,7 @@
                                 confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                             }
                         }).then(() => {
+                            this.dismissNativeCalendar();
                             this.loanModalOpen = true;
                         });
                     } else {
@@ -1278,6 +1327,12 @@
                 }
 
                 if (!this.isOperationalDay(pinjamDate)) {
+                    if (typeof Swal !== 'undefined' && Swal.isVisible()) {
+                        return;
+                    }
+
+                    this.dismissNativeCalendar();
+
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             title: 'Hari Tutup / Libur',
@@ -1285,6 +1340,9 @@
                             confirmButtonColor: '#0F766E',
                             confirmButtonText: 'Mengerti',
                             width: '24rem',
+                            willOpen: () => {
+                                this.dismissNativeCalendar();
+                            },
                             customClass: {
                                 popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                                 title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
@@ -1292,6 +1350,7 @@
                                 confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                             }
                         }).then(() => {
+                            this.dismissNativeCalendar();
                             this.loanModalOpen = true;
                         });
                     } else {
@@ -1324,11 +1383,18 @@
                 const datePart = this.tanggalKembali.split('T')[0];
 
                 if (curVal < bukaVal || curVal > tutupVal) {
+                    if (typeof Swal !== 'undefined' && Swal.isVisible()) {
+                        return;
+                    }
+
                     if (curVal < bukaVal) {
                         this.tanggalKembali = `${datePart}T${this.sarprasSchedule.jamBuka}`;
                     } else {
                         this.tanggalKembali = `${datePart}T${this.sarprasSchedule.jamTutup}`;
                     }
+
+                    // Tutup otomatis popup kalender browser agar tidak menutupi notifikasi
+                    this.dismissNativeCalendar();
 
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
@@ -1337,6 +1403,9 @@
                             confirmButtonColor: '#0F766E',
                             confirmButtonText: 'Mengerti',
                             width: '24rem',
+                            willOpen: () => {
+                                this.dismissNativeCalendar();
+                            },
                             customClass: {
                                 popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                                 title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
@@ -1344,6 +1413,7 @@
                                 confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                             }
                         }).then(() => {
+                            this.dismissNativeCalendar();
                             this.loanModalOpen = true;
                         });
                     } else {
@@ -1352,6 +1422,12 @@
                 }
 
                 if (!this.isOperationalDay(kembaliDate)) {
+                    if (typeof Swal !== 'undefined' && Swal.isVisible()) {
+                        return;
+                    }
+
+                    this.dismissNativeCalendar();
+
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             title: 'Hari Tutup / Libur',
@@ -1359,6 +1435,9 @@
                             confirmButtonColor: '#0F766E',
                             confirmButtonText: 'Mengerti',
                             width: '24rem',
+                            willOpen: () => {
+                                this.dismissNativeCalendar();
+                            },
                             customClass: {
                                 popup: 'rounded-2xl font-sans shadow-xl border border-[#D9E4E2] p-5 text-center',
                                 title: 'text-sm font-bold text-[#1F2937] m-0 mb-1',
@@ -1366,6 +1445,7 @@
                                 confirmButton: 'px-4 py-2 rounded-lg text-xs font-semibold bg-[#0F766E] hover:bg-[#115E59] text-white shadow-sm'
                             }
                         }).then(() => {
+                            this.dismissNativeCalendar();
                             this.loanModalOpen = true;
                         });
                     } else {

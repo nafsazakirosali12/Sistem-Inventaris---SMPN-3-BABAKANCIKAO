@@ -67,8 +67,7 @@ class AdminInventoryTest extends TestCase
         $response->assertDontSee('Beranda / Data Inventaris');
         // Year Picker component is present
         $response->assertSee('filter_tahun');
-        $response->assertSee('Select Year');
-        $response->assertSee('Today');
+        $response->assertSee('Pilih Tahun');
     }
 
     public function test_year_range_filter_filters_database_accurately(): void

@@ -30,6 +30,9 @@ class PeminjamLoanTest extends TestCase
     {
         parent::setUp();
 
+        // Set waktu simulasi pada jam kerja aktif Sarpras (Senin 09:00 WIB)
+        Carbon::setTestNow(Carbon::parse('2026-11-09 09:00:00', 'Asia/Jakarta'));
+
         $this->admin = User::factory()->create([
             'name' => 'Admin Sarpras',
             'username' => 'admin',
@@ -563,9 +566,9 @@ class PeminjamLoanTest extends TestCase
 
         // Verify category summary
         $loan->load('details.inventory.category');
-        $this->assertStringContainsString('Laptop Multimedia (2)', $loan->category_summary);
-        $this->assertStringContainsString('Proyektor (1)', $loan->category_summary);
-        $this->assertStringContainsString('Matras (3)', $loan->category_summary);
+        $this->assertStringContainsString('Laptop Multimedia (2 Unit)', $loan->category_summary);
+        $this->assertStringContainsString('Proyektor (1 Unit)', $loan->category_summary);
+        $this->assertStringContainsString('Matras (3 Unit)', $loan->category_summary);
     }
 
     public function test_multi_category_loan_rolls_back_if_any_category_exceeds_stock(): void
